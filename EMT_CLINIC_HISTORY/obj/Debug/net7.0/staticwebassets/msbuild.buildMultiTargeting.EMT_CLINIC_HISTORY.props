@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\EMT_CLINIC_HISTORY.props" />
+</Project>
