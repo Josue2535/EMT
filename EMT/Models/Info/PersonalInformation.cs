@@ -1,19 +1,19 @@
 ﻿using EMT.Models.Formats;
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
 using System.Text.Json;
 
 namespace EMT.Models.Implements
 {
     public class PersonalInformation
     {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? Id { get; set; }
         public DateTime Created { get; set; }
         public List<Field> FieldList { get; set; }
 
-        // Constructor por defecto
-        public PersonalInformation()
-        {
-            Created = DateTime.Now;
-            FieldList = new List<Field>();
-        }
+        
 
         // Método para convertir el objeto a formato JSON
         public string ToJson()

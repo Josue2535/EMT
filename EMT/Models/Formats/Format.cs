@@ -1,19 +1,18 @@
-﻿using System.Text.Json;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
+using System.Text.Json;
 
 namespace EMT.Models.Formats
 {
     public class Format
     {
-        public Guid Id { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? Id { get; set; }
         public DateTime CreationDate { get; set; }
         public List<FieldsFormat> ValidFields { get; set; }
 
-        public Format()
-        {
-            Id = Guid.NewGuid();
-            ValidFields = new List<FieldsFormat>();
-            CreationDate = DateTime.Now;
-        }
+        
 
         public string ToJson()
         {

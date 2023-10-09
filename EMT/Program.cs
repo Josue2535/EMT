@@ -1,3 +1,4 @@
+using EMT.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,9 @@ builder.Services.AddControllers(); // Agrega los servicios de los controladores
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.Configure<DataBaseSettings>(
+    builder.Configuration.GetSection("Database"));
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(options =>

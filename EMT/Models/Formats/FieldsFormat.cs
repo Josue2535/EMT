@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace EMT.Models
+namespace EMT.Models.Formats
 {
     public class FieldsFormat
     {

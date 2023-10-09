@@ -1,23 +1,19 @@
 ﻿using EMT.Models.Formats;
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
 using System.Text.Json;
 
 namespace EMT.Models.DAO
 {
     public class ClinicHistory
     {
-        public Guid Id { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? Id { get; set; }
         public DateTime Created { get; set; }
         public Guid PatientId { get; set; }
         public List<Attached> Attachments { get; set; }
-
-        // Constructor por defecto
-        public ClinicHistory()
-        {
-            Id = Guid.NewGuid();
-            Created = DateTime.Now;
-            Attachments = new List<Attached>();
-        }
-
+      
         // Método para convertir el objeto a formato JSON
         public string ToJson()
         {

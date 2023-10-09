@@ -7,12 +7,6 @@ namespace EMT.Models.Formats
 
         public string Description { get; set; }
 
-        public ClinicalHistoryFormat()
-        {
-
-            Description = "";
-        }
-
         public string ToJson()
         {
             return JsonSerializer.Serialize(this, new JsonSerializerOptions
