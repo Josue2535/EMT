@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace EMT.Models.DAO
 {
-    public class ClinicHistory
+    public class ClinicalHistory
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
@@ -24,9 +24,9 @@ namespace EMT.Models.DAO
         }
 
         // Método para convertir desde JSON a un objeto ClinicHistory
-        public static ClinicHistory FromJson(string json)
+        public static ClinicalHistory FromJson(string json)
         {
-            return JsonSerializer.Deserialize<ClinicHistory>(json);
+            return JsonSerializer.Deserialize<ClinicalHistory>(json);
         }
     }
 }
