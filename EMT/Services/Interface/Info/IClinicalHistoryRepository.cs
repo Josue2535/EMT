@@ -6,7 +6,6 @@ namespace EMT.Services.Interface.Info
     {
         // Agrega operaciones específicas si es necesario
 
-        // Agrega la historia clínica con validaciones
-        void AddClinicalHistory(ClinicalHistory clinicalHistory, string roleId);
+        void AddAttachet(string json);
     }
 }
