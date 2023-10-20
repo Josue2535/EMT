@@ -11,14 +11,8 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.5" />
     <PackageReference Include="MongoDB.Driver" Version="2.21.0" />
     <PackageReference Include="MongoDB.Driver.Core" Version="2.21.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\Implements\Formats\" />
-    <Folder Include="Services\Implements\Info\" />
-    <Folder Include="Services\Interface\Formats\" />
-    <Folder Include="Services\Interface\Info\" />
   </ItemGroup>
 
 </Project>

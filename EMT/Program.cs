@@ -1,6 +1,14 @@
+using EMT.Models.Formats;
 using EMT.Services;
+using EMT.Services.Implements.Formats;
+using EMT.Services.Implements.Info;
+using EMT.Services.Interface.Formats;
+using EMT.Services.Interface.Info;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
+
 var builder = WebApplication.CreateBuilder(args);
 
 var config = builder.Configuration;
@@ -25,6 +33,22 @@ builder.Services.AddAuthentication(options =>
     o.Authority = config.GetValue<string>("Jwt:Authority");
     o.Audience = config.GetValue<string>("Jwt:Audience");
 });
+// Configura la conexión a MongoDB
+builder.Services.AddSingleton<IMongoClient>(provider =>
+{
+    var connectionString = config.GetConnectionString("MongoDBConnection");
+    return new MongoClient(connectionString);
+});
+
+builder.Services.AddScoped<IMongoDatabase>(provider =>
+{
+    var client = provider.GetRequiredService<IMongoClient>();
+    var databaseName = config.GetConnectionString("MongoDBDatabaseName");
+    return client.GetDatabase(databaseName);
+});
+builder.Services.AddScoped<IClinicalHistoryFormatRepository, ClinicalHistoryFormatRepository>();
+builder.Services.AddScoped<IPacientRepository, PacientRepository>();
+
 
 builder.Services.AddCors(opts =>
 {
@@ -47,5 +71,7 @@ app.UseAuthorization();
 
 // Mapea los controladores
 app.MapControllers();
+
+
 
 app.Run();

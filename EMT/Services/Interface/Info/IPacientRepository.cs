@@ -6,7 +6,5 @@ namespace EMT.Services.Interface.Info
     {
         // Agrega operaciones específicas si es necesario
 
-        // Agrega la información del paciente con validaciones
-        void AddPacientInformation(Pacient pacient);
     }
 }

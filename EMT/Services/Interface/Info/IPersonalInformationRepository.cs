@@ -6,7 +6,6 @@ namespace EMT.Services.Interface.Info
     {
         // Agrega operaciones específicas si es necesario
 
-        // Agrega la información personal con validaciones
-        void AddPersonalInformation(PersonalInformation personalInformation);
+        
     }
 }
