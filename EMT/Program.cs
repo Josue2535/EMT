@@ -36,7 +36,7 @@ builder.Services.AddAuthentication(options =>
 // Configura la conexión a MongoDB
 builder.Services.AddSingleton<IMongoClient>(provider =>
 {
-    var connectionString = config.GetConnectionString("MongoDBConnection");
+    var connectionString = config.GetConnectionString("Database");
     return new MongoClient(connectionString);
 });
 
