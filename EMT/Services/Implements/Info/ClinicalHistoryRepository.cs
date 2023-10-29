@@ -1,6 +1,8 @@
 ﻿using EMT.Models.DAO;
+using EMT.Models.Implements;
 using EMT.Services.Interface.Formats;
 using EMT.Services.Interface.Info;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace EMT.Services.Implements.Info
@@ -11,11 +13,11 @@ namespace EMT.Services.Implements.Info
         private readonly IRoleRepository _roleRepository;
         private readonly IClinicalHistoryFormatRepository _clinicalHistoryFormatRepository;
 
-        public ClinicalHistoryRepository(IMongoDatabase database, IRoleRepository roleRepository, IClinicalHistoryFormatRepository clinicalHistoryFormatRepository)
+        public ClinicalHistoryRepository(string connectionString, string databaseName, string collectionName)
         {
-            _collection = database.GetCollection<ClinicalHistory>("ClinicalHistory");
-            _roleRepository = roleRepository;
-            _clinicalHistoryFormatRepository = clinicalHistoryFormatRepository;
+            var client = new MongoClient(connectionString);
+            var database = client.GetDatabase(databaseName);
+            _collection = database.GetCollection<ClinicalHistory>(collectionName);
         }
 
         public ClinicalHistory GetById(string id)
@@ -49,6 +51,11 @@ namespace EMT.Services.Implements.Info
         }
 
         public void Update(ClinicalHistory entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Delete(ObjectId id)
         {
             throw new NotImplementedException();
         }

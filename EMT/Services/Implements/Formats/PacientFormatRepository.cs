@@ -9,9 +9,11 @@ namespace EMT.Services.Implements.Formats
     {
         private readonly IMongoCollection<PacientFormat> _collection;
 
-        public PacientFormatRepository(IMongoDatabase database)
+        public PacientFormatRepository(string connectionString, string databaseName, string collectionName)
         {
-            _collection = database.GetCollection<PacientFormat>("PacientFormats");
+            var client = new MongoClient(connectionString);
+            var database = client.GetDatabase(databaseName);
+            _collection = database.GetCollection<PacientFormat>(collectionName);
         }
 
         public void Create(PacientFormat format)

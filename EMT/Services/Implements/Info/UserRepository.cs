@@ -1,5 +1,6 @@
 ﻿using EMT.Models.Implements;
 using EMT.Services.Interface.Info;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace EMT.Services.Implements.Info
@@ -8,9 +9,11 @@ namespace EMT.Services.Implements.Info
     {
         private readonly IMongoCollection<User> _collection;
 
-        public UserRepository(IMongoDatabase database)
+        public UserRepository(string connectionString, string databaseName, string collectionName)
         {
-            _collection = database.GetCollection<User>("Users");
+            var client = new MongoClient(connectionString);
+            var database = client.GetDatabase(databaseName);
+            _collection = database.GetCollection<User>(collectionName);
         }
 
         public User GetById(string id)
@@ -43,6 +46,11 @@ namespace EMT.Services.Implements.Info
             var user = _collection.Find(u => u.Id == userId).FirstOrDefault();
 
             return user?.Role;
+        }
+
+        public void Delete(ObjectId id)
+        {
+            throw new NotImplementedException();
         }
     }
 

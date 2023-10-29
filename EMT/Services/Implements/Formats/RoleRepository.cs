@@ -1,6 +1,7 @@
 ﻿using EMT.Models.Formats;
 using EMT.Models.Implements;
 using EMT.Services.Interface.Info;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace EMT.Services.Implements.Formats
@@ -9,9 +10,11 @@ namespace EMT.Services.Implements.Formats
     {
         private readonly IMongoCollection<Role> _collection;
 
-        public RoleRepository(IMongoDatabase database)
+        public RoleRepository(string connectionString, string databaseName, string collectionName)
         {
-            _collection = database.GetCollection<Role>("Roles");
+            var client = new MongoClient(connectionString);
+            var database = client.GetDatabase(databaseName);
+            _collection = database.GetCollection<Role>(collectionName);
         }
 
         public Role GetById(string id)
@@ -50,6 +53,11 @@ namespace EMT.Services.Implements.Formats
 
             // El rol no existe
             return new List<Field>();
+        }
+
+        public void Delete(ObjectId id)
+        {
+            throw new NotImplementedException();
         }
     }
 

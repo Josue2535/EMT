@@ -1,6 +1,7 @@
 ﻿using EMT.Models.Implements;
 using EMT.Services.Interface.Formats;
 using EMT.Services.Interface.Info;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace EMT.Services.Implements.Info
@@ -11,11 +12,11 @@ namespace EMT.Services.Implements.Info
         private readonly IRoleRepository _roleRepository;
         private readonly IPersonalInformationFormatRepository _personalInformationFormatRepository;
 
-        public PersonalInformationRepository(IMongoDatabase database, IRoleRepository roleRepository, IPersonalInformationFormatRepository personalInformationFormatRepository)
+        public PersonalInformationRepository(string connectionString, string databaseName, string collectionName)
         {
-            _collection = database.GetCollection<PersonalInformation>("PersonalInformation");
-            _roleRepository = roleRepository;
-            _personalInformationFormatRepository = personalInformationFormatRepository;
+            var client = new MongoClient(connectionString);
+            var database = client.GetDatabase(databaseName);
+            _collection = database.GetCollection<PersonalInformation>(collectionName);
         }
 
         public PersonalInformation GetById(string id)
@@ -43,7 +44,10 @@ namespace EMT.Services.Implements.Info
             _collection.DeleteOne(p => p.Id == id);
         }
 
-       
+        public void Delete(ObjectId id)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }

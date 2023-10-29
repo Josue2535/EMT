@@ -12,7 +12,7 @@ namespace EMT.Models.Formats
             return JsonSerializer.Serialize(this, new JsonSerializerOptions
             {
                 WriteIndented = true
-            });
+            }).ToString();
         }
     }
 }

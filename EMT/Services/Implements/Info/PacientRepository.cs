@@ -1,6 +1,8 @@
-﻿using EMT.Models.Implements;
+﻿using EMT.Models.DAO;
+using EMT.Models.Implements;
 using EMT.Services.Interface.Formats;
 using EMT.Services.Interface.Info;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace EMT.Services.Implements.Info
@@ -11,11 +13,11 @@ namespace EMT.Services.Implements.Info
         private readonly IRoleRepository _roleRepository;
         private readonly IPacientFormatRepository _pacientFormatRepository;
 
-        public PacientRepository(IMongoDatabase database, IRoleRepository roleRepository, IPacientFormatRepository pacientFormatRepository)
+        public PacientRepository(string connectionString, string databaseName, string collectionName)
         {
-            _collection = database.GetCollection<Pacient>("Pacients");
-            _roleRepository = roleRepository;
-            _pacientFormatRepository = pacientFormatRepository;
+            var client = new MongoClient(connectionString);
+            var database = client.GetDatabase(databaseName);
+            _collection = database.GetCollection<Pacient>(collectionName);
         }
 
         public Pacient GetById(string id)
@@ -61,5 +63,9 @@ namespace EMT.Services.Implements.Info
             Create(pacient);
         }
 
+        public void Delete(ObjectId id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

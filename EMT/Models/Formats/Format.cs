@@ -11,7 +11,7 @@ namespace EMT.Models.Formats
         public ObjectId? Id { get; set; }
         public DateTime CreationDate { get; set; }
 
-        [BsonRepresentation(BsonType.Document)]
+        
         public List<FieldsFormat> ValidFields { get; set; }
 
         
