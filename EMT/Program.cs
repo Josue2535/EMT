@@ -46,8 +46,14 @@ builder.Services.AddScoped<IMongoDatabase>(provider =>
     var databaseName = config.GetConnectionString("MongoDBDatabaseName");
     return client.GetDatabase(databaseName);
 });
-builder.Services.AddScoped<IClinicalHistoryFormatRepository, ClinicalHistoryFormatRepository>();
-builder.Services.AddScoped<IPacientRepository, PacientRepository>();
+builder.Services.AddScoped<IClinicalHistoryFormatRepository>(provider =>
+{
+    var connectionString = "mongodb://adminEMT:passwordEMT@localhost:27017/";
+    var databaseName = "EMT";
+    var collectionName = "ClinicalHistoryFormat";
+    return new ClinicalHistoryFormatRepository(connectionString, databaseName, collectionName);
+});
+//builder.Services.AddScoped<IPacientRepository, PacientRepository>();
 
 
 builder.Services.AddCors(opts =>

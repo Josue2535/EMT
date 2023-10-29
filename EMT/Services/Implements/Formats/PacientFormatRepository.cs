@@ -1,5 +1,6 @@
 ﻿using EMT.Models.Formats;
 using EMT.Services.Interface.Formats;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace EMT.Services.Implements.Formats
@@ -25,7 +26,7 @@ namespace EMT.Services.Implements.Formats
 
         public PacientFormat GetById(string id)
         {
-            return _collection.Find(f => f.Id == id).FirstOrDefault();
+            return _collection.Find(f => f.Id.Equals(id)).FirstOrDefault();
         }
 
         public void Update( PacientFormat format)
@@ -34,7 +35,7 @@ namespace EMT.Services.Implements.Formats
             _collection.ReplaceOne(filter, format);
         }
 
-        public void Delete(string id)
+        public void Delete(ObjectId id)
         {
             var filter = Builders<PacientFormat>.Filter.Eq(f => f.Id, id);
             _collection.DeleteOne(filter);
@@ -45,7 +46,12 @@ namespace EMT.Services.Implements.Formats
             throw new NotImplementedException();
         }
 
-        
+        public void Delete(string id)
+        {
+            throw new NotImplementedException();
+        }
+
+
 
         // Puedes agregar más métodos según sea necesario para tu aplicación
     }

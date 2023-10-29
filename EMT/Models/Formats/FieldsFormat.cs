@@ -1,9 +1,14 @@
-﻿using System.Text.Json;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
+using System.Text.Json;
 
 namespace EMT.Models.Formats
 {
     public class FieldsFormat
     {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public ObjectId? Id { get; set; }
         public string FieldType { get; set; }
         public string FieldName { get; set; }
         public bool IsOptional { get; set; }
