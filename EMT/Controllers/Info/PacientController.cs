@@ -40,7 +40,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var pacient = _repository.GetById(id);
+                var pacient = _repository.GetById(new ObjectId(id));
                 if (pacient == null)
                 {
                     return NotFound();
@@ -76,7 +76,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var existingPacient = _repository.GetById(id);
+                var existingPacient = _repository.GetById(new ObjectId(id));
                 if (existingPacient == null)
                 {
                     return NotFound();
@@ -99,13 +99,13 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var pacient = _repository.GetById(id);
+                var pacient = _repository.GetById(new ObjectId(id));
                 if (pacient == null)
                 {
                     return NotFound();
                 }
 
-                _repository.Delete(new ObjectId (pacient.Id));
+                _repository.Delete(pacient.Id.Value);
                 return NoContent();
             }
             catch (Exception ex)

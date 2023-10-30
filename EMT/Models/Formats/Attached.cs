@@ -4,7 +4,7 @@ namespace EMT.Models.Formats
 {
     public class Attached
     {
-        public string UserId { get; set; }
+        public string id { get; set; }
         public DateTime Created { get; set; }
         public List<Field> Fields { get; set; }
 

@@ -2,7 +2,10 @@
 using EMT.Services.Interface.Formats;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -32,7 +35,7 @@ namespace EMT.Controllers
         public IActionResult Get(string id)
         {
             // Implementa la lógica para obtener un formato por su ID
-            var format = _clinicalHistoryFormatRepository.GetById(id);
+            var format = _clinicalHistoryFormatRepository.GetById(new ObjectId(id));
 
             if (format == null)
             {
@@ -43,19 +46,39 @@ namespace EMT.Controllers
         }
 
         [HttpPost(Name = "CreateClinicalHistoryFormat")]
-        public IActionResult Post([FromBody] ClinicalHistoryFormat clinicalHistoryFormat)
+        public IActionResult Post([FromBody] JsonObject json)
         {
-            // Implementa la lógica para crear un nuevo formato
-            _clinicalHistoryFormatRepository.Create(clinicalHistoryFormat);
+            try
+            {
+                // Verifica si ya existe algún formato en la base de datos
+                var existingFormat = _clinicalHistoryFormatRepository.GetAll();
 
-            return CreatedAtRoute("GetClinicalHistoryFormatById", new { id = clinicalHistoryFormat.Id }, clinicalHistoryFormat);
+                if (!existingFormat.IsNullOrEmpty())
+                {
+                    // Ya existe un formato, retorna un error
+                    return Conflict("Ya existe un formato de historia clínica en la base de datos.");
+                }
+                // Convierte manualmente el JSON a un objeto ClinicalHistoryFormat
+                var clinicalHistoryFormat = ClinicalHistoryFormat.GetFromJson(json);
+
+                // Implementa la lógica para crear un nuevo formato
+                _clinicalHistoryFormatRepository.Create(clinicalHistoryFormat);
+
+                return CreatedAtRoute("GetClinicalHistoryFormatById", new { id = clinicalHistoryFormat.Id }, clinicalHistoryFormat);
+            }
+            catch (JsonException)
+            {
+                // Maneja errores de deserialización de JSON
+                return BadRequest("Formato JSON no válido");
+            }
         }
 
+
         [HttpPut("{id}", Name = "UpdateClinicalHistoryFormat")]
-        public IActionResult Put(string id, [FromBody] ClinicalHistoryFormat clinicalHistoryFormat)
+        public IActionResult Put(string id, [FromBody] JsonObject json)
         {
             // Implementa la lógica para actualizar un formato existente
-            var existingFormat = _clinicalHistoryFormatRepository.GetById(id);
+            var existingFormat = _clinicalHistoryFormatRepository.GetById(new ObjectId(id));
 
             if (existingFormat == null)
             {
@@ -63,7 +86,7 @@ namespace EMT.Controllers
             }
 
             // Actualiza las propiedades necesarias
-            existingFormat.Description = clinicalHistoryFormat.Description;
+            existingFormat = ClinicalHistoryFormat.GetFromJson(json);
 
             _clinicalHistoryFormatRepository.Update(existingFormat);
 
@@ -74,7 +97,7 @@ namespace EMT.Controllers
         public IActionResult Delete(string id)
         {
             // Implementa la lógica para eliminar un formato por su ID
-            var existingFormat = _clinicalHistoryFormatRepository.GetById(id);
+            var existingFormat = _clinicalHistoryFormatRepository.GetById(new ObjectId(id) );
 
             if (existingFormat == null)
             {

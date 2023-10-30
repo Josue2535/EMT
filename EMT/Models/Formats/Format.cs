@@ -14,7 +14,9 @@ namespace EMT.Models.Formats
         
         public List<FieldsFormat> ValidFields { get; set; }
 
-        
+        public Format() { 
+            Id = new ObjectId();
+        }
 
         public string ToJson()
         {

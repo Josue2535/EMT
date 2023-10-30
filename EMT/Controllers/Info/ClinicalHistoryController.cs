@@ -3,6 +3,7 @@ using EMT.Services.Interface.Info;
 using System;
 using System.Collections.Generic;
 using EMT.Models.DAO;
+using MongoDB.Bson;
 
 namespace EMT.Controllers.Info
 {
@@ -39,7 +40,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var clinicalHistory = _repository.GetById(id);
+                var clinicalHistory = _repository.GetById(new ObjectId(id));
                 if (clinicalHistory == null)
                 {
                     return NotFound();
@@ -75,7 +76,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var existingClinicalHistory = _repository.GetById(id);
+                var existingClinicalHistory = _repository.GetById(new ObjectId(id));
                 if (existingClinicalHistory == null)
                 {
                     return NotFound();
@@ -98,13 +99,13 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var clinicalHistory = _repository.GetById(id);
+                var clinicalHistory = _repository.GetById(new ObjectId(id));
                 if (clinicalHistory == null)
                 {
                     return NotFound();
                 }
 
-                _repository.Delete(new MongoDB.Bson.ObjectId(clinicalHistory.Id));
+                _repository.Delete(clinicalHistory.Id.Value);
                 return NoContent();
             }
             catch (Exception ex)

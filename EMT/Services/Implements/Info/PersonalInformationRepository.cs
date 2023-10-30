@@ -19,7 +19,7 @@ namespace EMT.Services.Implements.Info
             _collection = database.GetCollection<PersonalInformation>(collectionName);
         }
 
-        public PersonalInformation GetById(string id)
+        public PersonalInformation GetById(ObjectId id)
         {
             return _collection.Find(p => p.Id == id).FirstOrDefault();
         }
@@ -39,15 +39,11 @@ namespace EMT.Services.Implements.Info
             _collection.ReplaceOne(p => p.Id == personalInformation.Id, personalInformation);
         }
 
-        public void Delete(string id)
+        public void Delete(ObjectId id)
         {
             _collection.DeleteOne(p => p.Id == id);
         }
 
-        public void Delete(ObjectId id)
-        {
-            throw new NotImplementedException();
-        }
     }
 
 }

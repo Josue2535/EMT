@@ -3,6 +3,7 @@ using EMT.Services.Interface.Info;
 using System;
 using System.Collections.Generic;
 using EMT.Models.Implements;
+using MongoDB.Bson;
 
 namespace EMT.Controllers.Info
 {
@@ -39,7 +40,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var role = _repository.GetById(id);
+                var role = _repository.GetById(new ObjectId(id));
                 if (role == null)
                 {
                     return NotFound();
@@ -75,7 +76,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var existingRole = _repository.GetById(id);
+                var existingRole = _repository.GetById(new ObjectId(id));
                 if (existingRole == null)
                 {
                     return NotFound();
@@ -98,13 +99,13 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var role = _repository.GetById(id);
+                var role = _repository.GetById(new ObjectId(id));
                 if (role == null)
                 {
                     return NotFound();
                 }
 
-                _repository.Delete(new MongoDB.Bson.ObjectId(role.Id));
+                _repository.Delete(role.Id.Value);
                 return NoContent();
             }
             catch (Exception ex)

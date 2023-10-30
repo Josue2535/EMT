@@ -8,7 +8,7 @@ namespace EMT.Models.Implements
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string? Id { get; set; }
+        public ObjectId? Id { get; set; }
         public DateTime Created { get; set; }
         public string UserName { get; set; }
         public PersonalInformation PersonalInformation { get; set; }

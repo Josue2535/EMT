@@ -1,4 +1,5 @@
 ﻿using EMT.Models.Implements;
+using MongoDB.Bson;
 
 namespace EMT.Services.Interface.Info
 {
@@ -7,6 +8,6 @@ namespace EMT.Services.Interface.Info
         // Agrega operaciones específicas si es necesario
 
         // Obtiene el rol de un usuario por su id
-        Role GetRoleByUserId(string userId);
+        Role GetRoleByUserId(ObjectId userId);
     }
 }

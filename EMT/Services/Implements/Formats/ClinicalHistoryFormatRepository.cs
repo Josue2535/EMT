@@ -18,9 +18,9 @@ namespace EMT.Services.Implements.Formats
             _collection = database.GetCollection<ClinicalHistoryFormat>(collectionName);
         }
 
-        public ClinicalHistoryFormat GetById(string id)
+        public ClinicalHistoryFormat GetById(ObjectId id)
         {
-            var objectId = new ObjectId(id);
+            var objectId = id;
             return _collection.Find(new BsonDocument("_id", objectId)).SingleOrDefault();
         }
 
@@ -103,7 +103,8 @@ namespace EMT.Services.Implements.Formats
 
         public void Delete(ObjectId id)
         {
-            throw new NotImplementedException();
+            var filter = Builders<ClinicalHistoryFormat>.Filter.Eq("_id", id);
+            _collection.DeleteOne(filter);
         }
     }
 }

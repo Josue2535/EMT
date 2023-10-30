@@ -43,7 +43,7 @@ namespace EMT.Services.Implements.Formats
 
         public void Delete(ObjectId id)
         {
-            _collection.DeleteOne(pi => pi.Id == id);
+            _collection.DeleteOne(pi => pi.Id.Equals(id));
         }
 
         public bool IsPersonalInformationValid(string json)
@@ -51,10 +51,7 @@ namespace EMT.Services.Implements.Formats
             throw new NotImplementedException();
         }
 
-        public PersonalInformationFormat GetById(string id)
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 
 }

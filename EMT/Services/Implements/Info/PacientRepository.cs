@@ -20,7 +20,7 @@ namespace EMT.Services.Implements.Info
             _collection = database.GetCollection<Pacient>(collectionName);
         }
 
-        public Pacient GetById(string id)
+        public Pacient GetById(ObjectId id)
         {
             return _collection.Find(p => p.Id == id).FirstOrDefault();
         }
@@ -40,12 +40,12 @@ namespace EMT.Services.Implements.Info
             _collection.ReplaceOne(p => p.Id == pacient.Id, pacient);
         }
 
-        public void Delete(string id)
+        public void Delete(ObjectId id)
         {
             _collection.DeleteOne(p => p.Id == id);
         }
 
-        public void AddPacient(Pacient pacient, string roleId)
+        public void AddPacient(Pacient pacient, ObjectId roleId)
         {
             var role = _roleRepository.GetById(roleId);
 
@@ -63,9 +63,6 @@ namespace EMT.Services.Implements.Info
             Create(pacient);
         }
 
-        public void Delete(ObjectId id)
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 }

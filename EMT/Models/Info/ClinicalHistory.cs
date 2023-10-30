@@ -9,9 +9,9 @@ namespace EMT.Models.DAO
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string? Id { get; set; }
+        public ObjectId? Id { get; set; }
         public DateTime Created { get; set; }
-        public Guid PatientId { get; set; }
+        public string PatientId { get; set; }
         public List<Attached> Attachments { get; set; }
       
         // Método para convertir el objeto a formato JSON

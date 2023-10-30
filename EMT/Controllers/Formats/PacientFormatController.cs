@@ -41,7 +41,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                var format = _repository.GetById(id);
+                var format = _repository.GetById(new ObjectId(id));
                 if (format == null)
                 {
                     return NotFound();
@@ -50,7 +50,7 @@ namespace EMT.Controllers.Formats
             }
             catch (Exception ex)
             {
-                // Log the exception
+                // Log the exception 
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
         }
@@ -77,7 +77,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                var existingFormat = _repository.GetById(id);
+                var existingFormat = _repository.GetById(new ObjectId(id));
                 if (existingFormat == null)
                 {
                     return NotFound();
@@ -100,13 +100,13 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                var format = _repository.GetById(id);
+                var format = _repository.GetById(new ObjectId(id));
                 if (format == null)
                 {
                     return NotFound();
                 }
 
-                _repository.Delete(ObjectId.Parse(id));
+                _repository.Delete(new ObjectId(id));
                 return NoContent();
             }
             catch (Exception ex)

@@ -15,9 +15,9 @@ namespace EMT.Services.Implements
             _collection = database.GetCollection<T>(collectionName);
         }
 
-        public T GetById(string id)
+        public T GetById(ObjectId id)
         {
-            var objectId = new ObjectId(id);
+            var objectId = id;
             return _collection.Find(new BsonDocument("_id", objectId)).SingleOrDefault();
         }
 

@@ -3,6 +3,11 @@ using EMT.Models.Formats;
 using EMT.Services.Interface.Formats;
 using System;
 using System.Collections.Generic;
+using MongoDB.Bson;
+using System.Text.Json.Nodes;
+using EMT.Services.Implements.Formats;
+using Microsoft.IdentityModel.Tokens;
+using System.Text.Json;
 
 namespace EMT.Controllers.Formats
 {
@@ -39,7 +44,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                var format = _repository.GetById(id);
+                var format = _repository.GetById(new ObjectId(id));
                 if (format == null)
                 {
                     return NotFound();
@@ -55,42 +60,53 @@ namespace EMT.Controllers.Formats
 
         // POST: api/PersonalInformationFormat
         [HttpPost]
-        public ActionResult<PersonalInformationFormat> Post([FromBody] PersonalInformationFormat format)
+        public ActionResult<PersonalInformationFormat> Post([FromBody] JsonObject format)
         {
             try
             {
-                _repository.Create(format);
-                return CreatedAtRoute("GetPersonalInformationFormat", new { id = format.Id }, format);
+                // Verifica si ya existe algún formato en la base de datos
+                var existingFormat = _repository.GetAll();
+
+                if (!existingFormat.IsNullOrEmpty())
+                {
+                    // Ya existe un formato, retorna un error
+                    return Conflict("Ya existe un formato de historia clínica en la base de datos.");
+                }
+                // Convierte manualmente el JSON a un objeto ClinicalHistoryFormat
+                var personalInformationFormat = PersonalInformationFormat.GetFromJson(format);
+
+                // Implementa la lógica para crear un nuevo formato
+                _repository.Create(personalInformationFormat);
+
+                return CreatedAtRoute("GetClinicalHistoryFormatById", new { id = personalInformationFormat.Id }, personalInformationFormat);
             }
-            catch (Exception ex)
+            catch (JsonException)
             {
-                // Log the exception
-                return StatusCode(500, "Internal Server Error");
+                // Maneja errores de deserialización de JSON
+                return BadRequest("Formato JSON no válido");
             }
         }
 
         // PUT: api/PersonalInformationFormat/{id}
         [HttpPut("{id:length(24)}")]
-        public IActionResult Put(string id, [FromBody] PersonalInformationFormat updatedFormat)
+        public IActionResult Put(string id, [FromBody] JsonObject json)
         {
-            try
-            {
-                var existingFormat = _repository.GetById(id);
-                if (existingFormat == null)
-                {
-                    return NotFound();
-                }
+            // Implementa la lógica para actualizar un formato existente
+            var existingFormat = _repository.GetById(new ObjectId(id));
 
-                updatedFormat.Id = existingFormat.Id;
-                _repository.Update(updatedFormat);
-                return NoContent();
-            }
-            catch (Exception ex)
+            if (existingFormat == null)
             {
-                // Log the exception
-                return StatusCode(500, "Internal Server Error");
+                return NotFound();
             }
+
+            // Actualiza las propiedades necesarias
+            existingFormat = PersonalInformationFormat.GetFromJson(json);
+
+            _repository.Update(existingFormat);
+
+            return NoContent();
         }
+        
 
         // DELETE: api/PersonalInformationFormat/{id}
         [HttpDelete("{id:length(24)}")]
@@ -98,7 +114,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                var format = _repository.GetById(id);
+                var format = _repository.GetById(new ObjectId(id));
                 if (format == null)
                 {
                     return NotFound();
