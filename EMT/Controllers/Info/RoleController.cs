@@ -1,82 +1,116 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using EMT.Services.Interface.Info;
+using System;
+using System.Collections.Generic;
+using EMT.Models.Implements;
 
 namespace EMT.Controllers.Info
 {
-    public class RoleController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class RoleController : ControllerBase
     {
-        // GET: RoleController
-        public ActionResult Index()
+        private readonly IRoleRepository _repository;
+
+        public RoleController(IRoleRepository repository)
         {
-            return View();
+            _repository = repository;
         }
 
-        // GET: RoleController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: RoleController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: RoleController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        // GET: api/Role
+        [HttpGet]
+        public ActionResult<IEnumerable<Role>> Get()
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var roles = _repository.GetAll();
+                return Ok(roles);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
-        // GET: RoleController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: RoleController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        // GET: api/Role/{id}
+        [HttpGet("{id}", Name = "GetRole")]
+        public ActionResult<Role> Get(string id)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var role = _repository.GetById(id);
+                if (role == null)
+                {
+                    return NotFound();
+                }
+                return Ok(role);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
-        // GET: RoleController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: RoleController/Delete/5
+        // POST: api/Role
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult<Role> Post([FromBody] Role role)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                _repository.Create(role);
+                return CreatedAtRoute("GetRole", new { id = role.Id }, role);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        // PUT: api/Role/{id}
+        [HttpPut("{id}")]
+        public IActionResult Put(string id, [FromBody] Role updatedRole)
+        {
+            try
+            {
+                var existingRole = _repository.GetById(id);
+                if (existingRole == null)
+                {
+                    return NotFound();
+                }
+
+                updatedRole.Id = existingRole.Id;
+                _repository.Update(updatedRole);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        // DELETE: api/Role/{id}
+        [HttpDelete("{id}")]
+        public IActionResult Delete(string id)
+        {
+            try
+            {
+                var role = _repository.GetById(id);
+                if (role == null)
+                {
+                    return NotFound();
+                }
+
+                _repository.Delete(new MongoDB.Bson.ObjectId(role.Id));
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
     }

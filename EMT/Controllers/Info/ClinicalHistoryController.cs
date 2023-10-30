@@ -1,82 +1,116 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using EMT.Services.Interface.Info;
+using System;
+using System.Collections.Generic;
+using EMT.Models.DAO;
 
 namespace EMT.Controllers.Info
 {
-    public class ClinicalHistoryController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ClinicalHistoryController : ControllerBase
     {
-        // GET: ClinicalHistoryController
-        public ActionResult Index()
+        private readonly IClinicalHistoryRepository _repository;
+
+        public ClinicalHistoryController(IClinicalHistoryRepository repository)
         {
-            return View();
+            _repository = repository;
         }
 
-        // GET: ClinicalHistoryController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: ClinicalHistoryController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: ClinicalHistoryController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        // GET: api/ClinicalHistory
+        [HttpGet]
+        public ActionResult<IEnumerable<ClinicalHistory>> Get()
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var clinicalHistories = _repository.GetAll();
+                return Ok(clinicalHistories);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
-        // GET: ClinicalHistoryController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: ClinicalHistoryController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        // GET: api/ClinicalHistory/{id}
+        [HttpGet("{id}", Name = "GetClinicalHistory")]
+        public ActionResult<ClinicalHistory> Get(string id)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var clinicalHistory = _repository.GetById(id);
+                if (clinicalHistory == null)
+                {
+                    return NotFound();
+                }
+                return Ok(clinicalHistory);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
-        // GET: ClinicalHistoryController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: ClinicalHistoryController/Delete/5
+        // POST: api/ClinicalHistory
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult<ClinicalHistory> Post([FromBody] ClinicalHistory clinicalHistory)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                _repository.Create(clinicalHistory);
+                return CreatedAtRoute("GetClinicalHistory", new { id = clinicalHistory.Id }, clinicalHistory);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        // PUT: api/ClinicalHistory/{id}
+        [HttpPut("{id}")]
+        public IActionResult Put(string id, [FromBody] ClinicalHistory updatedClinicalHistory)
+        {
+            try
+            {
+                var existingClinicalHistory = _repository.GetById(id);
+                if (existingClinicalHistory == null)
+                {
+                    return NotFound();
+                }
+
+                updatedClinicalHistory.Id = existingClinicalHistory.Id;
+                _repository.Update(updatedClinicalHistory);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        // DELETE: api/ClinicalHistory/{id}
+        [HttpDelete("{id}")]
+        public IActionResult Delete(string id)
+        {
+            try
+            {
+                var clinicalHistory = _repository.GetById(id);
+                if (clinicalHistory == null)
+                {
+                    return NotFound();
+                }
+
+                _repository.Delete(new MongoDB.Bson.ObjectId(clinicalHistory.Id));
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
     }

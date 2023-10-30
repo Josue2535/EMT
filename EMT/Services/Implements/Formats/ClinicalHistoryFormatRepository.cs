@@ -101,6 +101,9 @@ namespace EMT.Services.Implements.Formats
             };
         }
 
-        
+        public void Delete(ObjectId id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

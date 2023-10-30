@@ -1,82 +1,116 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using EMT.Services.Interface.Info;
+using System;
+using System.Collections.Generic;
+using EMT.Models.Implements;
 
 namespace EMT.Controllers.Info
 {
-    public class PersonalInformationController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class PersonalInformationController : ControllerBase
     {
-        // GET: PersonalInformationController
-        public ActionResult Index()
+        private readonly IPersonalInformationRepository _repository;
+
+        public PersonalInformationController(IPersonalInformationRepository repository)
         {
-            return View();
+            _repository = repository;
         }
 
-        // GET: PersonalInformationController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: PersonalInformationController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: PersonalInformationController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        // GET: api/PersonalInformation
+        [HttpGet]
+        public ActionResult<IEnumerable<PersonalInformation>> Get()
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var personalInformations = _repository.GetAll();
+                return Ok(personalInformations);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
-        // GET: PersonalInformationController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: PersonalInformationController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        // GET: api/PersonalInformation/{id}
+        [HttpGet("{id}", Name = "GetPersonalInformation")]
+        public ActionResult<PersonalInformation> Get(string id)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var personalInformation = _repository.GetById(id);
+                if (personalInformation == null)
+                {
+                    return NotFound();
+                }
+                return Ok(personalInformation);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
-        // GET: PersonalInformationController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: PersonalInformationController/Delete/5
+        // POST: api/PersonalInformation
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult<PersonalInformation> Post([FromBody] PersonalInformation personalInformation)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                _repository.Create(personalInformation);
+                return CreatedAtRoute("GetPersonalInformation", new { id = personalInformation.Id }, personalInformation);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        // PUT: api/PersonalInformation/{id}
+        [HttpPut("{id}")]
+        public IActionResult Put(string id, [FromBody] PersonalInformation updatedPersonalInformation)
+        {
+            try
+            {
+                var existingPersonalInformation = _repository.GetById(id);
+                if (existingPersonalInformation == null)
+                {
+                    return NotFound();
+                }
+
+                updatedPersonalInformation.Id = existingPersonalInformation.Id;
+                _repository.Update(updatedPersonalInformation);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        // DELETE: api/PersonalInformation/{id}
+        [HttpDelete("{id}")]
+        public IActionResult Delete(string id)
+        {
+            try
+            {
+                var personalInformation = _repository.GetById(id);
+                if (personalInformation == null)
+                {
+                    return NotFound();
+                }
+
+                _repository.Delete(new MongoDB.Bson.ObjectId(personalInformation.Id));
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
     }

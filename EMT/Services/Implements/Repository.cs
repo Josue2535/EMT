@@ -48,5 +48,10 @@ namespace EMT.Services.Implements
             var propertyInfo = typeof(T).GetProperty("Id"); // Ajusta el nombre de la propiedad ID según tu modelo
             return propertyInfo.GetValue(entity, null);
         }
+
+        public void Delete(ObjectId id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,82 +1,116 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using EMT.Models.Formats;
+using EMT.Services.Interface.Formats;
+using System;
+using System.Collections.Generic;
 
 namespace EMT.Controllers.Formats
 {
-    public class PersonalInformationFormatController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class PersonalInformationFormatController : ControllerBase
     {
-        // GET: PersonalInformationFormatController
-        public ActionResult Index()
+        private readonly IPersonalInformationFormatRepository _repository;
+
+        public PersonalInformationFormatController(IPersonalInformationFormatRepository repository)
         {
-            return View();
+            _repository = repository;
         }
 
-        // GET: PersonalInformationFormatController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: PersonalInformationFormatController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: PersonalInformationFormatController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        // GET: api/PersonalInformationFormat
+        [HttpGet]
+        public ActionResult<IEnumerable<PersonalInformationFormat>> Get()
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var formats = _repository.GetAll();
+                return Ok(formats);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
-        // GET: PersonalInformationFormatController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: PersonalInformationFormatController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        // GET: api/PersonalInformationFormat/{id}
+        [HttpGet("{id:length(24)}", Name = "GetPersonalInformationFormat")]
+        public ActionResult<PersonalInformationFormat> Get(string id)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var format = _repository.GetById(id);
+                if (format == null)
+                {
+                    return NotFound();
+                }
+                return Ok(format);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
-        // GET: PersonalInformationFormatController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: PersonalInformationFormatController/Delete/5
+        // POST: api/PersonalInformationFormat
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult<PersonalInformationFormat> Post([FromBody] PersonalInformationFormat format)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                _repository.Create(format);
+                return CreatedAtRoute("GetPersonalInformationFormat", new { id = format.Id }, format);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        // PUT: api/PersonalInformationFormat/{id}
+        [HttpPut("{id:length(24)}")]
+        public IActionResult Put(string id, [FromBody] PersonalInformationFormat updatedFormat)
+        {
+            try
+            {
+                var existingFormat = _repository.GetById(id);
+                if (existingFormat == null)
+                {
+                    return NotFound();
+                }
+
+                updatedFormat.Id = existingFormat.Id;
+                _repository.Update(updatedFormat);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        // DELETE: api/PersonalInformationFormat/{id}
+        [HttpDelete("{id:length(24)}")]
+        public IActionResult Delete(string id)
+        {
+            try
+            {
+                var format = _repository.GetById(id);
+                if (format == null)
+                {
+                    return NotFound();
+                }
+
+                _repository.Delete(format.Id.Value);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
     }

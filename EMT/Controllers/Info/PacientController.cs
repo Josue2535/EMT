@@ -1,82 +1,117 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using EMT.Services.Interface.Info;
+using System;
+using System.Collections.Generic;
+using EMT.Models.Implements;
+using MongoDB.Bson;
 
 namespace EMT.Controllers.Info
 {
-    public class PacientController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class PacientController : ControllerBase
     {
-        // GET: PacientController
-        public ActionResult Index()
+        private readonly IPacientRepository _repository;
+
+        public PacientController(IPacientRepository repository)
         {
-            return View();
+            _repository = repository;
         }
 
-        // GET: PacientController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: PacientController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: PacientController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        // GET: api/Pacient
+        [HttpGet]
+        public ActionResult<IEnumerable<Pacient>> Get()
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var pacients = _repository.GetAll();
+                return Ok(pacients);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
-        // GET: PacientController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: PacientController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        // GET: api/Pacient/{id}
+        [HttpGet("{id}", Name = "GetPacient")]
+        public ActionResult<Pacient> Get(string id)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var pacient = _repository.GetById(id);
+                if (pacient == null)
+                {
+                    return NotFound();
+                }
+                return Ok(pacient);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
-        // GET: PacientController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: PacientController/Delete/5
+        // POST: api/Pacient
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult<Pacient> Post([FromBody] Pacient pacient)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                _repository.Create(pacient);
+                return CreatedAtRoute("GetPacient", new { id = pacient.Id }, pacient);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        // PUT: api/Pacient/{id}
+        [HttpPut("{id}")]
+        public IActionResult Put(string id, [FromBody] Pacient updatedPacient)
+        {
+            try
+            {
+                var existingPacient = _repository.GetById(id);
+                if (existingPacient == null)
+                {
+                    return NotFound();
+                }
+
+                updatedPacient.Id = existingPacient.Id;
+                _repository.Update(updatedPacient);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        // DELETE: api/Pacient/{id}
+        [HttpDelete("{id}")]
+        public IActionResult Delete(string id)
+        {
+            try
+            {
+                var pacient = _repository.GetById(id);
+                if (pacient == null)
+                {
+                    return NotFound();
+                }
+
+                _repository.Delete(new ObjectId (pacient.Id));
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
     }

@@ -2,6 +2,7 @@
 using EMT.Services.Interface.Formats;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -80,7 +81,7 @@ namespace EMT.Controllers
                 return NotFound();
             }
 
-            _clinicalHistoryFormatRepository.Delete(id);
+            _clinicalHistoryFormatRepository.Delete(new ObjectId(id));
 
             return NoContent();
         }

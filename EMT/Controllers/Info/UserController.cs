@@ -1,82 +1,116 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using EMT.Services.Interface.Info;
+using System;
+using System.Collections.Generic;
+using EMT.Models.Implements;
 
 namespace EMT.Controllers.Info
 {
-    public class UserController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class UserController : ControllerBase
     {
-        // GET: UserController
-        public ActionResult Index()
+        private readonly IUserRepository _repository;
+
+        public UserController(IUserRepository repository)
         {
-            return View();
+            _repository = repository;
         }
 
-        // GET: UserController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: UserController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: UserController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        // GET: api/User
+        [HttpGet]
+        public ActionResult<IEnumerable<User>> Get()
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var users = _repository.GetAll();
+                return Ok(users);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
-        // GET: UserController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: UserController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        // GET: api/User/{id}
+        [HttpGet("{id}", Name = "GetUser")]
+        public ActionResult<User> Get(string id)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var user = _repository.GetById(id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                return Ok(user);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
-        // GET: UserController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: UserController/Delete/5
+        // POST: api/User
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult<User> Post([FromBody] User user)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                _repository.Create(user);
+                return CreatedAtRoute("GetUser", new { id = user.Id }, user);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        // PUT: api/User/{id}
+        [HttpPut("{id}")]
+        public IActionResult Put(string id, [FromBody] User updatedUser)
+        {
+            try
+            {
+                var existingUser = _repository.GetById(id);
+                if (existingUser == null)
+                {
+                    return NotFound();
+                }
+
+                updatedUser.Id = existingUser.Id;
+                _repository.Update(updatedUser);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        // DELETE: api/User/{id}
+        [HttpDelete("{id}")]
+        public IActionResult Delete(string id)
+        {
+            try
+            {
+                var user = _repository.GetById(id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                _repository.Delete(new MongoDB.Bson.ObjectId(user.Id));
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
             }
         }
     }
