@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using EMT.Models.DAO;
 using MongoDB.Bson;
+using EMT.Models.Formats;
+using System.Text.Json.Nodes;
 
 namespace EMT.Controllers.Info
 {
@@ -62,6 +64,20 @@ namespace EMT.Controllers.Info
             {
                 _repository.Create(clinicalHistory);
                 return CreatedAtRoute("GetClinicalHistory", new { id = clinicalHistory.Id }, clinicalHistory);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+        //Post Anexo
+        [HttpPost("/atachett") ]
+        public ActionResult<ClinicalHistory> PostAttached(string id, [FromBody] JsonObject clinicalHistory)
+        {
+            try
+            {
+                return Ok();
             }
             catch (Exception ex)
             {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Nodes;
 using EMT.Models.Formats;
 using EMT.Services.Interface.Formats;
 using Microsoft.AspNetCore.Http;
@@ -57,12 +58,13 @@ namespace EMT.Controllers.Formats
 
         // POST: api/PacientFormat
         [HttpPost]
-        public ActionResult<PacientFormat> Post(PacientFormat format)
+        public ActionResult<PacientFormat> Post(JsonObject format)
         {
             try
             {
-                _repository.Create(format);
-                return CreatedAtRoute("GetPacientFormat", new { id = format.Id }, format);
+                var pacientFormat = PacientFormat.GetFromJson(format);
+                _repository.Create(pacientFormat);
+                return CreatedAtRoute("GetPacientFormat", new { id = pacientFormat.Id.ToString() }, format);
             }
             catch (Exception ex)
             {
@@ -73,18 +75,19 @@ namespace EMT.Controllers.Formats
 
         // PUT: api/PacientFormat/{id}
         [HttpPut("{id:length(24)}")]
-        public IActionResult Put(string id, PacientFormat updatedFormat)
+        public IActionResult Put(string id, JsonObject updatedFormat)
         {
             try
             {
+                var updatePacientFormat = PacientFormat.GetFromJson(updatedFormat);
                 var existingFormat = _repository.GetById(new ObjectId(id));
                 if (existingFormat == null)
                 {
                     return NotFound();
                 }
 
-                updatedFormat.Id = existingFormat.Id;
-                _repository.Update(updatedFormat);
+                updatePacientFormat.Id = existingFormat.Id;
+                _repository.Update(updatePacientFormat);
                 return NoContent();
             }
             catch (Exception ex)
