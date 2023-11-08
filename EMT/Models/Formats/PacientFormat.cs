@@ -10,10 +10,10 @@ namespace EMT.Models.Formats
         {
             try
             {
-                ObjectId id = new ObjectId();
+                string id = new ObjectId().ToString();
                 if (json.ContainsKey("Id"))
                 {
-                    id = new ObjectId(json["Id"].GetValue<string>());
+                    id = json["Id"].GetValue<string>();
                 }
 
 

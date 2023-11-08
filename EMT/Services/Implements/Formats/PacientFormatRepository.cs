@@ -26,7 +26,7 @@ namespace EMT.Services.Implements.Formats
             return _collection.Find(_ => true).ToList();
         }
 
-        public PacientFormat GetById(ObjectId id)
+        public PacientFormat GetById(string id)
         {
             return _collection.Find(f => f.Id.Equals(id)).FirstOrDefault();
         }
@@ -37,7 +37,7 @@ namespace EMT.Services.Implements.Formats
             _collection.ReplaceOne(filter, format);
         }
 
-        public void Delete(ObjectId id)
+        public void Delete(string id)
         {
             var filter = Builders<PacientFormat>.Filter.Eq(f => f.Id, id);
             _collection.DeleteOne(filter);

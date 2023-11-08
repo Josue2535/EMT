@@ -19,9 +19,9 @@ namespace EMT.Services.Implements.Info
             _collection = database.GetCollection<PersonalInformation>(collectionName);
         }
 
-        public PersonalInformation GetById(ObjectId id)
+        public PersonalInformation GetById(string id)
         {
-            return _collection.Find(p => p.Id == id).FirstOrDefault();
+            return _collection.Find(p => p.Id.Equals( id)).FirstOrDefault();
         }
 
         public IEnumerable<PersonalInformation> GetAll()
@@ -39,9 +39,9 @@ namespace EMT.Services.Implements.Info
             _collection.ReplaceOne(p => p.Id == personalInformation.Id, personalInformation);
         }
 
-        public void Delete(ObjectId id)
+        public void Delete(string id)
         {
-            _collection.DeleteOne(p => p.Id == id);
+            _collection.DeleteOne(p => p.Id.Value.Equals(id));
         }
 
     }

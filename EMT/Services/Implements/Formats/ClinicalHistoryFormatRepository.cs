@@ -18,7 +18,7 @@ namespace EMT.Services.Implements.Formats
             _collection = database.GetCollection<ClinicalHistoryFormat>(collectionName);
         }
 
-        public ClinicalHistoryFormat GetById(ObjectId id)
+        public ClinicalHistoryFormat GetById(string id)
         {
             var objectId = id;
             return _collection.Find(new BsonDocument("_id", objectId)).SingleOrDefault();

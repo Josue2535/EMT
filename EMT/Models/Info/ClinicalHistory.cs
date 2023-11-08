@@ -2,6 +2,7 @@
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace EMT.Models.DAO
 {
@@ -9,7 +10,7 @@ namespace EMT.Models.DAO
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public ObjectId? Id { get; set; }
+        public string? Id { get; set; }
         public DateTime Created { get; set; }
         public string PatientId { get; set; }
         public List<Attached> Attachments { get; set; }
@@ -24,9 +25,42 @@ namespace EMT.Models.DAO
         }
 
         // Método para convertir desde JSON a un objeto ClinicHistory
-        public static ClinicalHistory FromJson(string json)
+        public static ClinicalHistory FromJson(JsonObject json)
         {
-            return JsonSerializer.Deserialize<ClinicalHistory>(json);
+            try
+            {
+                // Asegúrate de manejar adecuadamente el campo "Id"
+                string? id = json.ContainsKey("Id") ? json["Id"].GetValue<string>() : null;
+
+                DateTime created = json["Created"].GetValue<DateTime>();
+                string patientId = json["PatientId"].GetValue<string>();
+
+                List<Attached> attachments = new List<Attached>();
+                var attachmentsJsonArray = json["Attachments"].AsArray();
+                foreach (var attachmentJson in attachmentsJsonArray)
+                {
+                    // Procesa cada adjunto y crea un objeto Attached
+                    Attached attachment = Attached.FromJson((JsonObject)attachmentJson);
+                    attachments.Add(attachment);
+                }
+
+                // Crea un nuevo objeto ClinicalHistory con los valores obtenidos
+                ClinicalHistory clinicalHistory = new ClinicalHistory
+                {
+                    Id = id,
+                    Created = created,
+                    PatientId = patientId,
+                    Attachments = attachments
+                };
+
+                return clinicalHistory;
+            }
+            catch (Exception ex)
+            {
+                // Maneja cualquier error durante el proceso de conversión
+                Console.WriteLine($"Error al convertir JsonObject a ClinicalHistory: {ex.Message}");
+                return null;
+            }
         }
     }
 }

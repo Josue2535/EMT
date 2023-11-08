@@ -44,7 +44,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                var format = _repository.GetById(new ObjectId(id));
+                var format = _repository.GetById(id);
                 if (format == null)
                 {
                     return NotFound();
@@ -92,7 +92,7 @@ namespace EMT.Controllers.Formats
         public IActionResult Put(string id, [FromBody] JsonObject json)
         {
             // Implementa la lógica para actualizar un formato existente
-            var existingFormat = _repository.GetById(new ObjectId(id));
+            var existingFormat = _repository.GetById(id);
 
             if (existingFormat == null)
             {
@@ -114,13 +114,13 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                var format = _repository.GetById(new ObjectId(id));
+                var format = _repository.GetById(id);
                 if (format == null)
                 {
                     return NotFound();
                 }
 
-                _repository.Delete(format.Id.Value);
+                _repository.Delete(format.Id);
                 return NoContent();
             }
             catch (Exception ex)

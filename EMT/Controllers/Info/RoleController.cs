@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using EMT.Models.Implements;
 using MongoDB.Bson;
+using System.Text.Json.Nodes;
 
 namespace EMT.Controllers.Info
 {
@@ -40,7 +41,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var role = _repository.GetById(new ObjectId(id));
+                var role = _repository.GetById(id);
                 if (role == null)
                 {
                     return NotFound();
@@ -56,12 +57,13 @@ namespace EMT.Controllers.Info
 
         // POST: api/Role
         [HttpPost]
-        public ActionResult<Role> Post([FromBody] Role role)
+        public ActionResult<Role> Post([FromBody] JsonObject role)
         {
             try
             {
-                _repository.Create(role);
-                return CreatedAtRoute("GetRole", new { id = role.Id }, role);
+                var rol = Role.FromJson(role);
+                _repository.Create(rol);
+                return CreatedAtRoute("GetRole", new { id = rol.Id }, role);
             }
             catch (Exception ex)
             {
@@ -72,16 +74,16 @@ namespace EMT.Controllers.Info
 
         // PUT: api/Role/{id}
         [HttpPut("{id}")]
-        public IActionResult Put(string id, [FromBody] Role updatedRole)
+        public IActionResult Put(string id, [FromBody] JsonObject updatedRoleJson)
         {
             try
             {
-                var existingRole = _repository.GetById(new ObjectId(id));
+                var existingRole = _repository.GetById(id);
                 if (existingRole == null)
                 {
                     return NotFound();
                 }
-
+                var updatedRole = Role.FromJson(updatedRoleJson);
                 updatedRole.Id = existingRole.Id;
                 _repository.Update(updatedRole);
                 return NoContent();
@@ -99,13 +101,13 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var role = _repository.GetById(new ObjectId(id));
+                var role = _repository.GetById(id);
                 if (role == null)
                 {
                     return NotFound();
                 }
 
-                _repository.Delete(role.Id.Value);
+                _repository.Delete(role.Id);
                 return NoContent();
             }
             catch (Exception ex)

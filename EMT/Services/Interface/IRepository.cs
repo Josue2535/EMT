@@ -4,10 +4,10 @@ namespace EMT.Services.Interface
 {
     public interface IRepository<T>
     {
-        T GetById(ObjectId id);
+        T GetById(string id);
         IEnumerable<T> GetAll();
         void Create(T entity);
         void Update(T entity);
-        void Delete(ObjectId id);
+        void Delete(string id);
     }
 }

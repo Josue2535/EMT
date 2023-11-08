@@ -17,7 +17,7 @@ namespace EMT.Services.Implements.Formats
             _collection = database.GetCollection<Role>(collectionName);
         }
 
-        public Role GetById(ObjectId id)
+        public Role GetById(string id)
         {
             return _collection.Find(role => role.Id == id).FirstOrDefault();
         }
@@ -37,12 +37,12 @@ namespace EMT.Services.Implements.Formats
             _collection.ReplaceOne(r => r.Id == role.Id, role);
         }
 
-        public void Delete(ObjectId id)
+        public void Delete(string id)
         {
-            _collection.DeleteOne(role => role.Id.Value.Equals( id));
+            _collection.DeleteOne(role => role.Id.Equals( id));
         }
 
-        public List<Field> GetValidFieldsForRole(ObjectId roleId)
+        public List<Field> GetValidFieldsForRole(string roleId)
         {
             var role = GetById(roleId);
 

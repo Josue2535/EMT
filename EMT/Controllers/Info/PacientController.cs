@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using EMT.Models.Implements;
 using MongoDB.Bson;
+using System.Text.Json.Nodes;
 
 namespace EMT.Controllers.Info
 {
@@ -40,7 +41,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var pacient = _repository.GetById(new ObjectId(id));
+                var pacient = _repository.GetById(id);
                 if (pacient == null)
                 {
                     return NotFound();
@@ -56,10 +57,11 @@ namespace EMT.Controllers.Info
 
         // POST: api/Pacient
         [HttpPost]
-        public ActionResult<Pacient> Post([FromBody] Pacient pacient)
+        public ActionResult<Pacient> Post([FromBody] JsonObject pacientJson)
         {
             try
             {
+                var pacient = Pacient.FromJson(pacientJson);
                 _repository.Create(pacient);
                 return CreatedAtRoute("GetPacient", new { id = pacient.Id }, pacient);
             }
@@ -72,16 +74,16 @@ namespace EMT.Controllers.Info
 
         // PUT: api/Pacient/{id}
         [HttpPut("{id}")]
-        public IActionResult Put(string id, [FromBody] Pacient updatedPacient)
+        public IActionResult Put(string id, [FromBody] JsonObject updatedPacientJson)
         {
             try
             {
-                var existingPacient = _repository.GetById(new ObjectId(id));
+                var existingPacient = _repository.GetById(id);
                 if (existingPacient == null)
                 {
                     return NotFound();
                 }
-
+                var updatedPacient = Pacient.FromJson(updatedPacientJson);
                 updatedPacient.Id = existingPacient.Id;
                 _repository.Update(updatedPacient);
                 return NoContent();
@@ -99,13 +101,13 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var pacient = _repository.GetById(new ObjectId(id));
+                var pacient = _repository.GetById(id);
                 if (pacient == null)
                 {
                     return NotFound();
                 }
 
-                _repository.Delete(pacient.Id.Value);
+                _repository.Delete(pacient.Id);
                 return NoContent();
             }
             catch (Exception ex)

@@ -9,6 +9,6 @@ namespace EMT.Services.Interface.Info
         // Agrega operaciones específicas si es necesario
 
         // Obtiene los campos válidos para un rol
-        List<Field> GetValidFieldsForRole(ObjectId roleId);
+        List<Field> GetValidFieldsForRole(string roleId);
     }
 }

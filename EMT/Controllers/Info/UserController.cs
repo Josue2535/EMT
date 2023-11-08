@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using EMT.Models.Implements;
 using MongoDB.Bson;
+using System.Text.Json.Nodes;
 
 namespace EMT.Controllers.Info
 {
@@ -40,7 +41,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var user = _repository.GetById(new ObjectId(id));
+                var user = _repository.GetById(id);
                 if (user == null)
                 {
                     return NotFound();
@@ -56,10 +57,12 @@ namespace EMT.Controllers.Info
 
         // POST: api/User
         [HttpPost]
-        public ActionResult<User> Post([FromBody] User user)
+        public ActionResult<User> Post([FromBody] JsonObject userJson)
         {
             try
             {
+
+                var user = EMT.Models.Implements.User.FromJson(userJson);
                 _repository.Create(user);
                 return CreatedAtRoute("GetUser", new { id = user.Id }, user);
             }
@@ -76,7 +79,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var existingUser = _repository.GetById(new ObjectId(id));
+                var existingUser = _repository.GetById(id);
                 if (existingUser == null)
                 {
                     return NotFound();
@@ -99,13 +102,13 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var user = _repository.GetById(new ObjectId(id));
+                var user = _repository.GetById(id);
                 if (user == null)
                 {
                     return NotFound();
                 }
 
-                _repository.Delete(user.Id.Value);
+                _repository.Delete(user.Id);
                 return NoContent();
             }
             catch (Exception ex)

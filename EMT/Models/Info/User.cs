@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace EMT.Models.Implements
 {
@@ -8,11 +9,10 @@ namespace EMT.Models.Implements
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public ObjectId? Id { get; set; }
+        public string? Id { get; set; }
         public DateTime Created { get; set; }
         public string UserName { get; set; }
-        public PersonalInformation PersonalInformation { get; set; }
-        public Role Role { get; set; }
+        public string PersonalInformationId { get; set; }
         public bool IsEnabled { get; set; }
 
 
@@ -26,9 +26,40 @@ namespace EMT.Models.Implements
         }
 
         // Método para convertir desde JSON a un objeto Usuario
-        public static User FromJson(string json)
+        public static User FromJson(JsonObject json)
         {
-            return JsonSerializer.Deserialize<User>(json);
+            try
+            {
+                // Aquí deberías extraer cada propiedad del objeto `json` y asignarla al objeto `User`
+                string id = json.ContainsKey("Id") ? json["Id"].GetValue<string>() : ObjectId.GenerateNewId().ToString();
+                DateTime created = json.ContainsKey("Created") ? json["Created"].GetValue<DateTime>() : DateTime.MinValue;
+                string userName = json.ContainsKey("UserName") ? json["UserName"].GetValue<string>() : string.Empty;
+
+                // Cambio aquí: PersonalInformation ahora es de tipo PersonalInformation
+                string personalInformation = json.ContainsKey("PersonalInformation")
+                    ? json["PersonalInformationId"].GetValue<string>()
+                    : null;
+
+                bool isEnabled = json.ContainsKey("IsEnabled") && json["IsEnabled"].GetValue<bool>();
+
+                // Crea un nuevo objeto User con los valores obtenidos
+                User user = new User
+                {
+                    Id = id,
+                    Created = created,
+                    UserName = userName,
+                    PersonalInformationId = personalInformation,
+                    IsEnabled = isEnabled
+                };
+
+                return user;
+            }
+            catch (Exception ex)
+            {
+                // Maneja cualquier error durante el proceso de conversión
+                Console.WriteLine($"Error al convertir JsonObject a User: {ex.Message}");
+                return null;
+            }
         }
     }
 }

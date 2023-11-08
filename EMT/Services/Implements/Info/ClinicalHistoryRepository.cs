@@ -20,7 +20,7 @@ namespace EMT.Services.Implements.Info
             _collection = database.GetCollection<ClinicalHistory>(collectionName);
         }
 
-        public ClinicalHistory GetById(ObjectId id)
+        public ClinicalHistory GetById(string id)
         {
             return _collection.Find(ch => ch.Id == id).FirstOrDefault();
         }
@@ -35,12 +35,12 @@ namespace EMT.Services.Implements.Info
             _collection.InsertOne(clinicalHistory);
         }
 
-        public void Update(ObjectId id, ClinicalHistory clinicalHistory)
+        public void Update(string id, ClinicalHistory clinicalHistory)
         {
             _collection.ReplaceOne(ch => ch.Id == id, clinicalHistory);
         }
 
-        public void Delete(ObjectId id)
+        public void Delete(string id)
         {
             _collection.DeleteOne(ch => ch.Id == id);
         }

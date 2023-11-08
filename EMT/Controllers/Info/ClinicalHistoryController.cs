@@ -42,7 +42,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var clinicalHistory = _repository.GetById(new ObjectId(id));
+                var clinicalHistory = _repository.GetById(id);
                 if (clinicalHistory == null)
                 {
                     return NotFound();
@@ -58,10 +58,11 @@ namespace EMT.Controllers.Info
 
         // POST: api/ClinicalHistory
         [HttpPost]
-        public ActionResult<ClinicalHistory> Post([FromBody] ClinicalHistory clinicalHistory)
+        public ActionResult<ClinicalHistory> Post([FromBody] JsonObject json)
         {
             try
             {
+                var clinicalHistory = ClinicalHistory.FromJson(json);
                 _repository.Create(clinicalHistory);
                 return CreatedAtRoute("GetClinicalHistory", new { id = clinicalHistory.Id }, clinicalHistory);
             }
@@ -71,33 +72,20 @@ namespace EMT.Controllers.Info
                 return StatusCode(500, "Internal Server Error");
             }
         }
-        //Post Anexo
-        [HttpPost("/atachett") ]
-        public ActionResult<ClinicalHistory> PostAttached(string id, [FromBody] JsonObject clinicalHistory)
-        {
-            try
-            {
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                return StatusCode(500, "Internal Server Error");
-            }
-        }
+        
 
         // PUT: api/ClinicalHistory/{id}
         [HttpPut("{id}")]
-        public IActionResult Put(string id, [FromBody] ClinicalHistory updatedClinicalHistory)
+        public IActionResult Put(string id, [FromBody] JsonObject updatedClinicalHistoryjson)
         {
             try
             {
-                var existingClinicalHistory = _repository.GetById(new ObjectId(id));
+                var existingClinicalHistory = _repository.GetById(id);
                 if (existingClinicalHistory == null)
                 {
                     return NotFound();
                 }
-
+                var updatedClinicalHistory = ClinicalHistory.FromJson(updatedClinicalHistoryjson);
                 updatedClinicalHistory.Id = existingClinicalHistory.Id;
                 _repository.Update(updatedClinicalHistory);
                 return NoContent();
@@ -115,13 +103,13 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var clinicalHistory = _repository.GetById(new ObjectId(id));
+                var clinicalHistory = _repository.GetById(id);
                 if (clinicalHistory == null)
                 {
                     return NotFound();
                 }
 
-                _repository.Delete(clinicalHistory.Id.Value);
+                _repository.Delete(clinicalHistory.Id);
                 return NoContent();
             }
             catch (Exception ex)

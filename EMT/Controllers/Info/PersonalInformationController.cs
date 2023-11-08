@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using EMT.Models.Implements;
 using MongoDB.Bson;
+using System.Text.Json.Nodes;
 
 namespace EMT.Controllers.Info
 {
@@ -40,7 +41,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var personalInformation = _repository.GetById(new ObjectId(id));
+                var personalInformation = _repository.GetById(id);
                 if (personalInformation == null)
                 {
                     return NotFound();
@@ -56,10 +57,11 @@ namespace EMT.Controllers.Info
 
         // POST: api/PersonalInformation
         [HttpPost]
-        public ActionResult<PersonalInformation> Post([FromBody] PersonalInformation personalInformation)
+        public ActionResult<PersonalInformation> Post([FromBody] JsonObject personalInformationJson)
         {
             try
             {
+                var personalInformation = PersonalInformation.FromJson(personalInformationJson);
                 _repository.Create(personalInformation);
                 return CreatedAtRoute("GetPersonalInformation", new { id = personalInformation.Id }, personalInformation);
             }
@@ -72,16 +74,16 @@ namespace EMT.Controllers.Info
 
         // PUT: api/PersonalInformation/{id}
         [HttpPut("{id}")]
-        public IActionResult Put(string id, [FromBody] PersonalInformation updatedPersonalInformation)
+        public IActionResult Put(string id, [FromBody] JsonObject updatedPersonalInformationJson)
         {
             try
             {
-                var existingPersonalInformation = _repository.GetById(new ObjectId(id));
+                var existingPersonalInformation = _repository.GetById(id);
                 if (existingPersonalInformation == null)
                 {
                     return NotFound();
                 }
-
+                var updatedPersonalInformation = PersonalInformation.FromJson(updatedPersonalInformationJson);
                 updatedPersonalInformation.Id = existingPersonalInformation.Id;
                 _repository.Update(updatedPersonalInformation);
                 return NoContent();
@@ -99,13 +101,13 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                var personalInformation = _repository.GetById(new ObjectId(id));
+                var personalInformation = _repository.GetById(id);
                 if (personalInformation == null)
                 {
                     return NotFound();
                 }
 
-                _repository.Delete(personalInformation.Id.Value);
+                _repository.Delete(personalInformation.Id);
                 return NoContent();
             }
             catch (Exception ex)

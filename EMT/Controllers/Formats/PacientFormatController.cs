@@ -42,7 +42,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                var format = _repository.GetById(new ObjectId(id));
+                var format = _repository.GetById(id);
                 if (format == null)
                 {
                     return NotFound();
@@ -80,7 +80,7 @@ namespace EMT.Controllers.Formats
             try
             {
                 var updatePacientFormat = PacientFormat.GetFromJson(updatedFormat);
-                var existingFormat = _repository.GetById(new ObjectId(id));
+                var existingFormat = _repository.GetById(id);
                 if (existingFormat == null)
                 {
                     return NotFound();
@@ -103,13 +103,13 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                var format = _repository.GetById(new ObjectId(id));
+                var format = _repository.GetById(id);
                 if (format == null)
                 {
                     return NotFound();
                 }
 
-                _repository.Delete(new ObjectId(id));
+                _repository.Delete(id);
                 return NoContent();
             }
             catch (Exception ex)

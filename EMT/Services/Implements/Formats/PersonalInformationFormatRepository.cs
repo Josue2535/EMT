@@ -21,7 +21,7 @@ namespace EMT.Services.Implements.Formats
         }
 
 
-        public PersonalInformationFormat GetById(ObjectId id)
+        public PersonalInformationFormat GetById(string id)
         {
             return _collection.Find(pi => pi.Id == id).FirstOrDefault();
         }
@@ -41,7 +41,7 @@ namespace EMT.Services.Implements.Formats
             _collection.ReplaceOne(pi => pi.Id == personalInformation.Id, personalInformation);
         }
 
-        public void Delete(ObjectId id)
+        public void Delete(string id)
         {
             _collection.DeleteOne(pi => pi.Id.Equals(id));
         }

@@ -21,11 +21,11 @@ namespace EMT.Models.Formats
         {
             try
             {
-                ObjectId id = new ObjectId();
+                string id = new ObjectId().ToString();
                 // Aquí deberías extraer cada propiedad del objeto `json` y asignarla al objeto `ClinicalHistoryFormat`
                 string description = json["Description"].GetValue<string>();  // Asegúrate de manejar los tipos de datos adecuadamente
                 if (json.ContainsKey("Id")){
-                    id = new ObjectId(json["Id"].GetValue<string>());
+                    id = json["Id"].GetValue<string>();
                 }
 
                 

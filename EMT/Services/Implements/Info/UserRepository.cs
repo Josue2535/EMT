@@ -16,9 +16,9 @@ namespace EMT.Services.Implements.Info
             _collection = database.GetCollection<User>(collectionName);
         }
 
-        public User GetById(ObjectId id)
+        public User GetById(string id)
         {
-            return _collection.Find(user => user.Id == id).FirstOrDefault();
+            return _collection.Find(user => user.Id.Equals( id)).FirstOrDefault();
         }
 
         public IEnumerable<User> GetAll()
@@ -36,17 +36,12 @@ namespace EMT.Services.Implements.Info
             _collection.ReplaceOne(u => u.Id == user.Id, user);
         }
 
-        public void Delete(ObjectId id)
+        public void Delete(string id)
         {
-            _collection.DeleteOne(user => user.Id == id);
+            _collection.DeleteOne(user => user.Id.Equals( id));
         }
 
-        public Role GetRoleByUserId(ObjectId userId)
-        {
-            var user = _collection.Find(u => u.Id == userId).FirstOrDefault();
-
-            return user?.Role;
-        }
+        
 
        
     }
