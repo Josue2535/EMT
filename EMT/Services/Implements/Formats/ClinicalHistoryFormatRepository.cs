@@ -106,5 +106,14 @@ namespace EMT.Services.Implements.Formats
             var filter = Builders<ClinicalHistoryFormat>.Filter.Eq("_id", id);
             _collection.DeleteOne(filter);
         }
+
+        public IEnumerable<ClinicalHistoryFormat> GetAll(List<string> list)
+        {
+            // Filtrar los formatos por los nombres proporcionados en la lista
+            var filter = Builders<ClinicalHistoryFormat>.Filter.In("Name", list);
+
+            // Obtener los formatos que cumplen con el filtro
+            return _collection.Find(filter).ToList();
+        }
     }
 }

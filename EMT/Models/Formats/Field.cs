@@ -1,4 +1,8 @@
-﻿using System.Text.Json.Nodes;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 
 namespace EMT.Models.Formats
 {
@@ -24,7 +28,7 @@ namespace EMT.Models.Formats
             try
             {
                 string name = json["Name"].GetValue<string>();
-                object value = json["Value"].GetValue<object>();
+                object value = ConvertJsonValue(json["Value"]);
 
                 // Crea un nuevo objeto Field con los valores obtenidos
                 Field field = new Field
@@ -41,6 +45,11 @@ namespace EMT.Models.Formats
                 Console.WriteLine($"Error al convertir JsonObject a Field: {ex.Message}");
                 return null;
             }
+        }
+
+        private static object ConvertJsonValue(JsonNode jsonNode)
+        {
+            return jsonNode.GetValue<object>();
         }
     }
 }

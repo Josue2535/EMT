@@ -6,11 +6,15 @@ using EMT.Models.DAO;
 using MongoDB.Bson;
 using EMT.Models.Formats;
 using System.Text.Json.Nodes;
+using EMT.Services.Implements.Formats;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EMT.Controllers.Info
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ClinicalHistoryController : ControllerBase
     {
         private readonly IClinicalHistoryRepository _repository;
@@ -26,6 +30,10 @@ namespace EMT.Controllers.Info
         {
             try
             {
+                if (!hasAccess("ClinicalHistory", "Get"))
+                {
+                    return Unauthorized();
+                }
                 var clinicalHistories = _repository.GetAll();
                 return Ok(clinicalHistories);
             }
@@ -42,6 +50,10 @@ namespace EMT.Controllers.Info
         {
             try
             {
+                if (!hasAccess("ClinicalHistory", "Get"))
+                {
+                    return Unauthorized();
+                }
                 var clinicalHistory = _repository.GetById(id);
                 if (clinicalHistory == null)
                 {
@@ -56,12 +68,43 @@ namespace EMT.Controllers.Info
             }
         }
 
+        // GET: api/ClinicalHistory/user/{id}
+        [HttpGet("user/{id}", Name = "GetClinicalHistoryByUser")]
+        public ActionResult<IEnumerable<ClinicalHistory>> GetByUserId(string id)
+        {
+            try
+            {
+                if (!hasAccess("ClinicalHistory", "Get"))
+                {
+                    return Unauthorized();
+                }
+                var clinicalHistories = _repository.GetByUserId(id);
+
+                if (clinicalHistories == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(clinicalHistories);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+
         // POST: api/ClinicalHistory
         [HttpPost]
         public ActionResult<ClinicalHistory> Post([FromBody] JsonObject json)
         {
             try
             {
+                if (!hasAccess("ClinicalHistory", "Post"))
+                {
+                    return Unauthorized();
+                }
                 var clinicalHistory = ClinicalHistory.FromJson(json);
                 _repository.Create(clinicalHistory);
                 return CreatedAtRoute("GetClinicalHistory", new { id = clinicalHistory.Id }, clinicalHistory);
@@ -80,6 +123,10 @@ namespace EMT.Controllers.Info
         {
             try
             {
+                if (!hasAccess("ClinicalHistory", "put"))
+                {
+                    return Unauthorized();
+                }
                 var existingClinicalHistory = _repository.GetById(id);
                 if (existingClinicalHistory == null)
                 {
@@ -103,6 +150,10 @@ namespace EMT.Controllers.Info
         {
             try
             {
+                if (!hasAccess("ClinicalHistory", "Delete"))
+                {
+                    return Unauthorized();
+                }
                 var clinicalHistory = _repository.GetById(id);
                 if (clinicalHistory == null)
                 {
@@ -117,6 +168,42 @@ namespace EMT.Controllers.Info
                 // Log the exception
                 return StatusCode(500, "Internal Server Error");
             }
+        }
+        public bool hasAccess(string name, string field)
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var handler = new JwtSecurityTokenHandler();
+
+            // Parsea el token y obtén la información de reclamaciones (claims)
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+            bool enable = false;
+            if (jsonToken != null)
+            {
+                // Obtén las reclamaciones del token
+                var claims = jsonToken.Claims;
+
+                // Encuentra la claim que contiene los roles
+                var rolesClaim = claims.Where(c => c.Type == "roles").ToList();
+
+                if (rolesClaim != null)
+                {
+
+
+                    // Ahora, roles contiene un array de strings con los roles del usuario
+                    foreach (var role in rolesClaim)
+                    {
+                        var rol = _RoleRepository.GetById(role.Value);
+                        if (rol != null && rol.IsFieldEnabled(name, field))
+                        {
+                            return true;
+                        }
+                        Console.WriteLine($"Rol: {role.Value}");
+                    }
+
+                }
+
+            }
+            return false;
         }
     }
 }

@@ -7,5 +7,6 @@ namespace EMT.Services.Interface.Info
         // Agrega operaciones específicas si es necesario
 
         void AddAttachet(string json);
+        ClinicalHistory GetByUserId(string id);
     }
 }

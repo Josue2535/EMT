@@ -6,7 +6,7 @@ namespace EMT.Models.Formats
 {
     public class ClinicalHistoryFormat : Format
     {
-
+        public string Name;
         public string Description { get; set; }
 
         public string ToJson()
@@ -22,6 +22,7 @@ namespace EMT.Models.Formats
             try
             {
                 string id = new ObjectId().ToString();
+                string name = json["Name"].GetValue<string>();
                 // Aquí deberías extraer cada propiedad del objeto `json` y asignarla al objeto `ClinicalHistoryFormat`
                 string description = json["Description"].GetValue<string>();  // Asegúrate de manejar los tipos de datos adecuadamente
                 if (json.ContainsKey("Id")){

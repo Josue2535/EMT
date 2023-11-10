@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json.Nodes;
 using EMT.Models.Formats;
+using EMT.Services.Implements.Formats;
 using EMT.Services.Interface.Formats;
+using EMT.Services.Interface.Info;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
@@ -11,13 +15,15 @@ namespace EMT.Controllers.Formats
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class PacientFormatController : ControllerBase
     {
         private readonly IPacientFormatRepository _repository;
-
-        public PacientFormatController(IPacientFormatRepository repository)
+        private readonly IRoleRepository _RoleRepository;
+        public PacientFormatController(IPacientFormatRepository repository, IRoleRepository roleRepositor)
         {
             _repository = repository;
+            _RoleRepository = roleRepositor;
         }
 
         // GET: api/PacientFormat
@@ -26,8 +32,14 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                var formats = _repository.GetAll();
-                return Ok(formats);
+                if (hasAccess("PacientFormat", "Get"))
+                {
+                    var formats = _repository.GetAll();
+                    return Ok(formats);
+                }
+                else {
+                    return Unauthorized();
+                }
             }
             catch (Exception ex)
             {
@@ -42,12 +54,18 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                var format = _repository.GetById(id);
-                if (format == null)
+                if (hasAccess("PacientFormat", "Get"))
                 {
-                    return NotFound();
+                    var format = _repository.GetById(id);
+                    if (format == null)
+                    {
+                        return NotFound();
+                    }
+                    return Ok(format);
                 }
-                return Ok(format);
+                else { 
+                    return Unauthorized();
+                }
             }
             catch (Exception ex)
             {
@@ -62,9 +80,16 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                var pacientFormat = PacientFormat.GetFromJson(format);
-                _repository.Create(pacientFormat);
-                return CreatedAtRoute("GetPacientFormat", new { id = pacientFormat.Id.ToString() }, format);
+                if (hasAccess("PacientFormat", "Post"))
+                {
+                    var pacientFormat = PacientFormat.GetFromJson(format);
+                    _repository.Create(pacientFormat);
+                    return CreatedAtRoute("GetPacientFormat", new { id = pacientFormat.Id.ToString() }, format);
+                }
+                else
+                {
+                    return Unauthorized();
+                }
             }
             catch (Exception ex)
             {
@@ -79,16 +104,23 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                var updatePacientFormat = PacientFormat.GetFromJson(updatedFormat);
-                var existingFormat = _repository.GetById(id);
-                if (existingFormat == null)
+                if (hasAccess("PacientFormat", "Put"))
                 {
-                    return NotFound();
-                }
+                    var updatePacientFormat = PacientFormat.GetFromJson(updatedFormat);
+                    var existingFormat = _repository.GetById(id);
+                    if (existingFormat == null)
+                    {
+                        return NotFound();
+                    }
 
-                updatePacientFormat.Id = existingFormat.Id;
-                _repository.Update(updatePacientFormat);
-                return NoContent();
+                    updatePacientFormat.Id = existingFormat.Id;
+                    _repository.Update(updatePacientFormat);
+                    return NoContent();
+                }
+                else
+                {
+                    return Unauthorized();
+                }
             }
             catch (Exception ex)
             {
@@ -103,20 +135,64 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                var format = _repository.GetById(id);
-                if (format == null)
+                if (hasAccess("PacientFormat", "Put"))
                 {
-                    return NotFound();
-                }
+                    var format = _repository.GetById(id);
+                    if (format == null)
+                    {
+                        return NotFound();
+                    }
 
-                _repository.Delete(id);
-                return NoContent();
+                    _repository.Delete(id);
+                    return NoContent();
+                }
+                else
+                {
+                    return Unauthorized();
+                }
             }
             catch (Exception ex)
             {
                 // Log the exception
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
+        }
+
+        public bool hasAccess(string name, string field)
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var handler = new JwtSecurityTokenHandler();
+
+            // Parsea el token y obtén la información de reclamaciones (claims)
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+            bool enable = false;
+            if (jsonToken != null)
+            {
+                // Obtén las reclamaciones del token
+                var claims = jsonToken.Claims;
+
+                // Encuentra la claim que contiene los roles
+                var rolesClaim = claims.Where(c => c.Type == "roles").ToList();
+
+                if (rolesClaim != null)
+                {
+
+
+                    // Ahora, roles contiene un array de strings con los roles del usuario
+                    foreach (var role in rolesClaim)
+                    {
+                        var rol = _RoleRepository.GetById(role.Value);
+                        if (rol != null && rol.IsFieldEnabled(name, field))
+                        {
+                            return true;
+                        }
+                        Console.WriteLine($"Rol: {role.Value}");
+                    }
+
+                }
+
+            }
+            return false;
         }
     }
 }

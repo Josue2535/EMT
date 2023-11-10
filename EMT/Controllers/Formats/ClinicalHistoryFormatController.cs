@@ -1,5 +1,6 @@
 ﻿using EMT.Models.Formats;
 using EMT.Services.Interface.Formats;
+using EMT.Services.Interface.Info;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -19,65 +20,49 @@ namespace EMT.Controllers
     public class ClinicalHistoryFormatController : ControllerBase
     {
         private readonly IClinicalHistoryFormatRepository _clinicalHistoryFormatRepository;
+        private readonly IRoleRepository _RoleRepository;
 
-        public ClinicalHistoryFormatController(IClinicalHistoryFormatRepository clinicalHistoryFormatRepository)
+        public ClinicalHistoryFormatController(IClinicalHistoryFormatRepository clinicalHistoryFormatRepository, IRoleRepository RoleRepository)
         {
             _clinicalHistoryFormatRepository = clinicalHistoryFormatRepository;
+            _RoleRepository = RoleRepository;
         }
 
         [HttpGet(Name = "GetClinicalHistoryFormats")]
         public IEnumerable<ClinicalHistoryFormat> Get()
         {
-            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-            var handler = new JwtSecurityTokenHandler();
-
-            // Parsea el token y obtén la información de reclamaciones (claims)
-            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
-
-            if (jsonToken != null)
+            if (hasAccess("ClinicHistoryFormat", "Get"))
             {
-                // Obtén las reclamaciones del token
-                var claims = jsonToken.Claims;
-
-                // Encuentra la claim que contiene los roles
-                var rolesClaim = claims.Where(c => c.Type == "roles").ToList();
-
-                if (rolesClaim != null)
-                {
-
-
-                    // Ahora, roles contiene un array de strings con los roles del usuario
-                    foreach (var role in rolesClaim)
-                    {
-                        Console.WriteLine($"Rol: {role.Value}");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("No se encontraron reclamaciones de roles en el token.");
-                }
+                // Implementa la lógica para obtener todos los formatos
+                var formats = _clinicalHistoryFormatRepository.GetAll(GetFormats());
+                return formats;
             }
             else
             {
-                Console.WriteLine("No se pudo parsear el token.");
+                return null;
+
             }
-            // Implementa la lógica para obtener todos los formatos
-            var formats = _clinicalHistoryFormatRepository.GetAll();
-            return formats;
         }
 
         [HttpGet("{id}", Name = "GetClinicalHistoryFormatById")]
         public IActionResult Get(string id)
         {
-            // Implementa la lógica para obtener un formato por su ID
-            var format = _clinicalHistoryFormatRepository.GetById(id);
-
-            if (format == null)
+            if (hasAccess("ClinicHistoryFormat", "Get"))
             {
-                return NotFound();
-            }
 
-            return Ok(format);
+                // Implementa la lógica para obtener un formato por su ID
+                var format = _clinicalHistoryFormatRepository.GetById(id);
+
+                if (format == null)
+                {
+                    return NotFound();
+                }
+                return Ok(format);
+            }
+            else {
+                return Unauthorized();
+            }
+            
         }
 
         [HttpPost(Name = "CreateClinicalHistoryFormat")]
@@ -85,14 +70,19 @@ namespace EMT.Controllers
         {
             try
             {
-                
-                // Convierte manualmente el JSON a un objeto ClinicalHistoryFormat
-                var clinicalHistoryFormat = ClinicalHistoryFormat.GetFromJson(json);
+                if (hasAccess("ClinicHistoryFormat", "post"))
+                {
+                    // Convierte manualmente el JSON a un objeto ClinicalHistoryFormat
+                    var clinicalHistoryFormat = ClinicalHistoryFormat.GetFromJson(json);
 
-                // Implementa la lógica para crear un nuevo formato
-                _clinicalHistoryFormatRepository.Create(clinicalHistoryFormat);
+                    // Implementa la lógica para crear un nuevo formato
+                    _clinicalHistoryFormatRepository.Create(clinicalHistoryFormat);
 
-                return CreatedAtRoute("GetClinicalHistoryFormatById", new { id = clinicalHistoryFormat.Id }, clinicalHistoryFormat);
+                    return CreatedAtRoute("GetClinicalHistoryFormatById", new { id = clinicalHistoryFormat.Id }, clinicalHistoryFormat);
+                }
+                else {
+                    return Unauthorized();
+                }
             }
             catch (JsonException)
             {
@@ -105,20 +95,26 @@ namespace EMT.Controllers
         [HttpPut("{id}", Name = "UpdateClinicalHistoryFormat")]
         public IActionResult Put(string id, [FromBody] JsonObject json)
         {
-            // Implementa la lógica para actualizar un formato existente
-            var existingFormat = _clinicalHistoryFormatRepository.GetById(id);
-
-            if (existingFormat == null)
+            if (hasAccess("ClinicHistoryFormat", "put"))
             {
-                return NotFound();
+                // Implementa la lógica para actualizar un formato existente
+                var existingFormat = _clinicalHistoryFormatRepository.GetById(id);
+
+                if (existingFormat == null)
+                {
+                    return NotFound();
+                }
+
+                // Actualiza las propiedades necesarias
+                existingFormat = ClinicalHistoryFormat.GetFromJson(json);
+
+                _clinicalHistoryFormatRepository.Update(existingFormat);
+
+                return NoContent();
             }
-
-            // Actualiza las propiedades necesarias
-            existingFormat = ClinicalHistoryFormat.GetFromJson(json);
-
-            _clinicalHistoryFormatRepository.Update(existingFormat);
-
-            return NoContent();
+            else {
+                return Unauthorized();
+            }
         }
 
         [HttpDelete("{id}", Name = "DeleteClinicalHistoryFormat")]
@@ -136,6 +132,88 @@ namespace EMT.Controllers
 
             return NoContent();
         }
+
+        public bool hasAccess(string name, string field)
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var handler = new JwtSecurityTokenHandler();
+
+            // Parsea el token y obtén la información de reclamaciones (claims)
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+            bool enable = false;
+            if (jsonToken != null)
+            {
+                // Obtén las reclamaciones del token
+                var claims = jsonToken.Claims;
+
+                // Encuentra la claim que contiene los roles
+                var rolesClaim = claims.Where(c => c.Type == "roles").ToList();
+
+                if (rolesClaim != null)
+                {
+
+
+                    // Ahora, roles contiene un array de strings con los roles del usuario
+                    foreach (var role in rolesClaim)
+                    {
+                        var rol = _RoleRepository.GetById(role.Value);
+                        if (rol != null && rol.IsFieldEnabled(name, field))
+                        {
+                            return true;
+                        }
+                        Console.WriteLine($"Rol: {role.Value}");
+                    }
+
+                }
+
+            }
+            return false;
+        }
+        public List<string> GetFormats()
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var handler = new JwtSecurityTokenHandler();
+
+            // Parsea el token y obtén la información de reclamaciones (claims)
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+
+            if (jsonToken != null)
+            {
+                // Obtén las reclamaciones del token
+                var claims = jsonToken.Claims;
+
+                // Encuentra la claim que contiene los roles
+                var rolesClaim = claims.Where(c => c.Type == "roles").ToList();
+
+                if (rolesClaim != null)
+                {
+                    // Inicializa una lista para almacenar los valores únicos
+                    List<string> uniqueValues = new List<string>();
+
+                    // Ahora, roles contiene un array de strings con los roles del usuario
+                    foreach (var role in rolesClaim)
+                    {
+                        var rol = _RoleRepository.GetById(role.Value);
+
+
+                        // Agrega los valores únicos de ValidFields al resultado
+                        uniqueValues.AddRange(rol.formats());
+
+
+                        Console.WriteLine($"Rol: {role.Value}");
+                    }
+
+                    // Devuelve la lista de valores únicos sin duplicados
+                    return uniqueValues.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                }
+
+            }
+
+            // Si no hay roles o el token no es válido, devuelve una lista vacía
+            return new List<string>();
+        }
+
+
     }
 
 }

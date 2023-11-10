@@ -9,6 +9,7 @@ namespace EMT.Models.Formats
         public string id { get; set; }
         public DateTime Created { get; set; }
         public List<Field> Fields { get; set; }
+        string NameFormat { get; set; }
 
         // Constructor por defecto
         public Attached()
@@ -33,7 +34,7 @@ namespace EMT.Models.Formats
             {
                 string id = json.ContainsKey("Id") ? json["Id"].GetValue<string>() : ObjectId.GenerateNewId().ToString();
                 DateTime created = json.ContainsKey("Created") ? json["Created"].GetValue<DateTime>() : DateTime.Now;
-
+                string name = json["NameFormat"].GetValue<string>();
                 List<Field> fields = new List<Field>();
                 var fieldsJsonArray = json["Fields"].AsArray();
                 foreach (var fieldJson in fieldsJsonArray)
@@ -47,6 +48,7 @@ namespace EMT.Models.Formats
                 Attached attached = new Attached
                 {
                     id = id,
+                    NameFormat = name,
                     Created = created,
                     Fields = fields
                 };

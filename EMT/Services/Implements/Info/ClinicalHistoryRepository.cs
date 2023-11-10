@@ -32,7 +32,20 @@ namespace EMT.Services.Implements.Info
 
         public void Create(ClinicalHistory clinicalHistory)
         {
-            _collection.InsertOne(clinicalHistory);
+            // Verificar si ya existe una historia clínica para el mismo UserId
+            var existingClinicalHistory = _collection.Find(ch => ch.PatientId == clinicalHistory.PatientId).FirstOrDefault();
+
+            if (existingClinicalHistory == null)
+            {
+                // No existe, se puede crear la nueva historia clínica
+                _collection.InsertOne(clinicalHistory);
+            }
+            else
+            {
+                // Ya existe una historia clínica para el mismo UserId, puedes manejarlo según tus necesidades
+                // En este ejemplo, lanzamos una excepción, pero puedes ajustarlo según tu lógica
+                throw new InvalidOperationException("Ya existe una historia clínica para este usuario.");
+            }
         }
 
         public void Update(string id, ClinicalHistory clinicalHistory)
@@ -55,7 +68,10 @@ namespace EMT.Services.Implements.Info
             throw new NotImplementedException();
         }
 
-        
+        public ClinicalHistory GetByUserId(string userId)
+        {
+            return _collection.Find(ch => ch.PatientId == userId).FirstOrDefault();
+        }
     }
 
 }

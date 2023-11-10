@@ -41,7 +41,7 @@ namespace EMT.Services.Implements.Info
 
         public void Delete(string id)
         {
-            _collection.DeleteOne(p => p.Id.Value.Equals(id));
+            _collection.DeleteOne(p => p.Id.Equals(id));
         }
 
     }

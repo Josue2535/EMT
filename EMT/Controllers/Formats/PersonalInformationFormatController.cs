@@ -8,6 +8,8 @@ using System.Text.Json.Nodes;
 using EMT.Services.Implements.Formats;
 using Microsoft.IdentityModel.Tokens;
 using System.Text.Json;
+using EMT.Services.Interface.Info;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace EMT.Controllers.Formats
 {
@@ -28,6 +30,10 @@ namespace EMT.Controllers.Formats
         {
             try
             {
+                if (!hasAccess("PersonalInformationFormat", "Get"))
+                {
+                    return Unauthorized();
+                }
                 var formats = _repository.GetAll();
                 return Ok(formats);
             }
@@ -44,6 +50,10 @@ namespace EMT.Controllers.Formats
         {
             try
             {
+                if (!hasAccess("PersonalInformationFormat", "Get"))
+                {
+                    return Unauthorized();
+                }
                 var format = _repository.GetById(id);
                 if (format == null)
                 {
@@ -64,6 +74,10 @@ namespace EMT.Controllers.Formats
         {
             try
             {
+                if (!hasAccess("PersonalInformationFormat", "Post"))
+                {
+                    return Unauthorized();
+                }
                 // Verifica si ya existe algún formato en la base de datos
                 var existingFormat = _repository.GetAll();
 
@@ -91,6 +105,10 @@ namespace EMT.Controllers.Formats
         [HttpPut("{id:length(24)}")]
         public IActionResult Put(string id, [FromBody] JsonObject json)
         {
+            if (!hasAccess("PersonalInformationFormat", "Put"))
+            {
+                return Unauthorized();
+            }
             // Implementa la lógica para actualizar un formato existente
             var existingFormat = _repository.GetById(id);
 
@@ -114,6 +132,10 @@ namespace EMT.Controllers.Formats
         {
             try
             {
+                if (!hasAccess("PersonalInformationFormat", "Delete"))
+                {
+                    return Unauthorized();
+                }
                 var format = _repository.GetById(id);
                 if (format == null)
                 {
@@ -128,6 +150,43 @@ namespace EMT.Controllers.Formats
                 // Log the exception
                 return StatusCode(500, "Internal Server Error");
             }
+        }
+
+        public bool hasAccess(string name, string field)
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var handler = new JwtSecurityTokenHandler();
+
+            // Parsea el token y obtén la información de reclamaciones (claims)
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+            bool enable = false;
+            if (jsonToken != null)
+            {
+                // Obtén las reclamaciones del token
+                var claims = jsonToken.Claims;
+
+                // Encuentra la claim que contiene los roles
+                var rolesClaim = claims.Where(c => c.Type == "roles").ToList();
+
+                if (rolesClaim != null)
+                {
+
+
+                    // Ahora, roles contiene un array de strings con los roles del usuario
+                    foreach (var role in rolesClaim)
+                    {
+                        var rol = _RoleRepository.GetById(role.Value);
+                        if (rol != null && rol.IsFieldEnabled(name, field))
+                        {
+                            return true;
+                        }
+                        Console.WriteLine($"Rol: {role.Value}");
+                    }
+
+                }
+
+            }
+            return false;
         }
     }
 }

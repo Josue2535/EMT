@@ -19,7 +19,7 @@ namespace EMT.Services.Implements.Formats
 
         public Role GetById(string id)
         {
-            return _collection.Find(role => role.Id == id).FirstOrDefault();
+            return _collection.Find(role => role.Name == id).FirstOrDefault();
         }
 
         public IEnumerable<Role> GetAll()
