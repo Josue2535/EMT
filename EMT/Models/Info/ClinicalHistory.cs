@@ -30,9 +30,9 @@ namespace EMT.Models.DAO
             try
             {
                 // Asegúrate de manejar adecuadamente el campo "Id"
-                string? id = json.ContainsKey("Id") ? json["Id"].GetValue<string>() : null;
+                var id = json.ContainsKey("Id") ? json["Id"].GetValue<string>() : ObjectId.GenerateNewId().ToString();
 
-                DateTime created = json["Created"].GetValue<DateTime>();
+                DateTime created = json.ContainsKey("Created") ? json["Created"].GetValue<DateTime>(): DateTime.Now;
                 string patientId = json["PatientId"].GetValue<string>();
 
                 List<Attached> attachments = new List<Attached>();

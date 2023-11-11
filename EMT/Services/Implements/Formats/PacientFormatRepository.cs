@@ -48,7 +48,12 @@ namespace EMT.Services.Implements.Formats
             throw new NotImplementedException();
         }
 
-        
+        public PacientFormat GetFirst()
+        {
+            return _collection.Find(p => true).FirstOrDefault();
+        }
+
+
 
 
 

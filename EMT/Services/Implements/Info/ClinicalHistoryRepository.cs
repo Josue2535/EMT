@@ -1,4 +1,5 @@
 ﻿using EMT.Models.DAO;
+using EMT.Models.Formats;
 using EMT.Models.Implements;
 using EMT.Services.Interface.Formats;
 using EMT.Services.Interface.Info;
@@ -37,6 +38,7 @@ namespace EMT.Services.Implements.Info
 
             if (existingClinicalHistory == null)
             {
+                clinicalHistory.Attachments = new List<Attached>();
                 // No existe, se puede crear la nueva historia clínica
                 _collection.InsertOne(clinicalHistory);
             }

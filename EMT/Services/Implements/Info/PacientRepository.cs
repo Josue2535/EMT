@@ -32,7 +32,22 @@ namespace EMT.Services.Implements.Info
 
         public void Create(Pacient pacient)
         {
+            // Verificar si ya existe un paciente con el mismo ID de información personal
+            if (IsDuplicatePersonalInfoId(pacient.PersonalInformationId))
+            {
+                Console.WriteLine($"Ya existe un paciente con el ID de información personal: {pacient.PersonalInformationId}");
+                // Puedes lanzar una excepción, manejar el error de alguna otra manera, o simplemente salir del método
+                return;
+            }
+
+            // Si no hay duplicados, proceder con la inserción
             _collection.InsertOne(pacient);
+        }
+
+        private bool IsDuplicatePersonalInfoId(string personalInfoId)
+        {
+            // Verificar si hay algún paciente con el mismo ID de información personal en la base de datos
+            return _collection.Find(p => p.PersonalInformationId == personalInfoId).Any();
         }
 
         public void Update( Pacient pacient)
@@ -63,6 +78,9 @@ namespace EMT.Services.Implements.Info
             Create(pacient);
         }
 
-        
+        public IEnumerable<Pacient> GetByRole(string name)
+        {
+            return _collection.Find(p => p.Role.Equals(name)).ToList();
+        }
     }
 }

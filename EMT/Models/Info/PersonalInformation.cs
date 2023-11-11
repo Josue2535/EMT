@@ -31,8 +31,8 @@ namespace EMT.Models.Implements
             try
             {
                 // Aquí deberías extraer cada propiedad del objeto `json` y asignarla al objeto `PersonalInformation`
-                string id = json.ContainsKey("Id") ? json["Id"].GetValue<string>() : ObjectId.GenerateNewId().ToString();
-                DateTime created = json.ContainsKey("Created") ? json["Created"].GetValue<DateTime>() : DateTime.MinValue;
+                var id = json.ContainsKey("Id") ? json["Id"].GetValue<string>() : ObjectId.GenerateNewId().ToString();
+                DateTime created = json.ContainsKey("Created") ? json["Created"].GetValue<DateTime>() : DateTime.Now;
 
                 List<Field> fieldList = new List<Field>();
                 var fieldListJsonArray = json.ContainsKey("FieldList") ? json["FieldList"].AsArray() : new JsonArray();

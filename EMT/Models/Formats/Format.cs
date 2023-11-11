@@ -32,7 +32,7 @@ namespace EMT.Models.Formats
             {
                 // Aquí deberías extraer cada propiedad del objeto `json` y asignarla al objeto `Format`
                 string id = json.ContainsKey("Id") ? json["Id"].GetValue<string>() : ObjectId.GenerateNewId().ToString();
-                DateTime creationDate = json.ContainsKey("CreationDate") ? json["CreationDate"].GetValue<DateTime>() : DateTime.MinValue;
+                DateTime creationDate = json.ContainsKey("CreationDate") ? json["CreationDate"].GetValue<DateTime>() : DateTime.Now;
 
                 List<FieldsFormat> validFields = new List<FieldsFormat>();
                 var validFieldsJsonArray = json.ContainsKey("ValidFields") ? json["ValidFields"].AsArray() : new JsonArray();

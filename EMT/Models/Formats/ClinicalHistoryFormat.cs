@@ -21,16 +21,14 @@ namespace EMT.Models.Formats
         {
             try
             {
-                string id = new ObjectId().ToString();
+                var id = json.ContainsKey("Id") ? json["Id"].GetValue<string>() : ObjectId.GenerateNewId().ToString();
                 string name = json["Name"].GetValue<string>();
                 // Aquí deberías extraer cada propiedad del objeto `json` y asignarla al objeto `ClinicalHistoryFormat`
                 string description = json["Description"].GetValue<string>();  // Asegúrate de manejar los tipos de datos adecuadamente
-                if (json.ContainsKey("Id")){
-                    id = json["Id"].GetValue<string>();
-                }
+                
 
                 
-                DateTime creationDate = json["CreationDate"].GetValue<DateTime>();  // Ajusta el formato de fecha según tus necesidades
+                DateTime creationDate = json.ContainsKey("CreationDate") ? json["CreationDate"].GetValue<DateTime>() : DateTime.Now;  // Ajusta el formato de fecha según tus necesidades
                 
                 List<FieldsFormat> validFields = new List<FieldsFormat>();
                 var validFieldsJsonArray = json["ValidFields"].AsArray();

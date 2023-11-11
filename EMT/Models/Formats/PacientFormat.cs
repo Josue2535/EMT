@@ -10,14 +10,10 @@ namespace EMT.Models.Formats
         {
             try
             {
-                string id = new ObjectId().ToString();
-                if (json.ContainsKey("Id"))
-                {
-                    id = json["Id"].GetValue<string>();
-                }
+                var id = json.ContainsKey("Id") ? json["Id"].GetValue<string>() : ObjectId.GenerateNewId().ToString();
 
 
-                DateTime creationDate = json["CreationDate"].GetValue<DateTime>();  // Ajusta el formato de fecha según tus necesidades
+                DateTime creationDate = json.ContainsKey("CreationDate") ? json["CreationDate"].GetValue<DateTime>() : DateTime.Now;  // Ajusta el formato de fecha según tus necesidades
 
                 List<FieldsFormat> validFields = new List<FieldsFormat>();
                 var validFieldsJsonArray = json["ValidFields"].AsArray();

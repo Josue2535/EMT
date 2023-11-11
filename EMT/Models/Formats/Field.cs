@@ -28,7 +28,7 @@ namespace EMT.Models.Formats
             try
             {
                 string name = json["Name"].GetValue<string>();
-                object value = ConvertJsonValue(json["Value"]);
+                object value = ConvertJsonValue(json["Value"].GetValue<JsonObject>());
 
                 // Crea un nuevo objeto Field con los valores obtenidos
                 Field field = new Field
@@ -47,7 +47,7 @@ namespace EMT.Models.Formats
             }
         }
 
-        private static object ConvertJsonValue(JsonNode jsonNode)
+        private static object ConvertJsonValue(JsonObject jsonNode)
         {
             return jsonNode.GetValue<object>();
         }

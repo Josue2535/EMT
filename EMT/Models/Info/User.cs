@@ -32,7 +32,7 @@ namespace EMT.Models.Implements
             {
                 // Aquí deberías extraer cada propiedad del objeto `json` y asignarla al objeto `User`
                 string id = json.ContainsKey("Id") ? json["Id"].GetValue<string>() : ObjectId.GenerateNewId().ToString();
-                DateTime created = json.ContainsKey("Created") ? json["Created"].GetValue<DateTime>() : DateTime.MinValue;
+                DateTime created = json.ContainsKey("Created") ? json["Created"].GetValue<DateTime>() : DateTime.Now;
                 string userName = json.ContainsKey("UserName") ? json["UserName"].GetValue<string>() : string.Empty;
 
                 // Cambio aquí: PersonalInformation ahora es de tipo PersonalInformation

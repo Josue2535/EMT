@@ -20,7 +20,11 @@ namespace EMT.Services.Implements.Info
         {
             return _collection.Find(user => user.Id.Equals( id)).FirstOrDefault();
         }
-
+        private bool IsDuplicatePersonalInfoId(string personalInfoId)
+        {
+            // Verificar si hay algún paciente con el mismo ID de información personal en la base de datos
+            return _collection.Find(p => p.PersonalInformationId == personalInfoId).Any();
+        }
         public IEnumerable<User> GetAll()
         {
             return _collection.Find(_ => true).ToList();
@@ -28,6 +32,12 @@ namespace EMT.Services.Implements.Info
 
         public void Create(User user)
         {
+            if(IsDuplicatePersonalInfoId(user.PersonalInformationId))
+            {
+                Console.WriteLine($"Ya existe un Usuario con el ID de información personal: {user.PersonalInformationId}");
+                // Puedes lanzar una excepción, manejar el error de alguna otra manera, o simplemente salir del método
+                return;
+            }
             _collection.InsertOne(user);
         }
 

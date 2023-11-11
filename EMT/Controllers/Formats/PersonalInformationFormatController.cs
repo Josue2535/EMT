@@ -18,10 +18,11 @@ namespace EMT.Controllers.Formats
     public class PersonalInformationFormatController : ControllerBase
     {
         private readonly IPersonalInformationFormatRepository _repository;
-
-        public PersonalInformationFormatController(IPersonalInformationFormatRepository repository)
+        private readonly IRoleRepository _RoleRepository;
+        public PersonalInformationFormatController(IPersonalInformationFormatRepository repository, IRoleRepository roleRepository)
         {
             _repository = repository;
+            _RoleRepository = roleRepository;
         }
 
         // GET: api/PersonalInformationFormat
@@ -152,7 +153,7 @@ namespace EMT.Controllers.Formats
             }
         }
 
-        public bool hasAccess(string name, string field)
+        private bool hasAccess(string name, string field)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var handler = new JwtSecurityTokenHandler();

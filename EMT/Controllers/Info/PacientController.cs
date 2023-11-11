@@ -5,18 +5,26 @@ using System.Collections.Generic;
 using EMT.Models.Implements;
 using MongoDB.Bson;
 using System.Text.Json.Nodes;
+using EMT.Services.Implements.Formats;
+using System.IdentityModel.Tokens.Jwt;
+using EMT.Services.Interface.Formats;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EMT.Controllers.Info
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class PacientController : ControllerBase
     {
         private readonly IPacientRepository _repository;
-
-        public PacientController(IPacientRepository repository)
+        private readonly IRoleRepository _RoleRepository;
+        private readonly IPacientFormatRepository _PacientFormtatRepository;
+        public PacientController(IPacientRepository repository, IRoleRepository roleRepository, IPacientFormatRepository PacientFormtatRepository)
         {
             _repository = repository;
+            _RoleRepository = roleRepository;
+            _PacientFormtatRepository = PacientFormtatRepository;
         }
 
         // GET: api/Pacient
@@ -25,6 +33,10 @@ namespace EMT.Controllers.Info
         {
             try
             {
+                if (!hasAccess("Pacient", "Get")) 
+                { 
+                    return Unauthorized();
+                }
                 var pacients = _repository.GetAll();
                 return Ok(pacients);
             }
@@ -41,7 +53,34 @@ namespace EMT.Controllers.Info
         {
             try
             {
+                if (!hasAccess("Pacient", "Get"))
+                {
+                    return Unauthorized();
+                }
                 var pacient = _repository.GetById(id);
+                if (pacient == null)
+                {
+                    return NotFound();
+                }
+                return Ok(pacient);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        [HttpGet("GetByRole")]
+        public ActionResult<Pacient> GetByRole()
+        {
+            try
+            {
+                if (!hasAccess("Pacient", "Get"))
+                {
+                    return Unauthorized();
+                }
+                var pacient = PacientsByRole();
                 if (pacient == null)
                 {
                     return NotFound();
@@ -61,9 +100,17 @@ namespace EMT.Controllers.Info
         {
             try
             {
+                if (!hasAccess("Pacient", "Post"))
+                {
+                    return Unauthorized();
+                }
                 var pacient = Pacient.FromJson(pacientJson);
-                _repository.Create(pacient);
-                return CreatedAtRoute("GetPacient", new { id = pacient.Id }, pacient);
+                if (pacient.isValid(_PacientFormtatRepository.GetFirst()))
+                {
+                    _repository.Create(pacient);
+                    return CreatedAtRoute("GetPacient", new { id = pacient.Id }, pacient);
+                }
+                return BadRequest("JSON NO VALIDO");    
             }
             catch (Exception ex)
             {
@@ -78,15 +125,23 @@ namespace EMT.Controllers.Info
         {
             try
             {
+                if (!hasAccess("Pacient", "Put"))
+                {
+                    return Unauthorized();
+                }
                 var existingPacient = _repository.GetById(id);
                 if (existingPacient == null)
                 {
                     return NotFound();
                 }
                 var updatedPacient = Pacient.FromJson(updatedPacientJson);
-                updatedPacient.Id = existingPacient.Id;
-                _repository.Update(updatedPacient);
-                return NoContent();
+                if (updatedPacient.isValid(_PacientFormtatRepository.GetFirst()))
+                {
+                    updatedPacient.Id = existingPacient.Id;
+                    _repository.Update(updatedPacient);
+                    return NoContent();
+                }
+                return BadRequest("JSON NO VALIDO");
             }
             catch (Exception ex)
             {
@@ -101,6 +156,10 @@ namespace EMT.Controllers.Info
         {
             try
             {
+                if (!hasAccess("Pacient", "Delete"))
+                {
+                    return Unauthorized();
+                }
                 var pacient = _repository.GetById(id);
                 if (pacient == null)
                 {
@@ -116,5 +175,86 @@ namespace EMT.Controllers.Info
                 return StatusCode(500, "Internal Server Error");
             }
         }
+
+        private bool hasAccess(string name, string field)
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var handler = new JwtSecurityTokenHandler();
+
+            // Parsea el token y obtén la información de reclamaciones (claims)
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+            bool enable = false;
+            if (jsonToken != null)
+            {
+                // Obtén las reclamaciones del token
+                var claims = jsonToken.Claims;
+
+                // Encuentra la claim que contiene los roles
+                var rolesClaim = claims.Where(c => c.Type == "roles").ToList();
+
+                if (rolesClaim != null)
+                {
+
+
+                    // Ahora, roles contiene un array de strings con los roles del usuario
+                    foreach (var role in rolesClaim)
+                    {
+                        var rol = _RoleRepository.GetById(role.Value);
+                        if (rol != null && rol.IsFieldEnabled(name, field))
+                        {
+                            return true;
+                        }
+                        Console.WriteLine($"Rol: {role.Value}");
+                    }
+
+                }
+
+            }
+            return false;
+        }
+        
+        private List<Pacient> PacientsByRole()
+        {
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var handler = new JwtSecurityTokenHandler();
+            var pacientsByUserRole = new List<Pacient>();
+            // Parsea el token y obtén la información de reclamaciones (claims)
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+            bool enable = false;
+            if (jsonToken != null)
+            {
+                // Obtén las reclamaciones del token
+                var claims = jsonToken.Claims;
+
+                // Encuentra la claim que contiene los roles
+                var rolesClaim = claims.Where(c => c.Type == "roles").ToList();
+
+                if (rolesClaim != null)
+                {
+
+
+                    
+
+                    // Iterar a través de los roles del usuario
+                    foreach (var role in rolesClaim)
+                    {
+                        var rol = _RoleRepository.GetById(role.Value);
+                        if (rol != null)
+                        {
+                            // Obtener los pacientes asociados a este rol
+                            var pacientsForRole = _repository.GetByRole(rol.Name);
+
+                            // Agregar los pacientes a la lista general
+                            pacientsByUserRole.AddRange(pacientsForRole);
+                        }
+                    }
+
+                }
+
+            }
+            return pacientsByUserRole;
+        }
+
+
     }
 }

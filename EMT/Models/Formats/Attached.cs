@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using Microsoft.IdentityModel.Tokens;
+using MongoDB.Bson;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -61,6 +62,44 @@ namespace EMT.Models.Formats
                 Console.WriteLine($"Error al convertir JsonObject a Attached: {ex.Message}");
                 return null;
             }
+        }
+
+        public bool IsValid(ClinicalHistoryFormat clinicalHistoryFormat)
+        {
+            // Verifica que todos los campos en Fields estén presentes en los campos válidos del formato
+            foreach (var field in Fields)
+            {
+                // Buscar el campo en los campos válidos del formato
+                var validField = clinicalHistoryFormat.ValidFields.FirstOrDefault(vf => vf.FieldName == field.Name);
+
+                // Si no se encuentra el campo en los campos válidos, es inválido
+                if (validField == null)
+                {
+                    Console.WriteLine($"Campo no válido: {field.Name}");
+                    return false;
+                }
+
+                // Aquí puedes agregar más lógica de validación según sea necesario
+                // ...
+
+                // Por ejemplo, puedes verificar si el tipo del campo coincide
+                if (field.Value.GetType().ToString() != validField.FieldType)
+                {
+                    Console.WriteLine($"Tipo de campo no válido para {field.Name}. Se esperaba {validField.FieldType} pero se encontró {field.GetType().ToString()}");
+                    return false;
+                }
+                // Verificar si el valor está presente en las opciones si no está vacío
+                if (!string.IsNullOrEmpty(field.Value.ToString()) && validField.FieldOptions != null && validField.FieldOptions.Any())
+                {
+                    if (!validField.FieldOptions.Contains(field.Value))
+                    {
+                        Console.WriteLine($"Valor no válido para {field.Name}. Se esperaba uno de {string.Join(", ", validField.FieldOptions)} pero se encontró {field.Value}");
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
     }
 }

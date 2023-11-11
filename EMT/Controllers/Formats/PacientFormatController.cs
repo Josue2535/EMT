@@ -158,7 +158,7 @@ namespace EMT.Controllers.Formats
             }
         }
 
-        public bool hasAccess(string name, string field)
+        private bool hasAccess(string name, string field)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var handler = new JwtSecurityTokenHandler();

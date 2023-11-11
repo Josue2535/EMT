@@ -133,7 +133,7 @@ namespace EMT.Controllers
             return NoContent();
         }
 
-        public bool hasAccess(string name, string field)
+        private bool hasAccess(string name, string field)
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var handler = new JwtSecurityTokenHandler();
@@ -169,7 +169,7 @@ namespace EMT.Controllers
             }
             return false;
         }
-        public List<string> GetFormats()
+        private List<string> GetFormats()
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var handler = new JwtSecurityTokenHandler();

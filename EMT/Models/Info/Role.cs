@@ -30,8 +30,8 @@ namespace EMT.Models.Implements
         {
             try
             {
-                var id = json.ContainsKey("Id") ? new ObjectId(json["Id"].GetValue<string>()) : ObjectId.GenerateNewId();
-                var created = json.ContainsKey("Created") ? json["Created"].GetValue<DateTime>(): new DateTime();
+                var id = json.ContainsKey("Id") ? json["Id"].GetValue<string>() : ObjectId.GenerateNewId().ToString();
+                var created = json.ContainsKey("Created") ? json["Created"].GetValue<DateTime>(): DateTime.UtcNow.ToLocalTime();
                 var name = json["Name"].GetValue<string>();
 
                 var validFields = new List<Field>();
