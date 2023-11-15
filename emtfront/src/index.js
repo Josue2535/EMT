@@ -1,17 +1,38 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+import ReactDOM from 'react-dom';
+import './index.css';
+import Keycloak from 'keycloak-js';
+
+// Muestra un mensaje de carga mientras se inicializa Keycloak
+ReactDOM.render(
+  <div>
+    <h1>Cargando...</h1>
+  </div>,
+  document.getElementById('root')
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+const keycloak = Keycloak({
+  realm: 'TU_REALM',
+  url: 'URL_DEL_SERVIDOR_DE_KEYCLOAK',
+  clientId: 'TU_CLIENT_ID',
+});
+
+keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
+  if (authenticated) {
+    console.log('Usuario autenticado');
+    renderApp();
+  } else {
+    console.log('Autenticación fallida');
+  }
+});
+
+const renderApp = () => {
+  ReactDOM.render(
+    <React.StrictMode>
+      <App keycloak={keycloak} />
+    </React.StrictMode>,
+    document.getElementById('root')
+  );
+};
