@@ -2,7 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Layout, Menu, Avatar } from 'antd';
-import { FileTextOutlined, UserOutlined } from '@ant-design/icons'; // Iconos para la historia clínica y el rol
+import { FileTextOutlined, UserOutlined, BookOutlined, UserAddOutlined } from '@ant-design/icons'; // Iconos para la historia clínica, el rol, el formato de historia clínica y el paciente
 
 import Home from './views/Home';
 import Dashboard from './views/Dashboard';
@@ -54,6 +54,36 @@ const App = () => {
     ]
   };
 
+  const historiaClinicaFormato = {
+    id: "string",
+    creationDate: "2023-11-16T18:24:33.725Z",
+    validFields: [
+      {
+        fieldType: "string",
+        fieldName: "string",
+        isOptional: true,
+        fieldOptions: [
+          "string"
+        ]
+      }
+    ],
+    description: "string"
+  };
+
+  const paciente = {
+    id: "string",
+    created: "2023-11-16T18:25:02.799Z",
+    role: "string",
+    fieldsList: [
+      {
+        name: "string",
+        value: "string"
+      }
+    ],
+    personalInformationId: "string",
+    isEnabled: true
+  };
+
   return (
     <Router>
       <Layout style={{ minHeight: '100vh' }}>
@@ -94,6 +124,34 @@ const App = () => {
                   Campos Válidos: {rol.validFields[0].value.join(', ')}
                 </div>
               </Menu.Item>
+            </Menu.SubMenu>
+            {/* Sección de Formato de Historia Clínica */}
+            <Menu.SubMenu key="4" icon={<BookOutlined />} title="Formato de Historia Clínica">
+              <Menu.Item key="4.1">
+                <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)' }}>
+                  ID: {historiaClinicaFormato.id}
+                </div>
+              </Menu.Item>
+              <Menu.Item key="4.2">
+                <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)' }}>
+                  Fecha de Creación: {historiaClinicaFormato.creationDate}
+                </div>
+              </Menu.Item>
+              {/* Aquí puedes agregar más detalles del formato de historia clínica según tus necesidades */}
+            </Menu.SubMenu>
+            {/* Sección de Paciente */}
+            <Menu.SubMenu key="5" icon={<UserAddOutlined />} title="Paciente">
+              <Menu.Item key="5.1">
+                <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)' }}>
+                  ID del Paciente: {paciente.id}
+                </div>
+              </Menu.Item>
+              <Menu.Item key="5.2">
+                <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)' }}>
+                  Fecha de Creación: {paciente.created}
+                </div>
+              </Menu.Item>
+              {/* Agregar más detalles del paciente según tus necesidades */}
             </Menu.SubMenu>
             {/* Otras opciones de la barra lateral */}
           </Menu>
