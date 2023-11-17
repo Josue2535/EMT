@@ -8,7 +8,12 @@ import Home from './views/Home';
 import Dashboard from './views/Dashboard';
 import Login from './components/Login';
 import Logout from './components/Logout';
-
+import HistoriaClinica from './views/HistoriaClinica';
+import Rol from './views/Rol';
+import FormatoHistoriaClinica from './views/FormatoHistoriaClinica';
+import Paciente from './views/Paciente';
+import InformacionPersonal from './views/InformacionPersonal';
+import Usuario from './views/Usuario';
 // Importar la imagen del usuario
 import userImage from './assets/images/6326055.png';
 
@@ -214,6 +219,12 @@ const App = () => {
               <Route path="/home" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/logout" element={<Logout />} />
+              <Route path="/historiaclinica" element={<HistoriaClinica />} />
+  <Route path="/rol" element={<Rol />} />
+  <Route path="/formatohistoriaclinica" element={<FormatoHistoriaClinica />} />
+  <Route path="/paciente" element={<Paciente />} />
+  <Route path="/informacionpersonal" element={<InformacionPersonal />} />
+  <Route path="/usuario" element={<Usuario />} />
             </Routes>
           </Content>
         </Layout>
