@@ -1,7 +1,9 @@
 // src/views/UsuarioCrud.js
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, message } from 'antd';
+import { Table, Button, Modal, Form, Input, message, Select } from 'antd';
 import { getUsers, createUser, updateUser, deleteUser } from '../api'; // Ajusta las funciones de la API según sea necesario
+
+const { Option } = Select;
 
 const Usuario = () => {
   const [usuarios, setUsuarios] = useState([]);
@@ -71,6 +73,7 @@ const Usuario = () => {
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id' },
     { title: 'Nombre de Usuario', dataIndex: 'username', key: 'username' },
+    { title: 'Roles', dataIndex: 'roles', key: 'roles', render: (roles) => roles.join(', ') },
     {
       title: 'Acciones',
       dataIndex: 'acciones',
@@ -106,8 +109,14 @@ const Usuario = () => {
           <Form.Item name="username" label="Nombre de Usuario" rules={[{ required: true, message: 'Por favor ingrese el nombre de usuario' }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="password" label="Contraseña" rules={[{ required: !editingUser, message: 'Por favor ingrese la contraseña' }]}>
-            <Input.Password />
+          
+          <Form.Item name="roles" label="Roles">
+            <Select mode="multiple" placeholder="Seleccione roles">
+              {/* Agrega las opciones de roles según sea necesario */}
+              <Option value="admin">Admin</Option>
+              <Option value="user">User</Option>
+              {/* ... otras opciones de roles */}
+            </Select>
           </Form.Item>
         </Form>
       </Modal>
