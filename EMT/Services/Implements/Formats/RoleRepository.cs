@@ -19,7 +19,8 @@ namespace EMT.Services.Implements.Formats
 
         public Role GetById(string id)
         {
-            return _collection.Find(role => role.Name == id).FirstOrDefault();
+            var filter = Builders<Role>.Filter.Regex("Name", new BsonRegularExpression(id, "i"));
+            return _collection.Find(filter).FirstOrDefault();
         }
 
         public IEnumerable<Role> GetAll()

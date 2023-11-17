@@ -12,6 +12,7 @@ namespace EMT.Models.Implements
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
         public DateTime Created { get; set; }
+        
         public string Name { get; set; }
         public List<Field> ValidFields { get; set; }
 
@@ -64,14 +65,14 @@ namespace EMT.Models.Implements
         public bool IsFieldEnabled(string fieldName, string value)
         {
             // Buscar el ValidField por el nombre
-            var field = ValidFields.FirstOrDefault(f => f.Name == fieldName);
+            var field = ValidFields.FirstOrDefault(f => f?.Name == fieldName);
 
             if (field != null)
             {
                 // Verificar si el valor está presente en el array de valores del ValidField
-                if (field.Value is List<string> stringList)
+                if (field.Value is IEnumerable<object> collection)
                 {
-                    return stringList.Contains(value);
+                    return collection.Contains(value);
                 }
 
                 // Si el campo es de otro tipo, puedes agregar lógica adicional aquí según tus necesidades
@@ -90,7 +91,7 @@ namespace EMT.Models.Implements
             if (field != null)
             {
                 // Verificar si el valor está presente en el array de valores del ValidField
-                if (field.Value is List<string> stringList)
+                if (field.Value is IEnumerable<object> collection)
                 {
                     return (List<string>)field.Value;
                 }
