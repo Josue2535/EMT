@@ -1,6 +1,6 @@
 // src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { Layout, Menu, Avatar } from 'antd';
 import { FileTextOutlined, UserOutlined, BookOutlined, UserAddOutlined, SolutionOutlined, UserSwitchOutlined } from '@ant-design/icons'; // Iconos para la historia clínica, el rol, el formato de historia clínica, el paciente, la información personal y el usuario
 
@@ -121,7 +121,7 @@ const App = () => {
           {/* Sección de Historia Clínica */}
           <Menu theme="dark" mode="vertical" defaultSelectedKeys={['1']}>
             <Menu.Item key="1" icon={<FileTextOutlined />}>
-              <span>Historia Clínica</span>
+            <Link to="/historiaclinica">Historia Clínica</Link>
               <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)' }}>
                 {historiaClinica.patientId} - {historiaClinica.created}
               </div>
@@ -131,7 +131,7 @@ const App = () => {
               {historiaClinica.attachments.map((attachment) => (
                 <Menu.Item key={attachment.id}>
                   <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)' }}>
-                    {attachment.id} - {attachment.created}
+                   <Link to= "/historiaclinica/">{attachment.id} - {attachment.created}</Link> 
                   </div>
                 </Menu.Item>
               ))}
@@ -140,7 +140,7 @@ const App = () => {
             <Menu.SubMenu key="3" icon={<UserOutlined />} title="Rol">
               <Menu.Item key="3.1">
                 <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)' }}>
-                  Rol: {rol.name}
+                <Link to="/rol">Rol: {rol.name}</Link>  
                 </div>
               </Menu.Item>
               <Menu.Item key="3.2">
@@ -153,7 +153,7 @@ const App = () => {
             <Menu.SubMenu key="4" icon={<BookOutlined />} title="Formato de Historia Clínica">
               <Menu.Item key="4.1">
                 <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)' }}>
-                  ID: {historiaClinicaFormato.id}
+                <Link to="/formatohistoriaclinica"> ID: {historiaClinicaFormato.id} </Link>       
                 </div>
               </Menu.Item>
               <Menu.Item key="4.2">
@@ -164,10 +164,10 @@ const App = () => {
               {/* Aquí puedes agregar más detalles del formato de historia clínica según tus necesidades */}
             </Menu.SubMenu>
             {/* Sección de Paciente */}
-            <Menu.SubMenu key="5" icon={<UserAddOutlined />} title="Paciente">
+          <Menu.SubMenu key="5" icon={<UserAddOutlined />} title="Paciente">
               <Menu.Item key="5.1">
                 <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)' }}>
-                  ID del Paciente: {paciente.id}
+                <Link to  ="/paciente">ID del Paciente: {paciente.id}</Link>
                 </div>
               </Menu.Item>
               <Menu.Item key="5.2">
@@ -181,7 +181,7 @@ const App = () => {
             <Menu.SubMenu key="6" icon={<SolutionOutlined />} title="Información Personal">
               <Menu.Item key="6.1">
                 <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)' }}>
-                  ID: {informacionPersonal.id}
+                <Link to  ="/informacionPersonal">ID: {informacionPersonal.id}</Link> 
                 </div>
               </Menu.Item>
               <Menu.Item key="6.2">
@@ -195,7 +195,8 @@ const App = () => {
             <Menu.SubMenu key="7" icon={<UserSwitchOutlined />} title="Usuario">
               <Menu.Item key="7.1">
                 <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)' }}>
-                  ID: {usuarioInfo.id}
+                <Link to  ="/usuario">ID: {usuarioInfo.id}</Link> 
+                  
                 </div>
               </Menu.Item>
               <Menu.Item key="7.2">
