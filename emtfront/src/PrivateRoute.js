@@ -1,5 +1,6 @@
 import React from 'react';
-import { Route, Redirect } from 'react-router-dom';
+import { Link, Route } from 'react-router-dom';
+import keycloak from './Keycloak';
 
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route
@@ -8,7 +9,7 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
       keycloak.authenticated ? (
         <Component {...props} />
       ) : (
-        <Redirect to="/login" />
+        <Link to="/login" />
       )
     }
   />
