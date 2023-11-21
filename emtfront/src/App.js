@@ -125,7 +125,7 @@ const App = () => {
 
   useEffect(() => {
     const checkAuthentication = async () => {
-      const authenticated = false;
+      const authenticated = keycloak.authenticated;
       setAuthenticated(authenticated);
     };
 
@@ -137,7 +137,7 @@ const App = () => {
   return (
     <ReactKeycloakProvider authClient={keycloak}>
        <Router>
-       {authenticated && (
+      {keycloak.authenticated && (
         <Layout style={{ minHeight: '100vh' }}>
           <Sider width={200} theme="dark">
           <div style={{ textAlign: 'center', padding: '16px' }}>
@@ -253,9 +253,9 @@ const App = () => {
           </Layout>
         </Layout>
       )}
-      {!authenticated && (
+      {!keycloak.authenticated && (
         <Routes>
-          <Route path="/login" element={<Login onLogin={handleLogin} />} />
+          <Route path="/login" element={<Login  />} />
         </Routes>
       )}
     </Router>
