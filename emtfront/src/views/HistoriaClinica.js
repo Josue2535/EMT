@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Table, Modal, Form, Input, Checkbox, message } from 'antd';
+import { Button, Table, Modal, Form, Input,  message } from 'antd';
 
 const HistoriaClinica = () => {
   const [historiasClinicas, setHistoriasClinicas] = useState([]);

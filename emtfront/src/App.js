@@ -1,16 +1,8 @@
 // src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { Layout, Menu, Avatar } from 'antd';
-import { useKeycloak } from '@react-keycloak/web';
-import {
-  FileTextOutlined,
-  UserOutlined,
-  BookOutlined,
-  UserAddOutlined,
-  SolutionOutlined,
-  UserSwitchOutlined,
-} from '@ant-design/icons';
+import { FileTextOutlined, UserOutlined, BookOutlined, UserAddOutlined, SolutionOutlined, UserSwitchOutlined } from '@ant-design/icons';
 
 import Home from './views/Home';
 import Dashboard from './views/Dashboard';
@@ -29,98 +21,92 @@ import userImage from './assets/images/6326055.png';
 
 const { Header, Sider, Content } = Layout;
 
-const PrivateRoute = ({ element, ...rest }) => {
-  const { keycloak } = useKeycloak();
-  
-  if (!keycloak.authenticated) {
-    keycloak.login();
-    return null; // Puedes retornar null o algún indicador de carga mientras redirige.
-  }
-
-  return React.cloneElement(element, rest);
-};
-
-
 const App = () => {
-  const { keycloak, initialized } = useKeycloak();
   const usuario = {
     nombre: 'Nombre del Usuario',
     imagen: userImage,
   };
 
   const historiaClinica = {
-    id: 'string',
-    created: '2023-11-16T18:22:43.612Z',
-    patientId: 'string',
+    id: "string",
+    created: "2023-11-16T18:22:43.612Z",
+    patientId: "string",
     attachments: [
       {
-        id: 'string',
-        created: '2023-11-16T18:22:43.612Z',
+        id: "string",
+        created: "2023-11-16T18:22:43.612Z",
         fields: [
           {
-            name: 'string',
-            value: 'string',
-          },
-        ],
-      },
-    ],
+            name: "string",
+            value: "string"
+          }
+        ]
+      }
+    ]
   };
 
   const rol = {
-    name: 'admin',
+    name: "admin",
     validFields: [
       {
-        name: 'ClinicHistoryFormat',
-        value: ['post', 'put', 'delet', 'get'],
-      },
-    ],
+        name: "ClinicHistoryFormat",
+        value: [
+          "post",
+          "put",
+          "delet",
+          "get"
+        ]
+      }
+    ]
   };
 
   const historiaClinicaFormato = {
-    id: 'string',
-    creationDate: '2023-11-16T18:24:33.725Z',
+    id: "string",
+    creationDate: "2023-11-16T18:24:33.725Z",
     validFields: [
       {
-        fieldType: 'string',
-        fieldName: 'string',
+        fieldType: "string",
+        fieldName: "string",
         isOptional: true,
-        fieldOptions: ['string'],
-      },
+        fieldOptions: [
+          "string"
+        ]
+      }
     ],
-    description: 'string',
+    description: "string"
   };
 
   const paciente = {
-    id: 'string',
-    created: '2023-11-16T18:25:02.799Z',
-    role: 'string',
+    id: "string",
+    created: "2023-11-16T18:25:02.799Z",
+    role: "string",
     fieldsList: [
       {
-        name: 'string',
-        value: 'string',
-      },
+        name: "string",
+        value: "string"
+      }
     ],
-    personalInformationId: 'string',
-    isEnabled: true,
+    personalInformationId: "string",
+    isEnabled: true
   };
 
   const informacionPersonal = {
-    id: 'string',
-    created: '2023-11-16T18:25:52.345Z',
+    id: "string",
+    created: "2023-11-16T18:25:52.345Z",
     fieldList: [
       {
-        name: 'string',
-        value: 'string',
-      },
-    ],
+        name: "string",
+        value: "string"
+      }
+    ]
   };
 
   const usuarioInfo = {
-    id: 'string',
-    created: '2023-11-16T18:27:26.287Z',
-    userName: 'string',
-    personalInformationId: 'string',
-    isEnabled: true,
+    id: "string",
+    created: "2023-11-16T18:27:26.287Z",
+    userName: "string",
+    personalInformationId: "string",
+    isEnabled: true
   };
 
   return (
@@ -197,7 +183,7 @@ const App = () => {
             </Menu.SubMenu>
             <Menu.SubMenu key="6.3" icon={<SolutionOutlined />} title="Formato de Informacion Personal">
               <Link to="/formatoInformacionPersonal">Formato de Información Personal</Link>
-            </Menu.SubMenu>
+              </Menu.SubMenu>
             <Menu.SubMenu key="8" icon={<UserAddOutlined />} title="Formato de Paciente">
               <Link to="/FormatoPaciente"></Link>
             </Menu.SubMenu>
@@ -218,38 +204,21 @@ const App = () => {
         <Layout>
           <Header style={{ background: '#fff', padding: 0 }}></Header>
           <Content style={{ margin: '16px' }}>
-            {initialized && (
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/logout" element={<Logout />} />
-                <Route
-                  path="/historiaclinica"
-                  element={<PrivateRoute element={<HistoriaClinica />} />}
-                />
-                <Route path="/rol" element={<PrivateRoute element={<Rol />} />} />
-                <Route
-                  path="/formatohistoriaclinica"
-                  element={<PrivateRoute element={<FormatoHistoriaClinica />} />}
-                />
-                <Route
-                  path="/formatoInformacionPersonal"
-                  element={<PrivateRoute element={<FormatoInformacionPersonal />} />}
-                />
-                <Route
-                  path="/formatoPaciente"
-                  element={<PrivateRoute element={<FormatoPaciente />} />}
-                />
-                <Route path="/paciente" element={<PrivateRoute element={<Paciente />} />} />
-                <Route
-                  path="/informacionpersonal"
-                  element={<PrivateRoute element={<InformacionPersonal />} />}
-                />
-                <Route path="/usuario" element={<PrivateRoute element={<Usuario />} />} />
-              </Routes>
-            )}
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/logout" element={<Logout />} />
+              <Route path="/historiaclinica" element={<HistoriaClinica />} />
+              <Route path="/rol" element={<Rol />} />
+              <Route path="/formatohistoriaclinica" element={<FormatoHistoriaClinica />} />
+              <Route path="/formatoInformacionPersonal" element={<FormatoInformacionPersonal />} />
+              <Route path="/formatoPaciente" element={<FormatoPaciente />} />
+              <Route path="/paciente" element={<Paciente />} />
+              <Route path="/informacionpersonal" element={<InformacionPersonal />} />
+              <Route path="/usuario" element={<Usuario />} />
+            </Routes>
           </Content>
         </Layout>
       </Layout>
