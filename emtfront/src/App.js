@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';
 import { Layout, Menu, Avatar } from 'antd';
 import { FileTextOutlined, UserOutlined, BookOutlined, UserAddOutlined, SolutionOutlined, UserSwitchOutlined } from '@ant-design/icons';
-
+import keycloak from "./Keycloak"
 import Home from './views/Home';
 import Dashboard from './views/Dashboard';
 import Login from './components/Login';
@@ -15,7 +15,7 @@ import InformacionPersonal from './views/InformacionPersonal';
 import Usuario from './views/Usuario';
 import FormatoInformacionPersonal from './views/FormatoInformacionPersonal';
 import FormatoPaciente from './views/FormatoPaciente';
-
+import { ReactKeycloakProvider } from "@react-keycloak/web";
 import userImage from './assets/images/6326055.png';
 
 const { Header, Sider, Content } = Layout;
@@ -108,6 +108,7 @@ const App = () => {
     isEnabled: true
   };
 
+  
   const [authenticated, setAuthenticated] = useState(false);
 
   const handleLogin = () => {
@@ -122,9 +123,21 @@ const App = () => {
     setAuthenticated(false);
   };
 
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      const authenticated = false;
+      setAuthenticated(authenticated);
+    };
+
+    checkAuthentication();
+  }, []);
+
+  
+
   return (
-    <Router>
-      {authenticated && (
+    <ReactKeycloakProvider authClient={keycloak}>
+       <Router>
+       {authenticated && (
         <Layout style={{ minHeight: '100vh' }}>
           <Sider width={200} theme="dark">
           <div style={{ textAlign: 'center', padding: '16px' }}>
@@ -246,7 +259,9 @@ const App = () => {
         </Routes>
       )}
     </Router>
+    </ReactKeycloakProvider>
   );
+  
 };
 
 export default App;

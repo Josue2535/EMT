@@ -2,8 +2,7 @@ import React from 'react';
 import { Button } from 'antd';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import keycloak from '../Keycloak'; 
+import { useKeycloak } from "@react-keycloak/web";
 import loginImage from '../assets/images/6326055.png';
 
 const LoginContainer = styled.div`
@@ -34,23 +33,11 @@ const Image = styled.img`
   margin-bottom: 16px;
 `;
 
+
 const Login = () => {
-  const navigate = useNavigate();
+  const { keycloak, initialized } = useKeycloak();
 
-  const handleLogin = async () => {
-    try {
-      await keycloak.init(); // Inicializa Keycloak
-      await keycloak.login(); // Inicia sesión con Keycloak
-
-      // Si la autenticación es exitosa, redirige al dashboard
-      if (keycloak.authenticated) {
-        navigate('/dashboard');
-      }
-    } catch (error) {
-      // Maneja errores de inicio de sesión
-      console.error('Error al iniciar sesión con Keycloak:', error);
-    }
-  };
+  
   return (
     <LoginContainer>
       <LoginCard
@@ -60,7 +47,8 @@ const Login = () => {
       >
         <Image src={loginImage} alt="Login" width={120} height={120} />
         <Title>Login</Title>
-        <Button type="primary" onClick={handleLogin}>
+        <Button type="primary" onClick={() => keycloak.login()}
+        >
           Iniciar sesión con Keycloak
         </Button>
       </LoginCard>
