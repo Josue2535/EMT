@@ -17,7 +17,7 @@ import FormatoInformacionPersonal from './views/FormatoInformacionPersonal';
 import FormatoPaciente from './views/FormatoPaciente';
 import { ReactKeycloakProvider } from "@react-keycloak/web";
 import userImage from './assets/images/6326055.png';
-
+import PrivateRoute from './PrivateRoute';
 const { Header, Sider, Content } = Layout;
 
 const App = () => {
@@ -137,7 +137,7 @@ const App = () => {
   return (
     <ReactKeycloakProvider authClient={keycloak}>
        <Router>
-      {keycloak.authenticated && (
+      
         <Layout style={{ minHeight: '100vh' }}>
           <Sider width={200} theme="dark">
           <div style={{ textAlign: 'center', padding: '16px' }}>
@@ -237,10 +237,10 @@ const App = () => {
             </Header>
             <Content style={{ margin: '16px' }}>
               <Routes>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/home" element={<Home />} />
+                <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+                <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
                 <Route path="/logout" element={<Logout onLogout={handleLogout} />} />
-                <Route path="/historiaclinica" element={<HistoriaClinica />} />
+                <Route path="/historiaclinica" element={<PrivateRoute><HistoriaClinica /></PrivateRoute>} />
                 <Route path="/rol" element={<Rol />} />
                 <Route path="/formatohistoriaclinica" element={<FormatoHistoriaClinica />} />
                 <Route path="/formatoInformacionPersonal" element={<FormatoInformacionPersonal />} />
@@ -252,12 +252,11 @@ const App = () => {
             </Content>
           </Layout>
         </Layout>
-      )}
-      {!keycloak.authenticated && (
+      
         <Routes>
           <Route path="/login" element={<Login  />} />
         </Routes>
-      )}
+      
     </Router>
     </ReactKeycloakProvider>
   );
