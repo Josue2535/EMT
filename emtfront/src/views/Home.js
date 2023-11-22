@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import { getUsers } from '../api'; // Ajusta la ruta según la ubicación real de tu archivo api.js
+import '../assets/styles/Home.css';
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
@@ -51,9 +52,13 @@ const Home = () => {
   }, []);
 
   return (
-    <div>
-      <h1 className="text-green-800 text-4xl">Welcome to the Homepage</h1>
-      {loading && <p>Loading...</p>}
+    <div className="home-container">
+      <h1 className="home-title">¡Bienvenido a la Página de Inicio!</h1>
+      {loading ? (
+        <p className="home-loading">Cargando...</p>
+      ) : (
+        <p className="home-success">¡La carga se completó exitosamente!</p>
+      )}
     </div>
   );
 };
