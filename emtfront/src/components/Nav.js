@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Menu, Button, Drawer, Typography } from "antd";
 import { useKeycloak } from "@react-keycloak/web";
 import { MenuOutlined, LogoutOutlined } from "@ant-design/icons";
-import { Navigate, redirect } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 const { Title } = Typography;
@@ -12,28 +11,21 @@ const Nav = () => {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
   const navigate = useNavigate();
+
   useEffect(() => {
     const fetchRolesAndRenderMenu = async () => {
       try {
-        // Obtén los roles del usuario desde keycloak
         const keycloakRoles = keycloak.tokenParsed?.roles || [];
         
-        // Para cada rol, realiza la petición para obtener la información
         const rolesPromises = keycloakRoles.map(async roleName => {
           const roleInfo = await fetchRoleInfo(roleName, keycloak.token);
           return roleInfo;
         });
     
-        // Espera a que todas las promesas se resuelvan
         const roles = await Promise.all(rolesPromises);
-    
-        // Filtra roles nulos (peticiones que fallaron)
         const validRoles = roles.filter(role => role !== null);
-    
-        // Combina los validFields de todos los roles en una sola lista
         const allValidFields = validRoles.flatMap(role => role.validFields);
     
-        // Crea los elementos del menú
         const items = createMenuItems(allValidFields);
         setMenuItems(items);
       } catch (error) {
@@ -41,7 +33,6 @@ const Nav = () => {
       }
     };
     
-    // Función para obtener la información de un rol
     const fetchRoleInfo = async (roleName, token) => {
       try {
         const response = await fetch(
@@ -75,10 +66,9 @@ const Nav = () => {
   }, [keycloak.authenticated]);
 
   const createMenuItems = (validFields) => {
-    // Genera elementos del menú según los validFields del rol
     return validFields.map((field) => {
-      const routeKey = field.name.toLowerCase(); // Usa el nombre como identificador de la ruta
-      const routeLabel = field.name; // Usa el nombre como etiqueta de la ruta
+      const routeKey = field.name.toLowerCase();
+      const routeLabel = field.name;
 
       return {
         key: routeKey,
@@ -104,14 +94,14 @@ const Nav = () => {
   };
 
   const handleMenuClick = (route) => {
-    // Actualiza el estado de redirección al hacer clic en el elemento del menú
     navigate(`/${route}`);
-    setDrawerVisible(false); // Cierra el Drawer después de la redirección
+    setDrawerVisible(false);
   };
+
   return (
-    <div style={{ display: "flex", alignItems: "center", backgroundColor: '#A2195B' }}>
+    <div style={{ display: "flex", alignItems: "center", backgroundColor: '#A2195B', padding: '8px' }}>
       {keycloak.authenticated && (
-        <Button type="link" icon={<MenuOutlined />} onClick={showDrawer} />
+        <Button type="link" icon={<MenuOutlined />} onClick={showDrawer}  />
       )}
       <Drawer
         title="EMT"
@@ -130,12 +120,14 @@ const Nav = () => {
       </Drawer>
 
       <div style={{ marginLeft: "auto", marginRight: "auto" }}>
-       
+      <Title level={4} style={{ marginBottom: 0, color: 'white' }}>
+          EMT APP
+        </Title>
       </div>
 
-      <div style={{marginRight: '20px' }}>
+      <div style={{ marginRight: '20px', marginLeft: '20px' }}>
         {keycloak.authenticated ? (
-          <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout}>
+          <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout} style={{ color: 'white' }}>
             Logout
           </Button>
         ) : (
