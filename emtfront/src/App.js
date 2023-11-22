@@ -128,11 +128,8 @@ const App = () => {
     const checkAuthentication = async () => {
       const authenticated = keycloak.authenticated;
       setAuthenticated(authenticated);
-
-
-          // Redirigir a la página home si el usuario está autenticado
+      console.log("Autenticacion: ",authenticated)
           if (authenticated) {
-            // Utiliza Navigate para redirigir
             return <Navigate to="/home" />;
           }
         };
