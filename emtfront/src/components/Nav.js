@@ -110,7 +110,7 @@ const Nav = () => {
         onClose={handleDrawerClose}
         visible={drawerVisible}
       >
-        <Menu mode="vertical">
+        <Menu mode="vertical" color="white">
         {keycloak.authenticated && menuItems.length > 0 && menuItems.map(item => (
             <Menu.Item key={item.key} onClick={() => handleMenuClick(item.key)}>
               {item.label}
@@ -127,11 +127,11 @@ const Nav = () => {
 
       <div style={{ marginRight: '20px', marginLeft: '20px' }}>
         {keycloak.authenticated ? (
-          <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout} style={{ color: 'white' }}>
+          <Button type="link"  icon={<LogoutOutlined />} onClick={handleLogout} style={{ color: 'white' }}>
             Logout
           </Button>
         ) : (
-          <Button type="primary" onClick={handleLogin}>
+          <Button type="primary"  onClick={handleLogin}>
             Login
           </Button>
         )}
