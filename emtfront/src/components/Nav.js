@@ -109,7 +109,7 @@ const Nav = () => {
     setDrawerVisible(false); // Cierra el Drawer después de la redirección
   };
   return (
-    <div style={{ display: "flex", alignItems: "center" }}>
+    <div style={{ display: "flex", alignItems: "center", backgroundColor: '#A2195B' }}>
       {keycloak.authenticated && (
         <Button type="link" icon={<MenuOutlined />} onClick={showDrawer} />
       )}
@@ -130,12 +130,10 @@ const Nav = () => {
       </Drawer>
 
       <div style={{ marginLeft: "auto", marginRight: "auto" }}>
-        <Title level={4} style={{ marginBottom: 0 }}>
-          EMT APP
-        </Title>
+       
       </div>
 
-      <div>
+      <div style={{marginRight: '20px' }}>
         {keycloak.authenticated ? (
           <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout}>
             Logout

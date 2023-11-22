@@ -153,7 +153,7 @@ const App = () => {
                   <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
                   <Route path="/home" element={<Home />} />
                   <Route path="/logout" element={<Logout onLogout={handleLogout} />} />
-                  <Route path="/ClinicalHistory" element={<PrivateRoute><HistoriaClinica /></PrivateRoute>} />
+                  <Route path="/ClinicHistory" element={<PrivateRoute><HistoriaClinica /></PrivateRoute>} />
                   <Route path="/rol" element={<Rol />} />
                   <Route path="/ClinicHistoryFormat" element={<PrivateRoute><FormatoHistoriaClinica /></PrivateRoute>} />
                   <Route path="/PersonalInformationFormat" element={<PrivateRoute><FormatoInformacionPersonal /></PrivateRoute>} />
