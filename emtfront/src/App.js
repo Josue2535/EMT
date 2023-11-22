@@ -18,6 +18,7 @@ import FormatoPaciente from './views/FormatoPaciente';
 import { ReactKeycloakProvider } from "@react-keycloak/web";
 import userImage from './assets/images/6326055.png';
 import PrivateRoute from './PrivateRoute';
+import Nav from './components/Nav';
 const { Header, Sider, Content } = Layout;
 
 const App = () => {
@@ -143,14 +144,17 @@ const App = () => {
     <ReactKeycloakProvider authClient={keycloak}>
       <Router>
 
-     
+      <Header style={{ background: '#fff', padding: 0 }}>
+              {/* Agrega el componente de navegación (Nav) aquí */}
+              <Nav authenticated={keycloak.authenticated} onLogin={handleLogin} onLogout={handleLogout} />
+            </Header>
             <Content style={{ margin: '16px' }}>
   
                 <Routes>
                   <Route path="/" element={<Navigate to="/home" />} />
                   <Route path="/login" element={<Login onLogin={handleLogin} />} />
                   <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-                  <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
+                  <Route path="/home" element={<Home />} />
                   <Route path="/logout" element={<Logout onLogout={handleLogout} />} />
                   <Route path="/historiaclinica" element={<PrivateRoute><HistoriaClinica /></PrivateRoute>} />
                   <Route path="/rol" element={<Rol />} />
