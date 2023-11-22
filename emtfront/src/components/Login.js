@@ -3,6 +3,7 @@ import { Button } from 'antd';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useKeycloak } from "@react-keycloak/web";
+import { Navigate, Redirect } from 'react-router-dom';  // Importa Redirect
 import loginImage from '../assets/images/6326055.png';
 
 const LoginContainer = styled.div`
@@ -33,11 +34,13 @@ const Image = styled.img`
   margin-bottom: 16px;
 `;
 
-
 const Login = () => {
   const { keycloak, initialized } = useKeycloak();
 
-  
+  if (keycloak.authenticated) {
+    return <Navigate to="/home" />; // Redirige si el usuario está autenticado
+  }
+
   return (
     <LoginContainer>
       <LoginCard
@@ -47,8 +50,7 @@ const Login = () => {
       >
         <Image src={loginImage} alt="Login" width={120} height={120} />
         <Title>Login</Title>
-        <Button type="primary" onClick={() => keycloak.login()}
-        >
+        <Button type="primary" onClick={() => keycloak.login()}>
           Iniciar sesión con Keycloak
         </Button>
       </LoginCard>

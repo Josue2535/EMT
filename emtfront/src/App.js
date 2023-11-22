@@ -147,7 +147,7 @@ const App = () => {
             <Content style={{ margin: '16px' }}>
   
                 <Routes>
-                  <Route path="/" element={<Navigate to="/login" />} />
+                  <Route path="/" element={<Navigate to="/home" />} />
                   <Route path="/login" element={<Login onLogin={handleLogin} />} />
                   <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
                   <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
