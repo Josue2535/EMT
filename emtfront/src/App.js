@@ -108,7 +108,7 @@ const App = () => {
     isEnabled: true
   };
 
-  
+
   const [authenticated, setAuthenticated] = useState(false);
 
   const handleLogin = () => {
@@ -127,66 +127,45 @@ const App = () => {
     const checkAuthentication = async () => {
       const authenticated = keycloak.authenticated;
       setAuthenticated(authenticated);
-    };
 
-    checkAuthentication();
-  }, []);
 
-  
+          // Redirigir a la página home si el usuario está autenticado
+          if (authenticated) {
+            // Utiliza Navigate para redirigir
+            return <Navigate to="/home" />;
+          }
+        };
+    
+        checkAuthentication();
+      }, [authenticated]);
 
   return (
     <ReactKeycloakProvider authClient={keycloak}>
-       <Router>
-      
-        <Layout style={{ minHeight: '100vh' }}>
-          <Sider width={200} theme="dark">
-          <div style={{ textAlign: 'center', padding: '16px' }}>
-            <Avatar size={48} src={usuario.imagen} />
-            <div style={{ marginTop: '8px', color: 'white' }}>{usuario.nombre}</div>
-          </div>
-          <menu
-              usuario={usuario}
-              historiaClinica={historiaClinica}
-              rol={rol}
-              historiaClinicaFormato={historiaClinicaFormato}
-              paciente={paciente}
-              informacionPersonal={informacionPersonal}
-              usuarioInfo={usuarioInfo}
-            />
-          </Sider>
-          <Layout>
-            <Header style={{ background: '#fff', padding: 0 }}>
-              <div style={{ textAlign: 'right', marginRight: '16px' }}>
-                <Avatar size={48} src={usuario.imagen} />
-                <span style={{ marginLeft: '8px' }}>{usuario.nombre}</span>
-              </div>
-            </Header>
+      <Router>
+
+     
             <Content style={{ margin: '16px' }}>
-              <Routes>
-                <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-                <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
-                <Route path="/logout" element={<Logout onLogout={handleLogout} />} />
-                <Route path="/historiaclinica" element={<PrivateRoute><HistoriaClinica /></PrivateRoute>} />
-                <Route path="/rol" element={<Rol />} />
-                <Route path="/formatohistoriaclinica" element={<PrivateRoute><FormatoHistoriaClinica /></PrivateRoute>} />
-                <Route path="/formatoInformacionPersonal" element={<PrivateRoute><FormatoInformacionPersonal /></PrivateRoute>} />
-                <Route path="/formatoPaciente" element={<PrivateRoute><FormatoPaciente /></PrivateRoute>} />
-                <Route path="/paciente" element={<PrivateRoute><Paciente /></PrivateRoute>} />
-                <Route path="/informacionpersonal" element={<PrivateRoute><InformacionPersonal /></PrivateRoute>} />
-                <Route path="/usuario" element={<PrivateRoute><Usuario /></PrivateRoute>} />
-              </Routes>
+  
+                <Routes>
+                  <Route path="/" element={<Navigate to="/login" />} />
+                  <Route path="/login" element={<Login onLogin={handleLogin} />} />
+                  <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+                  <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
+                  <Route path="/logout" element={<Logout onLogout={handleLogout} />} />
+                  <Route path="/historiaclinica" element={<PrivateRoute><HistoriaClinica /></PrivateRoute>} />
+                  <Route path="/rol" element={<Rol />} />
+                  <Route path="/formatohistoriaclinica" element={<PrivateRoute><FormatoHistoriaClinica /></PrivateRoute>} />
+                  <Route path="/formatoInformacionPersonal" element={<PrivateRoute><FormatoInformacionPersonal /></PrivateRoute>} />
+                  <Route path="/formatoPaciente" element={<PrivateRoute><FormatoPaciente /></PrivateRoute>} />
+                  <Route path="/paciente" element={<PrivateRoute><Paciente /></PrivateRoute>} />
+                  <Route path="/informacionpersonal" element={<PrivateRoute><InformacionPersonal /></PrivateRoute>} />
+                  <Route path="/usuario" element={<PrivateRoute><Usuario /></PrivateRoute>} />
+                  </Routes>
             </Content>
-          </Layout>
-        </Layout>
-      
-        <Routes>
-          <Route path="/login" element={<Login  />} />
-        </Routes>
-      
-    </Router>
+         
+      </Router>
     </ReactKeycloakProvider>
   );
-  
 };
 
 export default App;
