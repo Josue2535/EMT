@@ -29,10 +29,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Role", "Get"))
-                {
-                    return Unauthorized();
-                }
+                
                 var roles = _repository.GetAll();
                 return Ok(roles);
             }
@@ -49,10 +46,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Role", "Get"))
-                {
-                    return Unauthorized();
-                }
+                
                 var role = _repository.GetById(id);
                 if (role == null)
                 {
