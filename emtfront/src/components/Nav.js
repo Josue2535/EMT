@@ -1,62 +1,91 @@
-import React, { useState, useEffect } from 'react';
-import { useKeycloak } from '@react-keycloak/web';
-import { Menu, Button, Drawer, Typography } from 'antd';
-import { MenuOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Menu, Button, Drawer, Typography } from "antd";
+import { useKeycloak } from "@react-keycloak/web";
+import { MenuOutlined, LogoutOutlined } from "@ant-design/icons";
+import { Navigate, redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const { Title } = Typography;
 
 const Nav = () => {
   const { keycloak } = useKeycloak();
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [allRoutes, setAllRoutes] = useState([]);
-
+  const [menuItems, setMenuItems] = useState([]);
+  const navigate = useNavigate();
   useEffect(() => {
-    const fetchRoutes = async () => {
+    const fetchRolesAndRenderMenu = async () => {
       try {
-        if (keycloak.authenticated) {
-          const roles = keycloak.realmAccess.roles;
-          const userRoutes = [];
+        // Obtén los roles del usuario desde keycloak
+        const keycloakRoles = keycloak.tokenParsed?.roles || [];
+        
+        // Para cada rol, realiza la petición para obtener la información
+        const rolesPromises = keycloakRoles.map(async roleName => {
+          const roleInfo = await fetchRoleInfo(roleName, keycloak.token);
+          return roleInfo;
+        });
     
-          if (roles && roles.length > 0) {
-            for (const role of roles) {
-              const response = await fetch(`https://localhost:7208/api/Role/${role}`, {
-                method: 'GET',
-                headers: {
-                  'Authorization': `Bearer ${keycloak.token}`,
-                  'Accept': 'application/json',
-                },
-              });
+        // Espera a que todas las promesas se resuelvan
+        const roles = await Promise.all(rolesPromises);
     
-              if (response.ok) {
-                const data = await response.json();
+        // Filtra roles nulos (peticiones que fallaron)
+        const validRoles = roles.filter(role => role !== null);
     
-                // Console.log para depurar
-                console.log(`Data for role ${role}:`, data);
+        // Combina los validFields de todos los roles en una sola lista
+        const allValidFields = validRoles.flatMap(role => role.validFields);
     
-                // Obtener todas las rutas para el rol actual
-                const routesForRole = data.validFields.map(field => field.name);
-                userRoutes.push(...routesForRole);
-              } else {
-                console.error(`Failed to fetch data for role ${role}`);
-              }
-            }
-    
-            // Console.log para depurar
-            console.log('User routes:', userRoutes);
-    
-            setAllRoutes(userRoutes);
-          } else {
-            console.error('User has no roles');
-          }
-        }
+        // Crea los elementos del menú
+        const items = createMenuItems(allValidFields);
+        setMenuItems(items);
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error al obtener roles y construir el menú:', error);
       }
     };
     
-    fetchRoutes();
-  }, [keycloak]);
+    // Función para obtener la información de un rol
+    const fetchRoleInfo = async (roleName, token) => {
+      try {
+        const response = await fetch(
+          `https://localhost:7208/api/Role/${roleName}`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Error al obtener información del rol ${roleName}: ${response.statusText}`
+          );
+        }
+
+        const roleInfo = await response.json();
+        return roleInfo;
+      } catch (error) {
+        console.error("Error al obtener información del rol:", error);
+        return null;
+      }
+    };
+
+    if (keycloak.authenticated) {
+      fetchRolesAndRenderMenu();
+    }
+  }, [keycloak.authenticated]);
+
+  const createMenuItems = (validFields) => {
+    // Genera elementos del menú según los validFields del rol
+    return validFields.map((field) => {
+      const routeKey = field.name.toLowerCase(); // Usa el nombre como identificador de la ruta
+      const routeLabel = field.name; // Usa el nombre como etiqueta de la ruta
+
+      return {
+        key: routeKey,
+        label: routeLabel,
+      };
+    });
+  };
 
   const handleLogin = () => {
     keycloak.login();
@@ -74,30 +103,35 @@ const Nav = () => {
     setDrawerVisible(true);
   };
 
-  const userName = keycloak.authenticated ? keycloak.idTokenParsed.name : null;
-
+  const handleMenuClick = (route) => {
+    // Actualiza el estado de redirección al hacer clic en el elemento del menú
+    navigate(`/${route}`);
+    setDrawerVisible(false); // Cierra el Drawer después de la redirección
+  };
   return (
-    <div style={{ display: 'flex', alignItems: 'center' }}>
+    <div style={{ display: "flex", alignItems: "center" }}>
       {keycloak.authenticated && (
         <Button type="link" icon={<MenuOutlined />} onClick={showDrawer} />
       )}
-      <Drawer title="EMT" placement="left" closable={true} onClose={handleDrawerClose} visible={drawerVisible}>
+      <Drawer
+        title="EMT"
+        placement="left"
+        closable={true}
+        onClose={handleDrawerClose}
+        visible={drawerVisible}
+      >
         <Menu mode="vertical">
-          {keycloak.authenticated && allRoutes.length > 0 && (
-            <>
-              {allRoutes.map((route, index) => (
-                <Menu.Item key={index} icon={<UserOutlined />}>
-                  <Link to={`/${route}`}>{route}</Link>
-                </Menu.Item>
-              ))}
-            </>
-          )}
+        {keycloak.authenticated && menuItems.length > 0 && menuItems.map(item => (
+            <Menu.Item key={item.key} onClick={() => handleMenuClick(item.key)}>
+              {item.label}
+            </Menu.Item>
+          ))}
         </Menu>
       </Drawer>
 
-      <div style={{ marginLeft: 'auto', marginRight: 'auto' }}>
+      <div style={{ marginLeft: "auto", marginRight: "auto" }}>
         <Title level={4} style={{ marginBottom: 0 }}>
-          {userName ? `Hola, ${userName}` : 'EMT APP'}
+          EMT APP
         </Title>
       </div>
 

@@ -153,14 +153,14 @@ const App = () => {
                   <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
                   <Route path="/home" element={<Home />} />
                   <Route path="/logout" element={<Logout onLogout={handleLogout} />} />
-                  <Route path="/historiaclinica" element={<PrivateRoute><HistoriaClinica /></PrivateRoute>} />
+                  <Route path="/ClinicalHistory" element={<PrivateRoute><HistoriaClinica /></PrivateRoute>} />
                   <Route path="/rol" element={<Rol />} />
-                  <Route path="/formatohistoriaclinica" element={<PrivateRoute><FormatoHistoriaClinica /></PrivateRoute>} />
-                  <Route path="/formatoInformacionPersonal" element={<PrivateRoute><FormatoInformacionPersonal /></PrivateRoute>} />
-                  <Route path="/formatoPaciente" element={<PrivateRoute><FormatoPaciente /></PrivateRoute>} />
-                  <Route path="/paciente" element={<PrivateRoute><Paciente /></PrivateRoute>} />
-                  <Route path="/informacionpersonal" element={<PrivateRoute><InformacionPersonal /></PrivateRoute>} />
-                  <Route path="/usuario" element={<PrivateRoute><Usuario /></PrivateRoute>} />
+                  <Route path="/ClinicHistoryFormat" element={<PrivateRoute><FormatoHistoriaClinica /></PrivateRoute>} />
+                  <Route path="/PersonalInformationFormat" element={<PrivateRoute><FormatoInformacionPersonal /></PrivateRoute>} />
+                  <Route path="/PacientFormat" element={<PrivateRoute><FormatoPaciente /></PrivateRoute>} />
+                  <Route path="/Pacient" element={<PrivateRoute><Paciente /></PrivateRoute>} />
+                  <Route path="/PersonalInformation" element={<PrivateRoute><InformacionPersonal /></PrivateRoute>} />
+                  <Route path="/User" element={<PrivateRoute><Usuario /></PrivateRoute>} />
                   </Routes>
             </Content>
          
