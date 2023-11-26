@@ -1,3 +1,5 @@
+// src/views/Rol.js
+
 import React, { useState, useEffect } from 'react';
 import { Button, Modal, Form, Input, Table, Space, Select } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -10,7 +12,7 @@ const Rol = () => {
   const [roles, setRoles] = useState([]);
   const [visible, setVisible] = useState(false);
   const [form] = Form.useForm();
-  const [editingRole, setEditingRole] = useState(null); // Nuevo estado para el rol en edición
+  const [editingRole, setEditingRole] = useState(null);
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -37,27 +39,27 @@ const Rol = () => {
   }, [keycloak.token]);
 
   const showModal = (role) => {
-    setEditingRole(role); // Establece el rol en edición al abrir el modal
-    form.setFieldsValue(role); // Rellena el formulario con los datos del rol en edición
+    setEditingRole(role);
+    form.setFieldsValue(role);
     setVisible(true);
   };
 
-  const handleCreateEdit = () => {
+  const handleEdit = () => {
     const editedRole = form.getFieldsValue();
-
-    if (editingRole) {
-      // Si está editando un rol, actualiza el estado con la versión editada
-      const updatedRoles = roles.map((role) =>
-        role.id === editingRole.id ? { ...role, ...editedRole } : role
-      );
-      setRoles(updatedRoles);
-    } else {
-      // Si no está editando, agrega el nuevo rol al estado
-      setRoles([...roles, editedRole]);
-    }
-
-    setEditingRole(null); // Limpia el rol en edición
+    const updatedRoles = roles.map((role) =>
+      role.id === editingRole.id ? { ...role, ...editedRole } : role
+    );
+    setRoles(updatedRoles);
+    setEditingRole(null);
     setVisible(false);
+    form.resetFields();
+  };
+
+  const handleCreate = () => {
+    const newRole = form.getFieldsValue();
+    setRoles([...roles, newRole]);
+    setVisible(false);
+    form.resetFields();
   };
 
   const handleDelete = (id) => {
@@ -94,11 +96,19 @@ const Rol = () => {
       <Modal
         title={editingRole ? 'Editar Rol' : 'Crear Rol'}
         visible={visible}
-        onOk={handleCreateEdit}
-        onCancel={() => setVisible(false)}
+        onOk={editingRole ? handleEdit : handleCreate}
+        onCancel={() => {
+          setEditingRole(null);
+          setVisible(false);
+          form.resetFields();
+        }}
       >
         <Form form={form} layout="vertical">
-          <Form.Item label="Nombre" name="name" rules={[{ required: true, message: 'Por favor, ingresa el nombre del rol' }]}>
+          <Form.Item
+            label="Nombre"
+            name="name"
+            rules={[{ required: true, message: 'Por favor, ingresa el nombre del rol' }]}
+          >
             <Input />
           </Form.Item>
           <Form.Item label="Campos Válidos" name="validFields">
@@ -109,19 +119,22 @@ const Rol = () => {
                     <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
                       <Form.Item
                         {...restField}
-                        name={[name, 'name']}
-                        fieldKey={[fieldKey, 'name']}
-                        rules={[{ required: true, message: 'Ingrese el nombre del campo válido' }]}
-                      >
-                        <Input placeholder="Nombre del Campo" />
-                      </Form.Item>
-                      <Form.Item
-                        {...restField}
                         name={[name, 'value']}
                         fieldKey={[fieldKey, 'value']}
                         rules={[{ required: true, message: 'Seleccione al menos una acción' }]}
                       >
-                        <Select mode="multiple" placeholder="Seleccione acciones">
+                        <Select
+                          mode="tags"
+                          placeholder="Seleccione acciones"
+                          value={form.getFieldValue(['validFields', name, 'value']) || []}
+                          onChange={(selectedValues) => {
+                            form.setFieldsValue({
+                              validFields: form.getFieldValue('validFields').map((field) =>
+                                field.key === name ? { ...field, value: selectedValues } : field
+                              ),
+                            });
+                          }}
+                        >
                           <Option value="post">post</Option>
                           <Option value="put">put</Option>
                           <Option value="delete">delete</Option>
@@ -129,6 +142,7 @@ const Rol = () => {
                         </Select>
                       </Form.Item>
                       <Button type="link" onClick={() => remove(name)} icon={<DeleteOutlined />} />
+
                     </Space>
                   ))}
                   <Form.Item>
