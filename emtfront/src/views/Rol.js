@@ -140,12 +140,16 @@ const Rol = () => {
           <Form.Item label="Nombre" name="name" rules={[{ required: true, message: 'Por favor, ingresa el nombre del rol' }]}>
             <Input />
           </Form.Item>
-          <Form.Item label="Campos Válidos" name="validFields">
+          <Form.Item
+            label="Campos Válidos"
+            name="validFields"
+            style={{ maxHeight: '200px', overflow: 'auto' }}
+          >
             <Form.List name="validFields">
               {(fields, { add, remove }) => (
-                <>
+                <div>
                   {fields.map(({ key, name, fieldKey, ...restField }) => (
-                    <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                    <div key={key} style={{ marginBottom: '8px' }}>
                       <Form.Item
                         {...restField}
                         name={[name, 'name']}
@@ -159,8 +163,9 @@ const Rol = () => {
                         name={[name, 'value']}
                         fieldKey={[fieldKey, 'value']}
                         rules={[{ required: true, message: 'Seleccione al menos una acción' }]}
+                        style={{ display: 'inline-block', marginLeft: '8px', width: '200px' }}
                       >
-                        <Select mode="multiple" placeholder="Seleccione acciones">
+                        <Select mode="multiple" placeholder="Seleccione acciones" style={{ width: '100%', overflow: 'auto' }}>
                           <Option value="post">post</Option>
                           <Option value="put">put</Option>
                           <Option value="delete">delete</Option>
@@ -168,14 +173,14 @@ const Rol = () => {
                         </Select>
                       </Form.Item>
                       <Button type="link" onClick={() => remove(name)} icon={<DeleteOutlined />} />
-                    </Space>
+                    </div>
                   ))}
                   <Form.Item>
                     <Button type="dashed" onClick={() => add()} icon={<EditOutlined />}>
                       Agregar Campo Válido
                     </Button>
                   </Form.Item>
-                </>
+                </div>
               )}
             </Form.List>
           </Form.Item>
