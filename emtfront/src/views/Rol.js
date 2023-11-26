@@ -1,5 +1,3 @@
-// src/views/Rol.js
-
 import React, { useState, useEffect } from 'react';
 import { Button, Modal, Form, Input, Table, Space, Select } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -44,27 +42,62 @@ const Rol = () => {
     setVisible(true);
   };
 
-  const handleEdit = () => {
-    const editedRole = form.getFieldsValue();
-    const updatedRoles = roles.map((role) =>
-      role.id === editingRole.id ? { ...role, ...editedRole } : role
-    );
-    setRoles(updatedRoles);
-    setEditingRole(null);
-    setVisible(false);
-    form.resetFields();
+  const handleSubmit = async () => {
+    try {
+      const url = 'https://localhost:7208/api/Role';
+      const method = editingRole ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+        body: JSON.stringify({
+          name: form.getFieldValue('name'),
+          validFields: form.getFieldValue('validFields').map((field) => ({
+            name: field.name,
+            value: field.value,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al ${editingRole ? 'editar' : 'crear'} el rol: ${response.statusText}`);
+      }
+
+      const updatedRoles = await response.json();
+      setRoles(updatedRoles);
+
+      form.resetFields();
+      setEditingRole(null);
+      setVisible(false);
+    } catch (error) {
+      console.error(`Error al ${editingRole ? 'editar' : 'crear'} el rol:`, error);
+    }
   };
 
-  const handleCreate = () => {
-    const newRole = form.getFieldsValue();
-    setRoles([...roles, newRole]);
-    setVisible(false);
-    form.resetFields();
-  };
+  const handleDelete = async (id) => {
+    try {
+      const url = `https://localhost:7208/api/Role/${id}`;
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+      });
 
-  const handleDelete = (id) => {
-    const updatedRoles = roles.filter((role) => role.id !== id);
-    setRoles(updatedRoles);
+      if (!response.ok) {
+        throw new Error(`Error al eliminar el rol: ${response.statusText}`);
+      }
+
+      const updatedRoles = roles.filter((role) => role.id !== id);
+      setRoles(updatedRoles);
+    } catch (error) {
+      console.error('Error al eliminar el rol:', error);
+    }
   };
 
   const columns = [
@@ -96,19 +129,15 @@ const Rol = () => {
       <Modal
         title={editingRole ? 'Editar Rol' : 'Crear Rol'}
         visible={visible}
-        onOk={editingRole ? handleEdit : handleCreate}
+        onOk={handleSubmit}
         onCancel={() => {
+          form.resetFields();
           setEditingRole(null);
           setVisible(false);
-          form.resetFields();
         }}
       >
         <Form form={form} layout="vertical">
-          <Form.Item
-            label="Nombre"
-            name="name"
-            rules={[{ required: true, message: 'Por favor, ingresa el nombre del rol' }]}
-          >
+          <Form.Item label="Nombre" name="name" rules={[{ required: true, message: 'Por favor, ingresa el nombre del rol' }]}>
             <Input />
           </Form.Item>
           <Form.Item label="Campos Válidos" name="validFields">
@@ -119,22 +148,19 @@ const Rol = () => {
                     <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
                       <Form.Item
                         {...restField}
+                        name={[name, 'name']}
+                        fieldKey={[fieldKey, 'name']}
+                        rules={[{ required: true, message: 'Ingrese el nombre del campo válido' }]}
+                      >
+                        <Input placeholder="Nombre del Campo" />
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
                         name={[name, 'value']}
                         fieldKey={[fieldKey, 'value']}
                         rules={[{ required: true, message: 'Seleccione al menos una acción' }]}
                       >
-                        <Select
-                          mode="tags"
-                          placeholder="Seleccione acciones"
-                          value={form.getFieldValue(['validFields', name, 'value']) || []}
-                          onChange={(selectedValues) => {
-                            form.setFieldsValue({
-                              validFields: form.getFieldValue('validFields').map((field) =>
-                                field.key === name ? { ...field, value: selectedValues } : field
-                              ),
-                            });
-                          }}
-                        >
+                        <Select mode="multiple" placeholder="Seleccione acciones">
                           <Option value="post">post</Option>
                           <Option value="put">put</Option>
                           <Option value="delete">delete</Option>
@@ -142,7 +168,6 @@ const Rol = () => {
                         </Select>
                       </Form.Item>
                       <Button type="link" onClick={() => remove(name)} icon={<DeleteOutlined />} />
-
                     </Space>
                   ))}
                   <Form.Item>

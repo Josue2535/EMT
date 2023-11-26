@@ -1,7 +1,7 @@
 .App {
   text-align: center;
 }
-
+iframe#webpack-dev-server-client-overlay{display:none!important}
 .App-logo {
   height: 40vmin;
   pointer-events: none;
