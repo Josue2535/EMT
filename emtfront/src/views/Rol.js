@@ -46,7 +46,7 @@ const Rol = () => {
     try {
       const url = 'https://localhost:7208/api/Role';
       const method = editingRole ? 'PUT' : 'POST';
-
+  
       const response = await fetch(url, {
         method,
         headers: {
@@ -55,21 +55,21 @@ const Rol = () => {
           Authorization: `Bearer ${keycloak.token}`,
         },
         body: JSON.stringify({
-          name: form.getFieldValue('name'),
-          validFields: form.getFieldValue('validFields').map((field) => ({
-            name: field.name,
-            value: field.value,
+          Name: form.getFieldValue('name'),
+          ValidFields: form.getFieldValue('validFields').map((field) => ({
+            Name: field.name,
+            Value: JSON.stringify({ key: 'value' }),  // Modificar esta línea según tus necesidades
           })),
         }),
       });
-
+  
       if (!response.ok) {
         throw new Error(`Error al ${editingRole ? 'editar' : 'crear'} el rol: ${response.statusText}`);
       }
-
+  
       const updatedRoles = await response.json();
       setRoles(updatedRoles);
-
+  
       form.resetFields();
       setEditingRole(null);
       setVisible(false);
@@ -77,6 +77,8 @@ const Rol = () => {
       console.error(`Error al ${editingRole ? 'editar' : 'crear'} el rol:`, error);
     }
   };
+  
+  
 
   const handleDelete = async (id) => {
     try {
