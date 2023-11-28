@@ -7,7 +7,7 @@ namespace EMT.Services.Interface.Info
     public interface IRoleRepository : IRepository<Role>
     {
         // Agrega operaciones específicas si es necesario
-
+        Role GetByName(string id);
         // Obtiene los campos válidos para un rol
         List<Field> GetValidFieldsForRole(string roleId);
     }

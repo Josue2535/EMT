@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Form, Input, Table, Space, Select } from 'antd';
+import { Button, Modal, Form, Input, Table, Space, Select, Popconfirm, message } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useKeycloak } from '@react-keycloak/web';
 
@@ -42,10 +42,42 @@ const Rol = () => {
     setVisible(true);
   };
 
+  const showDeleteConfirm = (id) => {
+    Modal.confirm({
+      title: 'Confirmar Eliminación',
+      content: '¿Estás seguro de que deseas eliminar este rol?',
+      okText: 'Sí',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk() {
+        handleDelete(id);
+      },
+      onCancel() {
+        console.log('Cancel');
+      },
+    });
+  };
+
   const handleSubmit = async () => {
     try {
-      const url = 'https://localhost:7208/api/Role';
+      const url = editingRole
+        ? `https://localhost:7208/api/Role/${editingRole.id}`
+        : 'https://localhost:7208/api/Role'; // Cambiar la URL según sea necesario
       const method = editingRole ? 'PUT' : 'POST';
+  
+      const roleData = {
+        Name: form.getFieldValue('name'),
+        ValidFields: form.getFieldValue('validFields').map((field) => ({
+          Name: field.name,
+          Value: field.value,
+        })),
+      };
+  
+      // Si estás creando un nuevo rol, omite id y creationDate
+      if (!editingRole) {
+        delete roleData.id;
+        delete roleData.creationDate;
+      }
   
       const response = await fetch(url, {
         method,
@@ -54,20 +86,26 @@ const Rol = () => {
           Accept: 'application/json',
           Authorization: `Bearer ${keycloak.token}`,
         },
-        body: JSON.stringify({
-          Name: form.getFieldValue('name'),
-          ValidFields: form.getFieldValue('validFields').map((field) => ({
-            Name: field.name,
-            Value: JSON.stringify({ key: 'value' }),  // Modificar esta línea según tus necesidades
-          })),
-        }),
+        body: JSON.stringify(roleData),
       });
   
       if (!response.ok) {
         throw new Error(`Error al ${editingRole ? 'editar' : 'crear'} el rol: ${response.statusText}`);
       }
   
-      const updatedRoles = await response.json();
+      // Obtener la lista actualizada después de la operación exitosa
+      const updatedRolesResponse = await fetch('https://localhost:7208/api/Role', {
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+      });
+  
+      if (!updatedRolesResponse.ok) {
+        throw new Error(`Error al obtener roles después de la operación: ${updatedRolesResponse.statusText}`);
+      }
+  
+      const updatedRoles = await updatedRolesResponse.json();
       setRoles(updatedRoles);
   
       form.resetFields();
@@ -97,6 +135,7 @@ const Rol = () => {
 
       const updatedRoles = roles.filter((role) => role.id !== id);
       setRoles(updatedRoles);
+      message.success('Rol eliminado correctamente');
     } catch (error) {
       console.error('Error al eliminar el rol:', error);
     }
@@ -114,7 +153,14 @@ const Rol = () => {
       render: (text, record) => (
         <Space size="middle">
           <Button icon={<EditOutlined />} onClick={() => showModal(record)} />
-          <Button icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)} />
+          <Popconfirm
+            title="¿Estás seguro de que deseas eliminar este rol?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Sí"
+            cancelText="No"
+          >
+            <Button icon={<DeleteOutlined />} />
+          </Popconfirm>
         </Space>
       ),
     },

@@ -167,7 +167,7 @@ namespace EMT.Controllers.Info
                     // Ahora, roles contiene un array de strings con los roles del usuario
                     foreach (var role in rolesClaim)
                     {
-                        var rol = _RoleRepository.GetById(role.Value);
+                        var rol = _RoleRepository.GetByName(role.Value);
                         if (rol != null && rol.IsFieldEnabled(name, field))
                         {
                             return true;

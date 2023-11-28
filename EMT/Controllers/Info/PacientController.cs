@@ -238,7 +238,7 @@ namespace EMT.Controllers.Info
                     // Iterar a través de los roles del usuario
                     foreach (var role in rolesClaim)
                     {
-                        var rol = _RoleRepository.GetById(role.Value);
+                        var rol = _RoleRepository.GetByName(role.Value);
                         if (rol != null)
                         {
                             // Obtener los pacientes asociados a este rol

@@ -36,7 +36,7 @@ const Nav = () => {
     const fetchRoleInfo = async (roleName, token) => {
       try {
         const response = await fetch(
-          `https://localhost:7208/api/Role/${roleName}`,
+          `https://localhost:7208/api/Role/ByName/${roleName}`,
           {
             method: "GET",
             headers: {

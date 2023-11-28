@@ -31,7 +31,7 @@ namespace EMT.Controllers
         [HttpGet(Name = "GetClinicalHistoryFormats")]
         public IEnumerable<ClinicalHistoryFormat> Get()
         {
-            if (hasAccess("ClinicHistoryFormat", "Get"))
+            if (hasAccess("ClinicHistoryFormat", "get"))
             {
                 // Implementa la lógica para obtener todos los formatos
                 var formats = _clinicalHistoryFormatRepository.GetAll(GetFormats());
@@ -47,7 +47,7 @@ namespace EMT.Controllers
         [HttpGet("{id}", Name = "GetClinicalHistoryFormatById")]
         public IActionResult Get(string id)
         {
-            if (hasAccess("ClinicHistoryFormat", "Get"))
+            if (hasAccess("ClinicHistoryFormat", "get"))
             {
 
                 // Implementa la lógica para obtener un formato por su ID
@@ -156,7 +156,7 @@ namespace EMT.Controllers
                     // Ahora, roles contiene un array de strings con los roles del usuario
                     foreach (var role in rolesClaim)
                     {
-                        var rol = _RoleRepository.GetById(role.Value);
+                        var rol = _RoleRepository.GetByName(role.Value);
                         if (rol != null && rol.IsFieldEnabled(name, field))
                         {
                             return true;
@@ -189,22 +189,29 @@ namespace EMT.Controllers
                 {
                     // Inicializa una lista para almacenar los valores únicos
                     List<string> uniqueValues = new List<string>();
-
-                    // Ahora, roles contiene un array de strings con los roles del usuario
-                    foreach (var role in rolesClaim)
+                    try
                     {
-                        var rol = _RoleRepository.GetById(role.Value);
+                        // Ahora, roles contiene un array de strings con los roles del usuario
+                        foreach (var role in rolesClaim)
+                        {
+                            var rol = _RoleRepository.GetByName(role.Value);
+
+                            if (rol != null)
+                            {
+                                // Agrega los valores únicos de ValidFields al resultado
+                                uniqueValues.AddRange(rol.formats());
 
 
-                        // Agrega los valores únicos de ValidFields al resultado
-                        uniqueValues.AddRange(rol.formats());
+                                Console.WriteLine($"Rol: {role.Value}");
+                            }
+                        }
 
-
-                        Console.WriteLine($"Rol: {role.Value}");
+                        // Devuelve la lista de valores únicos sin duplicados
+                        return uniqueValues.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                    }catch (Exception ex)
+                    {
+                        return new List<string>();  
                     }
-
-                    // Devuelve la lista de valores únicos sin duplicados
-                    return uniqueValues.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
                 }
 
             }
