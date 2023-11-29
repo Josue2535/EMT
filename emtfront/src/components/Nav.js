@@ -99,7 +99,7 @@ const Nav = () => {
   };
 
   return (
-    <div style={{ display: "flex", alignItems: "center", backgroundColor: '#A2195B', padding: '8px' }}>
+    <div style={{ display: "flex", alignItems: "center", backgroundColor: '#CA5724', padding: '8px' }}>
       {keycloak.authenticated && (
         <Button type="link" icon={<MenuOutlined />} onClick={showDrawer}  />
       )}
@@ -121,7 +121,7 @@ const Nav = () => {
 
       <div style={{ marginLeft: "auto", marginRight: "auto" }}>
       <Title level={4} style={{ marginBottom: 0, color: 'white' }}>
-          EMT APP
+          Emergency Medical Team
         </Title>
       </div>
 
