@@ -33,7 +33,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Pacient", "Get")) 
+                if (!hasAccess("Pacient", "get")) 
                 { 
                     return Unauthorized();
                 }
@@ -53,7 +53,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Pacient", "Get"))
+                if (!hasAccess("Pacient", "get"))
                 {
                     return Unauthorized();
                 }
@@ -76,7 +76,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Pacient", "Get"))
+                if (!hasAccess("Pacient", "get"))
                 {
                     return Unauthorized();
                 }
@@ -100,12 +100,12 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Pacient", "Post"))
+                if (!hasAccess("Pacient", "post"))
                 {
                     return Unauthorized();
                 }
                 var pacient = Pacient.FromJson(pacientJson);
-                if (pacient.isValid(_PacientFormtatRepository.GetFirst()))
+                if (pacient.IsValid(_PacientFormtatRepository.GetFirst()))
                 {
                     _repository.Create(pacient);
                     return CreatedAtRoute("GetPacient", new { id = pacient.Id }, pacient);
@@ -125,7 +125,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Pacient", "Put"))
+                if (!hasAccess("Pacient", "put"))
                 {
                     return Unauthorized();
                 }
@@ -135,7 +135,7 @@ namespace EMT.Controllers.Info
                     return NotFound();
                 }
                 var updatedPacient = Pacient.FromJson(updatedPacientJson);
-                if (updatedPacient.isValid(_PacientFormtatRepository.GetFirst()))
+                if (updatedPacient.IsValid(_PacientFormtatRepository.GetFirst()))
                 {
                     updatedPacient.Id = existingPacient.Id;
                     _repository.Update(updatedPacient);
@@ -156,7 +156,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Pacient", "Delete"))
+                if (!hasAccess("Pacient", "delete"))
                 {
                     return Unauthorized();
                 }
@@ -199,7 +199,7 @@ namespace EMT.Controllers.Info
                     // Ahora, roles contiene un array de strings con los roles del usuario
                     foreach (var role in rolesClaim)
                     {
-                        var rol = _RoleRepository.GetById(role.Value);
+                        var rol = _RoleRepository.GetByName(role.Value);
                         if (rol != null && rol.IsFieldEnabled(name, field))
                         {
                             return true;
@@ -212,7 +212,7 @@ namespace EMT.Controllers.Info
             }
             return false;
         }
-        
+
         private List<Pacient> PacientsByRole()
         {
             var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");

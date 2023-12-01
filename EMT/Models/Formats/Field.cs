@@ -52,21 +52,21 @@ namespace EMT.Models.Formats
 
         private static object ConvertJsonValue(JsonNode jsonNode)
         {
-            if (jsonNode is JsonObject jsonObject)
+            if (jsonNode is JsonObject)
             {
                 // Si es un objeto JSON, devuelve el objeto directamente
-                return jsonObject.GetValue<object>();
+                return jsonNode.GetValue<object>();
             }
-            else if (jsonNode is JsonArray jsonArray)
+            else if (jsonNode is JsonArray)
             {
                 var values = new List<object>();
 
-                foreach (var item in jsonArray)
+                foreach (var item in (JsonArray)jsonNode)
                 {
                     if (item is JsonValue jsonValue)
                     {
-                        // Si el valor es un JsonValue, extrae el valor directamente como cadena
-                        values.Add(jsonValue.GetValue<string>());
+                        // Especifica el tipo al extraer el valor
+                        values.Add(jsonValue.GetValue<object>());
                     }
                     else if (item is JsonObject obj)
                     {
@@ -79,8 +79,8 @@ namespace EMT.Models.Formats
             }
             else if (jsonNode is JsonValue jsonStringValue)
             {
-                // Si es un valor, devuelve el valor directamente como cadena
-                return jsonStringValue.GetValue<string>();
+                // Especifica el tipo al extraer el valor
+                return jsonStringValue.GetValue<object>();
             }
             else
             {
@@ -88,6 +88,9 @@ namespace EMT.Models.Formats
                 return jsonNode.GetValue<object>();
             }
         }
+
+
+
 
 
 

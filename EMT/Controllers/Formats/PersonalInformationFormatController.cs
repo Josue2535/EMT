@@ -31,7 +31,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (!hasAccess("PersonalInformationFormat", "Get"))
+                if (!hasAccess("PersonalInformationFormat", "get"))
                 {
                     return Unauthorized();
                 }
@@ -51,7 +51,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (!hasAccess("PersonalInformationFormat", "Get"))
+                if (!hasAccess("PersonalInformationFormat", "get"))
                 {
                     return Unauthorized();
                 }
@@ -75,7 +75,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (!hasAccess("PersonalInformationFormat", "Post"))
+                if (!hasAccess("PersonalInformationFormat", "post"))
                 {
                     return Unauthorized();
                 }
@@ -106,7 +106,7 @@ namespace EMT.Controllers.Formats
         [HttpPut("{id:length(24)}")]
         public IActionResult Put(string id, [FromBody] JsonObject json)
         {
-            if (!hasAccess("PersonalInformationFormat", "Put"))
+            if (!hasAccess("PersonalInformationFormat", "put"))
             {
                 return Unauthorized();
             }
@@ -133,7 +133,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (!hasAccess("PersonalInformationFormat", "Delete"))
+                if (!hasAccess("PersonalInformationFormat", "delete"))
                 {
                     return Unauthorized();
                 }
