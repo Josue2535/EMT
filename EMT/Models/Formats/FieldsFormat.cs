@@ -20,7 +20,7 @@ namespace EMT.Models.Formats
         {
             return JsonSerializer.Serialize(this, new JsonSerializerOptions
             {
-                WriteIndented = true // Hace que la salida JSON esté formateada
+                WriteIndented = true
             });
         }
         public static FieldsFormat FromJson(JsonObject json)

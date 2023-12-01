@@ -29,9 +29,10 @@ namespace EMT.Models.Formats
             {
                 string name = json["Name"].GetValue<string>();
                 var valueToken = json["Value"];
+                //string valueToken = json["Value"].GetValue<string>();
 
                 // Convierte el valor según el tipo de dato
-                object value = ConvertJsonValue(valueToken);
+                object value = ConvertJsonValue(valueToken, name);
 
                 // Crea un nuevo objeto Field con los valores obtenidos
                 Field field = new Field
@@ -39,6 +40,8 @@ namespace EMT.Models.Formats
                     Name = name,
                     Value = value
                 };
+
+                Console.WriteLine(field.Value.GetType());
 
                 return field;
             }
@@ -49,7 +52,43 @@ namespace EMT.Models.Formats
                 return null;
             }
         }
+        private static object ConvertJsonValue(JsonNode jsonNode,String name)
+        {
+            if (jsonNode is JsonObject)
+            {
+                // Si es un objeto JSON, devuelve el objeto directamente
+                return jsonNode.GetValue<object>();
+            }
+            else if (jsonNode is JsonArray)
+            {
+                var values = new List<object>();
 
+                foreach (var item in (JsonArray)jsonNode)
+                {
+                    if (item is JsonValue jsonValue)
+                    {
+                        // Especifica el tipo al extraer el valor
+                        values.Add(jsonValue.GetValue<object>());
+                    }
+                    else if (item is JsonObject obj)
+                    {
+                        values.Add(ConvertJsonValue(obj));
+                    }
+                    // Puedes agregar lógica adicional aquí para otros tipos si es necesario
+                }
+
+                return values;
+            }
+            else if (jsonNode is JsonValue jsonStringValue)
+            {
+                return jsonStringValue.GetValue<object>();
+            }
+            else
+            {
+                // Para otros tipos de nodos, devuelve el valor directamente
+                return jsonNode.GetValue<object>();
+            }
+        }
         private static object ConvertJsonValue(JsonNode jsonNode)
         {
             if (jsonNode is JsonObject)

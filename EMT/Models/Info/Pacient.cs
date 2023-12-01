@@ -116,8 +116,58 @@ namespace EMT.Models.Implements
 
                 if (expectedFieldType != actualFieldType)
                 {
-                    Console.WriteLine($"Tipo de campo no válido para {field.Name}. Se esperaba {expectedFieldType} pero se encontró {actualFieldType}");
-                    return false;
+                    switch (expectedFieldType)
+                    {
+                        case "String":
+                            // Conversión a String
+                            field.Value = field.Value?.ToString();
+                            break;
+
+                        case "Number":
+                            // Conversión a Number (Int)
+                                try
+                                {
+                                field.Value = Int32.Parse(field.Value.ToString());
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine($"Error al convertir {field.Name} a Number: {ex.Message}");
+                                    return false;
+                                }
+                            
+                            break;
+                        case "Integer":
+                        
+                                try
+                                {
+                                field.Value = Int32.Parse(field.Value.ToString());
+                            }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine($"Error al convertir {field.Name} a Number: {ex.Message}");
+                                    return false;
+                                }
+                            break;
+
+                        case "LocalDate":
+                            // Intenta convertir a DateTime utilizando DateTime.TryParse
+                            if (DateTime.TryParse(field.Value?.ToString(), out DateTime dateValue))
+                            {
+                                field.Value = dateValue;
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Error al convertir {field.Name} a Date. Valor no válido.");
+                                return false;
+                            }
+                            break;
+
+                        // Puedes agrega más casos según tus necesidades
+
+                        default:
+                            Console.WriteLine($"Tipo de campo no reconocido: {expectedFieldType}");
+                            return false;
+                    }
                 }
 
                 return true;
