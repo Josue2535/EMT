@@ -66,5 +66,21 @@ namespace EMT.Models.DAO
                 return null;
             }
         }
+        public bool IsValid(ClinicalHistoryFormat format, Attached at)
+        {
+            try
+            {
+                return at.IsValid(format);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al validar el formato del paciente: {ex.Message}");
+                return false;
+            }
+        }
+
+        
+
     }
+}
 }

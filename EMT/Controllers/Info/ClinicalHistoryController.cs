@@ -111,6 +111,12 @@ namespace EMT.Controllers.Info
                     return Unauthorized();
                 }
                 var clinicalHistory = ClinicalHistory.FromJson(json);
+                foreach (var at in clinicalHistory.Attachments) {
+                    var format = _clinicalHistoryFormatRepository.GetByName(at.NameFormat);
+                    if (clinicalHistory.IsValid(format, at) == false) { 
+                        return BadRequest("Formato Historia clinica no valido");
+                    }
+                }
                 _repository.Create(clinicalHistory);
                 return CreatedAtRoute("GetClinicalHistory", new { id = clinicalHistory.Id }, clinicalHistory);
             }
