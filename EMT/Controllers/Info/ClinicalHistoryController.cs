@@ -143,7 +143,16 @@ namespace EMT.Controllers.Info
                 {
                     return NotFound();
                 }
+                
                 var updatedClinicalHistory = ClinicalHistory.FromJson(updatedClinicalHistoryjson);
+                foreach (var at in updatedClinicalHistory.Attachments)
+                {
+                    var format = _clinicalHistoryFormatRepository.GetByName(at.NameFormat);
+                    if (updatedClinicalHistory.IsValid(format, at) == false)
+                    {
+                        return BadRequest("Formato Historia clinica no valido");
+                    }
+                }
                 updatedClinicalHistory.Id = existingClinicalHistory.Id;
                 _repository.Update(updatedClinicalHistory);
                 return NoContent();
@@ -163,8 +172,11 @@ namespace EMT.Controllers.Info
                 {
                     return Unauthorized();
                 }
+
                 var attached = Attached.FromJson(attachedJson);
-                if (attached.IsValid(_clinicalHistoryFormatRepository.GetById(attached.id))) {
+                var format = _clinicalHistoryFormatRepository.GetByName(attached.NameFormat);
+               
+                if (attached.IsValid(format)) {
                     var ch = _repository.GetById(id);
                     ch.Attachments.Add(attached);
                     _repository.Update(ch);
