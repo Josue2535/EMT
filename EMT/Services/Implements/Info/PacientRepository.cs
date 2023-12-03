@@ -1,9 +1,11 @@
 ﻿using EMT.Models.DAO;
+using EMT.Models.Formats;
 using EMT.Models.Implements;
 using EMT.Services.Interface.Formats;
 using EMT.Services.Interface.Info;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Xml.Linq;
 
 namespace EMT.Services.Implements.Info
 {
@@ -81,6 +83,14 @@ namespace EMT.Services.Implements.Info
         public IEnumerable<Pacient> GetByRole(string name)
         {
             return _collection.Find(p => p.Role.Equals(name)).ToList();
+        }
+        public IEnumerable<Pacient> SearchByField(string fieldName, string value)
+        {
+            // Implementación de la búsqueda por campo específico
+            var filter = new Field();
+            filter.Name = fieldName;
+            filter.Value = value;   
+            return _collection.Find(p => p.FieldsList.Contains(filter)).ToList();
         }
     }
 }

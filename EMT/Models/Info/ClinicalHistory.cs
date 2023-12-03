@@ -13,6 +13,8 @@ namespace EMT.Models.DAO
         public string? Id { get; set; }
         public DateTime Created { get; set; }
         public string PatientId { get; set; }
+
+        public string NameFormat {  get; set; }
         public List<Attached> Attachments { get; set; }
       
         // Método para convertir el objeto a formato JSON
@@ -34,6 +36,7 @@ namespace EMT.Models.DAO
 
                 DateTime created = json.ContainsKey("Created") ? json["Created"].GetValue<DateTime>(): DateTime.Now;
                 string patientId = json["PatientId"].GetValue<string>();
+                string nameFormat = json["NameFormat"].GetValue<string>();
 
                 List<Attached> attachments = new List<Attached>();
                 var attachmentsJsonArray = json["Attachments"].AsArray();
@@ -50,7 +53,8 @@ namespace EMT.Models.DAO
                     Id = id,
                     Created = created,
                     PatientId = patientId,
-                    Attachments = attachments
+                    Attachments = attachments,
+                    NameFormat = nameFormat
                 };
 
                 return clinicalHistory;

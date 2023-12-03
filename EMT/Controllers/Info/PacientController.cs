@@ -9,6 +9,7 @@ using EMT.Services.Implements.Formats;
 using System.IdentityModel.Tokens.Jwt;
 using EMT.Services.Interface.Formats;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
 
 namespace EMT.Controllers.Info
 {
@@ -93,6 +94,30 @@ namespace EMT.Controllers.Info
                 return StatusCode(500, "Internal Server Error");
             }
         }
+        [HttpGet("GetByField")]
+        public IActionResult GetByField([FromBody] JsonObject filter)
+        {
+            try
+            {
+                if (!hasAccess("Pacient", "get"))
+                {
+                    return Unauthorized();
+                }
+                var fieldname = filter["Name"].GetValue<string>();
+                var value = filter["value"].GetValue<string>();
+                var pacient = _repository.SearchByField(fieldname,value );
+                if (pacient == null)
+                {
+                    return NotFound();
+                }
+                return Ok(pacient);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return BadRequest("Json invalido");
+            }
+        }
 
         // POST: api/Pacient
         [HttpPost]
@@ -105,7 +130,8 @@ namespace EMT.Controllers.Info
                     return Unauthorized();
                 }
                 var pacient = Pacient.FromJson(pacientJson);
-                if (pacient.IsValid(_PacientFormtatRepository.GetFirst()))
+
+                if (pacient.IsValid(_PacientFormtatRepository.GetFirst())&&!pacient.FieldsList.IsNullOrEmpty())
                 {
                     _repository.Create(pacient);
                     return CreatedAtRoute("GetPacient", new { id = pacient.Id }, pacient);

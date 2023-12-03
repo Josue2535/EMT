@@ -82,9 +82,16 @@ namespace EMT.Controllers.Formats
             {
                 if (hasAccess("PacientFormat", "post"))
                 {
-                    var pacientFormat = PacientFormat.GetFromJson(format);
-                    _repository.Create(pacientFormat);
-                    return CreatedAtRoute("GetPacientFormat", new { id = pacientFormat.Id.ToString() }, format);
+                    if (_repository.GetAll() == null)
+                    {
+                        var pacientFormat = PacientFormat.GetFromJson(format);
+                        _repository.Create(pacientFormat);
+                        return CreatedAtRoute("GetPacientFormat", new { id = pacientFormat.Id.ToString() }, format);
+                    }
+                    else
+                    {
+                        return StatusCode(StatusCodes.Status400BadRequest, "a format already exists");
+                    }
                 }
                 else
                 {
