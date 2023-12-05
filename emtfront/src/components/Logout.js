@@ -2,14 +2,12 @@ import React from 'react';
 import { Button } from 'antd';
 
 const Logout = ({ keycloak }) => {
-  const handleLogout = () => {
-    keycloak.logout();
-  };
+  
 
   return (
     <div>
       <h2>Logout</h2>
-      <Button type="primary" onClick={handleLogout}>
+      <Button type="primary" onClick={keycloak.logout()}>
         Cerrar sesión
       </Button>
     </div>

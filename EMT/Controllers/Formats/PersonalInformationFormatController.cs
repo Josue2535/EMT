@@ -10,11 +10,13 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text.Json;
 using EMT.Services.Interface.Info;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EMT.Controllers.Formats
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class PersonalInformationFormatController : ControllerBase
     {
         private readonly IPersonalInformationFormatRepository _repository;
@@ -31,7 +33,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (!hasAccess("PersonalInformationFormat", "Get"))
+                if (!hasAccess("PersonalInformationFormat", "get"))
                 {
                     return Unauthorized();
                 }
@@ -51,7 +53,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (!hasAccess("PersonalInformationFormat", "Get"))
+                if (!hasAccess("PersonalInformationFormat", "get"))
                 {
                     return Unauthorized();
                 }
@@ -75,7 +77,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (!hasAccess("PersonalInformationFormat", "Post"))
+                if (!hasAccess("PersonalInformationFormat", "post"))
                 {
                     return Unauthorized();
                 }
@@ -106,7 +108,7 @@ namespace EMT.Controllers.Formats
         [HttpPut("{id:length(24)}")]
         public IActionResult Put(string id, [FromBody] JsonObject json)
         {
-            if (!hasAccess("PersonalInformationFormat", "Put"))
+            if (!hasAccess("PersonalInformationFormat", "put"))
             {
                 return Unauthorized();
             }
@@ -133,7 +135,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (!hasAccess("PersonalInformationFormat", "Delete"))
+                if (!hasAccess("PersonalInformationFormat", "delete"))
                 {
                     return Unauthorized();
                 }
@@ -176,7 +178,7 @@ namespace EMT.Controllers.Formats
                     // Ahora, roles contiene un array de strings con los roles del usuario
                     foreach (var role in rolesClaim)
                     {
-                        var rol = _RoleRepository.GetById(role.Value);
+                        var rol = _RoleRepository.GetByName(role.Value);
                         if (rol != null && rol.IsFieldEnabled(name, field))
                         {
                             return true;

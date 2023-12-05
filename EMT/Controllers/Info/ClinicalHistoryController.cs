@@ -111,6 +111,12 @@ namespace EMT.Controllers.Info
                     return Unauthorized();
                 }
                 var clinicalHistory = ClinicalHistory.FromJson(json);
+                foreach (var at in clinicalHistory.Attachments) {
+                    var format = _clinicalHistoryFormatRepository.GetByName(at.NameFormat);
+                    if (clinicalHistory.IsValid(format, at) == false) { 
+                        return BadRequest("Formato Historia clinica no valido");
+                    }
+                }
                 _repository.Create(clinicalHistory);
                 return CreatedAtRoute("GetClinicalHistory", new { id = clinicalHistory.Id }, clinicalHistory);
             }
@@ -137,7 +143,16 @@ namespace EMT.Controllers.Info
                 {
                     return NotFound();
                 }
+                
                 var updatedClinicalHistory = ClinicalHistory.FromJson(updatedClinicalHistoryjson);
+                foreach (var at in updatedClinicalHistory.Attachments)
+                {
+                    var format = _clinicalHistoryFormatRepository.GetByName(at.NameFormat);
+                    if (updatedClinicalHistory.IsValid(format, at) == false)
+                    {
+                        return BadRequest("Formato Historia clinica no valido");
+                    }
+                }
                 updatedClinicalHistory.Id = existingClinicalHistory.Id;
                 _repository.Update(updatedClinicalHistory);
                 return NoContent();
@@ -157,8 +172,11 @@ namespace EMT.Controllers.Info
                 {
                     return Unauthorized();
                 }
+
                 var attached = Attached.FromJson(attachedJson);
-                if (attached.IsValid(_clinicalHistoryFormatRepository.GetById(attached.id))) {
+                var format = _clinicalHistoryFormatRepository.GetByName(attached.NameFormat);
+               
+                if (attached.IsValid(format)) {
                     var ch = _repository.GetById(id);
                     ch.Attachments.Add(attached);
                     _repository.Update(ch);
@@ -223,7 +241,7 @@ namespace EMT.Controllers.Info
                     // Ahora, roles contiene un array de strings con los roles del usuario
                     foreach (var role in rolesClaim)
                     {
-                        var rol = _RoleRepository.GetById(role.Value);
+                        var rol = _RoleRepository.GetByName(role.Value);
                         if (rol != null && rol.IsFieldEnabled(name, field))
                         {
                             return true;

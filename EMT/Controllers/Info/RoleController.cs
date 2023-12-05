@@ -29,12 +29,27 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Role", "Get"))
-                {
-                    return Unauthorized();
-                }
+                
                 var roles = _repository.GetAll();
                 return Ok(roles);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+        [HttpGet("ByName/{name}", Name = "GetRoleByName")]
+        public ActionResult<Role> GetRoleByName(string name)
+        {
+            try
+            {
+                var role = _repository.GetByName(name);
+                if (role == null)
+                {
+                    return NotFound();
+                }
+                return Ok(role);
             }
             catch (Exception ex)
             {
@@ -49,10 +64,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Role", "Get"))
-                {
-                    return Unauthorized();
-                }
+                
                 var role = _repository.GetById(id);
                 if (role == null)
                 {
@@ -163,7 +175,7 @@ namespace EMT.Controllers.Info
                     // Ahora, roles contiene un array de strings con los roles del usuario
                     foreach (var role in rolesClaim)
                     {
-                        var rol = _repository.GetById(role.Value);
+                        var rol = _repository.GetByName(role.Value);
                         if (rol != null && rol.IsFieldEnabled(name, field))
                         {
                             return true;

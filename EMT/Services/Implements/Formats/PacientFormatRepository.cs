@@ -18,7 +18,21 @@ namespace EMT.Services.Implements.Formats
 
         public void Create(PacientFormat format)
         {
-            _collection.InsertOne(format);
+            // Verifica si ya existe un formato con los mismos datos
+            var existingFormat = _collection.Find(f => true).FirstOrDefault();
+
+            if (existingFormat != null)
+            {
+                // Ya existe un formato con los mismos datos, maneja el error o realiza alguna acción necesaria
+                Console.WriteLine("Ya existe un formato con los mismos datos. No se puede crear uno nuevo.");
+                // Puedes lanzar una excepción, devolver un mensaje de error, etc.
+            }
+            else
+            {
+                // No hay un formato existente, procede con la creación
+                _collection.InsertOne(format);
+                Console.WriteLine("Formato creado exitosamente.");
+            }
         }
 
         public IEnumerable<PacientFormat> GetAll()

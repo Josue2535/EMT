@@ -49,7 +49,7 @@ namespace EMT.Models.Implements
 
                 return new Role
                 {
-                    Id = id.ToString(),
+                    Id = id,
                     Created = created,
                     Name = name,
                     ValidFields = validFields
@@ -93,7 +93,7 @@ namespace EMT.Models.Implements
                 // Verificar si el valor está presente en el array de valores del ValidField
                 if (field.Value is IEnumerable<object> collection)
                 {
-                    return (List<string>)field.Value;
+                    return collection.Select(item => item.ToString()).ToList(); 
                 }
 
                 // Si el campo es de otro tipo, puedes agregar lógica adicional aquí según tus necesidades

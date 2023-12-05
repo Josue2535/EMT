@@ -19,10 +19,15 @@ namespace EMT.Services.Implements.Formats
 
         public Role GetById(string id)
         {
+            var objectId = ObjectId.Parse(id);
+            var filter = Builders<Role>.Filter.Eq("_id", objectId);
+            return _collection.Find(filter).FirstOrDefault();
+        }
+        public Role GetByName(string id)
+        {
             var filter = Builders<Role>.Filter.Regex("Name", new BsonRegularExpression(id, "i"));
             return _collection.Find(filter).FirstOrDefault();
         }
-
         public IEnumerable<Role> GetAll()
         {
             return _collection.Find(_ => true).ToList();

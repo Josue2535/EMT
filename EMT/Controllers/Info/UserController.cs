@@ -73,7 +73,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("User", "Post"))
+                if (!hasAccess("User", "post"))
                 {
                     return Unauthorized();
                 }
@@ -94,7 +94,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("User", "Put"))
+                if (!hasAccess("User", "put"))
                 {
                     return Unauthorized();
                 }
@@ -121,7 +121,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("User", "Dalete"))
+                if (!hasAccess("User", "dalete"))
                 {
                     return Unauthorized();
                 }
@@ -163,7 +163,7 @@ namespace EMT.Controllers.Info
                     // Ahora, roles contiene un array de strings con los roles del usuario
                     foreach (var role in rolesClaim)
                     {
-                        var rol = _RoleRepository.GetById(role.Value);
+                        var rol = _RoleRepository.GetByName(role.Value);
                         if (rol != null && rol.IsFieldEnabled(name, field))
                         {
                             return true;

@@ -32,7 +32,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (hasAccess("PacientFormat", "Get"))
+                if (hasAccess("PacientFormat", "get"))
                 {
                     var formats = _repository.GetAll();
                     return Ok(formats);
@@ -54,7 +54,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (hasAccess("PacientFormat", "Get"))
+                if (hasAccess("PacientFormat", "get"))
                 {
                     var format = _repository.GetById(id);
                     if (format == null)
@@ -80,11 +80,18 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (hasAccess("PacientFormat", "Post"))
+                if (hasAccess("PacientFormat", "post"))
                 {
-                    var pacientFormat = PacientFormat.GetFromJson(format);
-                    _repository.Create(pacientFormat);
-                    return CreatedAtRoute("GetPacientFormat", new { id = pacientFormat.Id.ToString() }, format);
+                    if (_repository.GetAll() == null)
+                    {
+                        var pacientFormat = PacientFormat.GetFromJson(format);
+                        _repository.Create(pacientFormat);
+                        return CreatedAtRoute("GetPacientFormat", new { id = pacientFormat.Id.ToString() }, format);
+                    }
+                    else
+                    {
+                        return StatusCode(StatusCodes.Status400BadRequest, "a format already exists");
+                    }
                 }
                 else
                 {
@@ -104,7 +111,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (hasAccess("PacientFormat", "Put"))
+                if (hasAccess("PacientFormat", "put"))
                 {
                     var updatePacientFormat = PacientFormat.GetFromJson(updatedFormat);
                     var existingFormat = _repository.GetById(id);
@@ -135,7 +142,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (hasAccess("PacientFormat", "Put"))
+                if (hasAccess("PacientFormat", "put"))
                 {
                     var format = _repository.GetById(id);
                     if (format == null)
@@ -181,7 +188,7 @@ namespace EMT.Controllers.Formats
                     // Ahora, roles contiene un array de strings con los roles del usuario
                     foreach (var role in rolesClaim)
                     {
-                        var rol = _RoleRepository.GetById(role.Value);
+                        var rol = _RoleRepository.GetByName(role.Value);
                         if (rol != null && rol.IsFieldEnabled(name, field))
                         {
                             return true;

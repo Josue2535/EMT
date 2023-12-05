@@ -1,11 +1,12 @@
 // src/views/UsuarioCrud.js
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, message, Select } from 'antd';
-import { getUsers, createUser, updateUser, deleteUser } from '../api'; // Ajusta las funciones de la API según sea necesario
+import { Table, Button, Modal, Form, Input, message, Select, Checkbox } from 'antd';
+import { useKeycloak } from '@react-keycloak/web';
 
 const { Option } = Select;
 
 const Usuario = () => {
+  const { keycloak } = useKeycloak();
   const [usuarios, setUsuarios] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [form] = Form.useForm();
@@ -13,7 +14,17 @@ const Usuario = () => {
 
   const fetchUsuarios = async () => {
     try {
-      const data = await getUsers();
+      const response = await fetch('https://localhost:7208/api/User', {
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al obtener usuarios: ${response.statusText}`);
+      }
+
+      const data = await response.json();
       setUsuarios(data);
     } catch (error) {
       console.error('Error al obtener la lista de usuarios', error);
@@ -23,7 +34,7 @@ const Usuario = () => {
 
   useEffect(() => {
     fetchUsuarios();
-  }, []);
+  }, [keycloak.token]); // Agrega keycloak.token como dependencia para que se vuelva a cargar cuando cambie el token
 
   const handleCreate = () => {
     setEditingUser(null);
@@ -38,7 +49,17 @@ const Usuario = () => {
 
   const handleDelete = async (userId) => {
     try {
-      await deleteUser(userId);
+      const response = await fetch(`https://localhost:7208/api/User/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al eliminar usuario: ${response.statusText}`);
+      }
+
       message.success('Usuario eliminado exitosamente');
       fetchUsuarios();
     } catch (error) {
@@ -50,18 +71,28 @@ const Usuario = () => {
   const handleModalOk = async () => {
     try {
       const values = await form.validateFields();
-      if (editingUser) {
-        await updateUser(editingUser.id, values);
-        message.success('Usuario actualizado exitosamente');
-      } else {
-        await createUser(values);
-        message.success('Usuario creado exitosamente');
+      const url = editingUser ? `https://localhost:7208/api/User/${editingUser.id}` : 'https://localhost:7208/api/User';
+      const method = editingUser ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al ${editingUser ? 'actualizar' : 'crear'} usuario: ${response.statusText}`);
       }
+
+      message.success(`Usuario ${editingUser ? 'actualizado' : 'creado'} exitosamente`);
       setModalVisible(false);
       fetchUsuarios();
     } catch (error) {
-      console.error('Error al guardar el usuario', error);
-      message.error('Error al guardar el usuario');
+      console.error(`Error al ${editingUser ? 'actualizar' : 'crear'} el usuario`, error);
+      message.error(`Error al ${editingUser ? 'actualizar' : 'crear'} el usuario`);
     }
   };
 
@@ -72,8 +103,9 @@ const Usuario = () => {
 
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id' },
-    { title: 'Nombre de Usuario', dataIndex: 'username', key: 'username' },
-    { title: 'Roles', dataIndex: 'roles', key: 'roles', render: (roles) => roles.join(', ') },
+    { title: 'Nombre de Usuario', dataIndex: 'userName', key: 'userName' },
+    { title: 'Fecha de Creación', dataIndex: 'created', key: 'created' },
+    { title: 'Habilitado', dataIndex: 'isEnabled', key: 'isEnabled', render: (isEnabled) => isEnabled ? 'Sí' : 'No' },
     {
       title: 'Acciones',
       dataIndex: 'acciones',
@@ -106,18 +138,13 @@ const Usuario = () => {
         onCancel={handleModalCancel}
       >
         <Form form={form} layout="vertical" name="usuario_form">
-          <Form.Item name="username" label="Nombre de Usuario" rules={[{ required: true, message: 'Por favor ingrese el nombre de usuario' }]}>
+          <Form.Item name="userName" label="Nombre de Usuario" rules={[{ required: true, message: 'Por favor ingrese el nombre de usuario' }]}>
             <Input />
           </Form.Item>
-          
-          <Form.Item name="roles" label="Roles">
-            <Select mode="multiple" placeholder="Seleccione roles">
-              {/* Agrega las opciones de roles según sea necesario */}
-              <Option value="admin">Admin</Option>
-              <Option value="user">User</Option>
-              {/* ... otras opciones de roles */}
-            </Select>
+          <Form.Item name="isEnabled" label="Habilitado" valuePropName="checked">
+            <Checkbox />
           </Form.Item>
+          {/* Otras propiedades como "created" y "id" se asignan automáticamente en el backend */}
         </Form>
       </Modal>
     </div>

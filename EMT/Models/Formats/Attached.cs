@@ -10,7 +10,7 @@ namespace EMT.Models.Formats
         public string id { get; set; }
         public DateTime Created { get; set; }
         public List<Field> Fields { get; set; }
-        string NameFormat { get; set; }
+        public string NameFormat { get; set; }
 
         // Constructor por defecto
         public Attached()
@@ -64,42 +64,72 @@ namespace EMT.Models.Formats
             }
         }
 
-        public bool IsValid(ClinicalHistoryFormat clinicalHistoryFormat)
+        
+        public bool IsValid(ClinicalHistoryFormat format)
         {
-            // Verifica que todos los campos en Fields estén presentes en los campos válidos del formato
-            foreach (var field in Fields)
+            try
             {
-                // Buscar el campo en los campos válidos del formato
-                var validField = clinicalHistoryFormat.ValidFields.FirstOrDefault(vf => vf.FieldName == field.Name);
-
-                // Si no se encuentra el campo en los campos válidos, es inválido
-                if (validField == null)
+                foreach (var field in Fields)
                 {
-                    Console.WriteLine($"Campo no válido: {field.Name}");
-                    return false;
-                }
+                    var validField = format.ValidFields.FirstOrDefault(vf => vf.FieldName == field.Name);
 
-                // Aquí puedes agregar más lógica de validación según sea necesario
-                // ...
-
-                // Por ejemplo, puedes verificar si el tipo del campo coincide
-                if (field.Value.GetType().ToString() != validField.FieldType)
-                {
-                    Console.WriteLine($"Tipo de campo no válido para {field.Name}. Se esperaba {validField.FieldType} pero se encontró {field.GetType().ToString()}");
-                    return false;
-                }
-                // Verificar si el valor está presente en las opciones si no está vacío
-                if (!string.IsNullOrEmpty(field.Value.ToString()) && validField.FieldOptions != null && validField.FieldOptions.Any())
-                {
-                    if (!validField.FieldOptions.Contains(field.Value))
+                    if (validField == null)
                     {
-                        Console.WriteLine($"Valor no válido para {field.Name}. Se esperaba uno de {string.Join(", ", validField.FieldOptions)} pero se encontró {field.Value}");
+                        Console.WriteLine($"Campo no válido: {field.Name}");
+                        return false;
+                    }
+
+                    if (!IsValidFieldType(field, validField))
+                    {
+                        return false;
+                    }
+
+                    if (!IsValidFieldValue(field, validField))
+                    {
                         return false;
                     }
                 }
-            }
 
-            return true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al validar el formato del paciente: {ex.Message}");
+                return false;
+            }
         }
+
+        private bool IsValidFieldType(Field field, FieldsFormat validField)
+        {
+            var ret = field.IsValidFieldType(field, validField);
+            return ret;
+        }
+
+        private bool IsValidFieldValue(Field field, FieldsFormat validField)
+        {
+            try
+            {
+                var fieldValueString = field.Value?.ToString();
+
+                if (!string.IsNullOrEmpty(fieldValueString) && validField.FieldOptions != null && validField.FieldOptions.Any())
+                {
+                    if (!validField.FieldOptions.Contains(fieldValueString))
+                    {
+                        Console.WriteLine($"Valor no válido para {field.Name}. Se esperaba uno de {string.Join(", ", validField.FieldOptions)} pero se encontró {fieldValueString}");
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al validar el valor del campo para {field.Name}: {ex.Message}");
+                return false;
+            }
+        }
+
+
     }
 }
+

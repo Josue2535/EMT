@@ -41,7 +41,7 @@ namespace EMT.Services.Implements.Formats
 
         public void Update(ClinicalHistoryFormat entity)
         {
-            var filter = Builders<ClinicalHistoryFormat>.Filter.Eq("_id", entity.Id);
+            var filter = Builders<ClinicalHistoryFormat>.Filter.Eq("_id", new ObjectId(entity.Id));
             _collection.ReplaceOne(filter, entity);
         }
 
