@@ -10,11 +10,13 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text.Json;
 using EMT.Services.Interface.Info;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EMT.Controllers.Formats
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class PersonalInformationFormatController : ControllerBase
     {
         private readonly IPersonalInformationFormatRepository _repository;

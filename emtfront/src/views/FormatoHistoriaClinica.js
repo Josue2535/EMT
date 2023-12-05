@@ -85,7 +85,9 @@ const FormatoHistoriaClinica = () => {
 
   const handleOk = async (values) => {
     try {
-      const url = 'https://localhost:7208/ClinicalHistoryFormat';
+      const url = formatoData.id
+        ? `https://localhost:7208/ClinicalHistoryFormat/${formatoData.id}`
+        : 'https://localhost:7208/ClinicalHistoryFormat';
       const method = formatoData.id ? 'PUT' : 'POST';
   
       const requestBody = {
@@ -109,11 +111,26 @@ const FormatoHistoriaClinica = () => {
         );
       }
   
-      const updatedFormatos = await response.json();
-      setFormatos(updatedFormatos);
+      // If editing or creating is successful, reload the list of formats
+      const updatedFormatosResponse = await fetch('https://localhost:7208/ClinicalHistoryFormat', {
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+      });
   
+      if (!updatedFormatosResponse.ok) {
+        throw new Error(`Error al obtener datos: ${updatedFormatosResponse.statusText}`);
+      }
+  
+      const updatedFormatosData = await updatedFormatosResponse.json();
+      setFormatos(updatedFormatosData);
+  
+      // Close the creation modal and reset form fields
+      setIsModalVisible(false);
       form.resetFields();
   
+      // Reset formatoData state for new creations
       if (!formatoData.id) {
         setFormatoData({
           id: '',
@@ -123,15 +140,10 @@ const FormatoHistoriaClinica = () => {
           validFields: [],
         });
       }
-  
-      setIsModalVisible(false);
     } catch (error) {
       console.error(`Error al ${formatoData.id ? 'editar' : 'crear'} el formato:`, error);
     }
   };
-  
-  
-
   const handleCancel = () => {
     setIsModalVisible(false);
     form.resetFields();
@@ -219,9 +231,29 @@ const FormatoHistoriaClinica = () => {
     showModal(editedFormato);
   };
 
-  const handleDelete = (index) => {
-    setFormatos(formatos.filter((formato, i) => i !== index));
+  const handleDelete = async (index) => {
+    try {
+      const formatToDelete = formatos[index];
+  
+      // Send a request to delete the format using the format ID and Keycloak token
+      const deleteResponse = await fetch(`https://localhost:7208/ClinicalHistoryFormat/${formatToDelete.id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+      });
+  
+      if (!deleteResponse.ok) {
+        throw new Error(`Error al eliminar el formato: ${deleteResponse.statusText}`);
+      }
+  
+      // If deletion is successful, update the list of formats
+      setFormatos(formatos.filter((formato, i) => i !== index));
+    } catch (error) {
+      console.error('Error al eliminar el formato:', error);
+    }
   };
+  
 
   const columns = [
     {

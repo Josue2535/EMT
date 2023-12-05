@@ -107,7 +107,8 @@ namespace EMT.Controllers
 
                 // Actualiza las propiedades necesarias
                 existingFormat = ClinicalHistoryFormat.GetFromJson(json);
-
+                existingFormat.Id = id;
+                
                 _clinicalHistoryFormatRepository.Update(existingFormat);
 
                 return NoContent();
