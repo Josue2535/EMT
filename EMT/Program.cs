@@ -95,14 +95,14 @@ builder.Services.AddScoped<IPersonalInformationRepository>(provider =>
 {
     var connectionString = "mongodb://adminEMT:passwordEMT@localhost:27017/";
     var databaseName = "EMT";
-    var collectionName = "Pacient";
+    var collectionName = "PersonalInformation";
     return new PersonalInformationRepository(connectionString, databaseName, collectionName);
 });
 builder.Services.AddScoped<IUserRepository>(provider =>
 {
     var connectionString = "mongodb://adminEMT:passwordEMT@localhost:27017/";
     var databaseName = "EMT";
-    var collectionName = "Pacient";
+    var collectionName = "User";
     return new UserRepository(connectionString, databaseName, collectionName);
 });
 //builder.Services.AddScoped<IPacientRepository, PacientRepository>();

@@ -18,7 +18,9 @@ namespace EMT.Services.Implements.Info
 
         public User GetById(string id)
         {
-            return _collection.Find(user => user.Id.Equals( id)).FirstOrDefault();
+            var objectId = ObjectId.Parse(id);
+            var filter = Builders<User>.Filter.Eq("_id", objectId);
+            return _collection.Find(filter).FirstOrDefault();
         }
         private bool IsDuplicatePersonalInfoId(string personalInfoId)
         {
@@ -27,7 +29,7 @@ namespace EMT.Services.Implements.Info
         }
         public IEnumerable<User> GetAll()
         {
-            return _collection.Find(_ => true).ToList();
+            return _collection.Find(p => true).ToList();
         }
 
         public void Create(User user)

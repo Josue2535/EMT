@@ -77,7 +77,7 @@ namespace EMT.Controllers.Info
                 {
                     return Unauthorized();
                 }
-                var user = EMT.Models.Implements.User.FromJson(userJson);
+                var user = User.FromJson(userJson);
                 _repository.Create(user);
                 return CreatedAtRoute("GetUser", new { id = user.Id }, user);
             }
