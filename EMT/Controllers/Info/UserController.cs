@@ -73,11 +73,11 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("User", "Post"))
+                if (!hasAccess("User", "post"))
                 {
                     return Unauthorized();
                 }
-                var user = User.FromJson(userJson);
+                var user = EMT.Models.Implements.User.FromJson(userJson);
                 _repository.Create(user);
                 return CreatedAtRoute("GetUser", new { id = user.Id }, user);
             }
@@ -94,7 +94,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("User", "Put"))
+                if (!hasAccess("User", "put"))
                 {
                     return Unauthorized();
                 }
@@ -121,7 +121,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("User", "Dalete"))
+                if (!hasAccess("User", "dalete"))
                 {
                     return Unauthorized();
                 }
