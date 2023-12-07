@@ -9,6 +9,7 @@ using EMT.Services.Interface.Info;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
 
 namespace EMT.Controllers.Formats
@@ -82,7 +83,7 @@ namespace EMT.Controllers.Formats
             {
                 if (hasAccess("PacientFormat", "post"))
                 {
-                    if (_repository.GetAll() == null)
+                    if (_repository.GetAll().ToList().IsNullOrEmpty())
                     {
                         var pacientFormat = PacientFormat.GetFromJson(format);
                         _repository.Create(pacientFormat);
