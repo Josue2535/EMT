@@ -1,5 +1,5 @@
 // src/api.js
-const API_URL = 'https://tu-backend-api-url';
+const API_URL = 'https://localhost:7208/api';
 
 export const getUsers = async () => {
   try {
@@ -58,7 +58,7 @@ export const deleteUser = async (userId) => {
 
 export const getPacientes = async () => {
     try {
-      const response = await fetch(`${API_URL}/pacientes`);
+      const response = await fetch(`${API_URL}/pacient`);
       const data = await response.json();
       return data;
     } catch (error) {
@@ -68,7 +68,7 @@ export const getPacientes = async () => {
   
   export const createPaciente = async (pacienteData) => {
     try {
-      const response = await fetch(`${API_URL}/pacientes`, {
+      const response = await fetch(`${API_URL}/pacient`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ export const getPacientes = async () => {
   
   export const updatePaciente = async (pacienteId, pacienteData) => {
     try {
-      const response = await fetch(`${API_URL}/pacientes/${pacienteId}`, {
+      const response = await fetch(`${API_URL}/pacient/${pacienteId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ export const getPacientes = async () => {
   
   export const deletePaciente = async (pacienteId) => {
     try {
-      const response = await fetch(`${API_URL}/pacientes/${pacienteId}`, {
+      const response = await fetch(`${API_URL}/pacient/${pacienteId}`, {
         method: 'DELETE',
       });
       const data = await response.json();

@@ -1,17 +1,33 @@
-// src/views/Paciente.js
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, message } from 'antd';
-import { getPacientes, createPaciente, updatePaciente, deletePaciente } from '../api';
+import { Table, Button, Modal, Form, Input, message, Space, Select } from 'antd';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { useKeycloak } from '@react-keycloak/web';
+import { getPacientes, createPaciente, updatePaciente, deletePaciente, getPacientFormat } from '../api';
 
 const Paciente = () => {
+  const { keycloak } = useKeycloak();
   const [pacientes, setPacientes] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [editingPaciente, setEditingPaciente] = useState(null);
+  const [formatoPaciente, setFormatoPaciente] = useState([]);
 
   const fetchPacientes = async () => {
     try {
-      const data = await getPacientes();
+      const keycloakToken = keycloak.token;
+
+      const response = await fetch('https://localhost:7208/api/Pacient', {
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${keycloakToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al obtener datos: ${response.statusText}`);
+      }
+
+      const data = await response.json();
       setPacientes(data);
     } catch (error) {
       console.error('Error al obtener la lista de pacientes', error);
@@ -19,42 +35,137 @@ const Paciente = () => {
     }
   };
 
+  const fetchPacientFormat = async () => {
+    try {
+      const keycloakToken = keycloak.token;
+
+      const response = await fetch('https://localhost:7208/api/PacientFormat', {
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${keycloakToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al obtener formato de paciente: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setFormatoPaciente(data[0]?.validFields || []);
+    } catch (error) {
+      console.error('Error al obtener el formato de paciente', error);
+      message.error('Error al obtener el formato de paciente');
+    }
+  };
+
   useEffect(() => {
     fetchPacientes();
-  }, []);
+    fetchPacientFormat();
+  }, [keycloak.token]);
 
   const handleCreate = () => {
     setEditingPaciente(null);
     setModalVisible(true);
   };
 
-  const handleEdit = (paciente) => {
+  const handleEdit = async (paciente) => {
     setEditingPaciente(paciente);
-    form.setFieldsValue(paciente);
+    form.setFieldsValue({
+      id: paciente.id,
+      created: paciente.created,
+      role: paciente.role,
+      isEnabled: paciente.isEnabled,
+      ...paciente.fieldsList.reduce((acc, field) => {
+        acc[field.name] = field.value;
+        return acc;
+      }, {}),
+    });
     setModalVisible(true);
   };
 
   const handleDelete = async (pacienteId) => {
-    try {
-      await deletePaciente(pacienteId);
-      message.success('Paciente eliminado exitosamente');
-      fetchPacientes();
-    } catch (error) {
-      console.error('Error al eliminar el paciente', error);
-      message.error('Error al eliminar el paciente');
-    }
+    Modal.confirm({
+      title: 'Confirmar Eliminación',
+      content: '¿Estás seguro de que deseas eliminar este paciente?',
+      onOk: async () => {
+        try {
+          const keycloakToken = keycloak.token;
+
+          const response = await fetch(`https://localhost:7208/api/Pacient/${pacienteId}`, {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${keycloakToken}`,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error al eliminar el paciente: ${response.statusText}`);
+          }
+
+          message.success('Paciente eliminado exitosamente');
+          fetchPacientes(); // Recargar la lista de pacientes
+        } catch (error) {
+          console.error('Error al eliminar el paciente', error);
+          message.error('Error al eliminar el paciente');
+        }
+      },
+      onCancel: () => {
+        console.log('Cancelado');
+      },
+    });
   };
 
   const handleModalOk = async () => {
     try {
       const values = await form.validateFields();
+      const fieldsList = formatoPaciente.map((field) => ({
+        Name: field.fieldName,
+        Value: values[field.fieldName],
+      }));
+
+      const pacienteData = {
+        Role: values.role,
+        FieldsList: fieldsList,
+        PersonalInformationId: "someId",  // Cambia "someId" según sea necesario
+        IsEnabled: values.isEnabled,
+      };
+
       if (editingPaciente) {
-        await updatePaciente(editingPaciente.id, values);
+        const keycloakToken = keycloak.token;
+
+        const response = await fetch(`https://localhost:7208/api/Pacient/${editingPaciente.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${keycloakToken}`,
+          },
+          body: JSON.stringify(pacienteData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error al actualizar el paciente: ${response.statusText}`);
+        }
+
         message.success('Paciente actualizado exitosamente');
       } else {
-        await createPaciente(values);
+        const keycloakToken = keycloak.token;
+
+        const response = await fetch('https://localhost:7208/api/Pacient', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${keycloakToken}`,
+          },
+          body: JSON.stringify(pacienteData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error al crear el paciente: ${response.statusText}`);
+        }
+
         message.success('Paciente creado exitosamente');
       }
+
       setModalVisible(false);
       fetchPacientes();
     } catch (error) {
@@ -63,6 +174,7 @@ const Paciente = () => {
     }
   };
 
+
   const handleModalCancel = () => {
     setModalVisible(false);
     form.resetFields();
@@ -70,21 +182,17 @@ const Paciente = () => {
 
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id' },
-    { title: 'Nombre', dataIndex: 'nombre', key: 'nombre' },
-    { title: 'Apellido', dataIndex: 'apellido', key: 'apellido' },
+    { title: 'Fecha de Creación', dataIndex: 'created', key: 'created' },
+    { title: 'Rol', dataIndex: 'role', key: 'role' },
+    { title: 'Habilitado', dataIndex: 'isEnabled', key: 'isEnabled', render: (isEnabled) => isEnabled ? 'Sí' : 'No' },
     {
       title: 'Acciones',
-      dataIndex: 'acciones',
       key: 'acciones',
       render: (_, record) => (
-        <>
-          <Button type="primary" size="small" onClick={() => handleEdit(record)}>
-            Editar
-          </Button>
-          <Button type="danger" size="small" onClick={() => handleDelete(record.id)} style={{ marginLeft: '8px' }}>
-            Eliminar
-          </Button>
-        </>
+        <Space>
+          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+          <Button icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)} />
+        </Space>
       ),
     },
   ];
@@ -104,13 +212,47 @@ const Paciente = () => {
         onCancel={handleModalCancel}
       >
         <Form form={form} layout="vertical" name="paciente_form">
-          <Form.Item name="nombre" label="Nombre" rules={[{ required: true, message: 'Por favor ingrese el nombre' }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="apellido" label="Apellido" rules={[{ required: true, message: 'Por favor ingrese el apellido' }]}>
-            <Input />
-          </Form.Item>
-          {/* Agrega más campos según tus necesidades */}
+          {formatoPaciente.length > 0 && (
+            <>
+              {!editingPaciente && (
+                <>
+                  <Form.Item name="role" label="Rol">
+                    <Input />
+                  </Form.Item>
+                  <Form.Item name="isEnabled" label="Habilitado">
+                    <Select>
+                      <Select.Option value={true}>Sí</Select.Option>
+                      <Select.Option value={false}>No</Select.Option>
+                    </Select>
+                  </Form.Item>
+                </>
+              )}
+              {formatoPaciente.map((field) => (
+                <Form.Item
+                  key={field.fieldName}
+                  name={field.fieldName}
+                  label={field.fieldName}
+                  rules={[{ required: !field.isOptional, message: `Por favor ingrese ${field.fieldName}` }]}
+                >
+                  {field.fieldOptions.length > 0 ? (
+                    <Select>
+                      {field.fieldOptions.map((option) => (
+                        <Select.Option key={option} value={option}>
+                          {option}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  ) : field.fieldType === 'String' ? (
+                    <Input />
+                  ) : field.fieldType === 'Integer' ? (
+                    <Input type="number" />
+                  ) : field.fieldType === 'LocalDate' ? (
+                    <Input type="date" />
+                  ) : null}
+                </Form.Item>
+              ))}
+            </>
+          )}
         </Form>
       </Modal>
     </div>
