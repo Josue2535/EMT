@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.IdentityModel.Tokens;
+using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -55,6 +57,7 @@ namespace EMT.Models.Formats
         }
         private static object ConvertJsonValue(JsonNode jsonNode,String name)
         {
+
             if (jsonNode is JsonObject)
             {
                 // Si es un objeto JSON, devuelve el objeto directamente
@@ -66,15 +69,33 @@ namespace EMT.Models.Formats
 
                 foreach (var item in (JsonArray)jsonNode)
                 {
+                    if (!item["fields"].AsArray().IsNullOrEmpty())
+                    {
+                        List<Field> fields = new List<Field>();
+                        var fieldsJsonArray = item["fields"].AsArray();
+                        foreach (var fieldJson in fieldsJsonArray)
+                        {
+                            // Procesa cada campo y crea un objeto Field
+                            Field field = Field.FromJson((JsonObject)fieldJson);
+                            fields.Add(field);
+                        }
+                        values.Add(fields);
+                    }
+                        else if (item is JsonObject fieldObject)
+                    {
+                        
+                            values.Add(ConvertJsonValue(fieldObject));
+                        
+
+                        // Recursivamente convierte los objetos de la lista
+                        
+                    }
                     if (item is JsonValue jsonValue)
                     {
                         // Especifica el tipo al extraer el valor
-                        values.Add(jsonValue.GetValue<object>());
+                        values.Add(jsonValue.GetValue<string>());
                     }
-                    else if (item is JsonObject obj)
-                    {
-                        values.Add(ConvertJsonValue(obj));
-                    }
+                    
                     // Puedes agregar lógica adicional aquí para otros tipos si es necesario
                 }
 
@@ -131,7 +152,7 @@ namespace EMT.Models.Formats
                 else
                 {
                     // Si no es una cadena base64, devuelve el valor directamente
-                    return jsonStringValue.GetValue<object>();
+                    return jsonStringValue.GetValue<string>();
                 }
             }
             else
@@ -198,6 +219,12 @@ namespace EMT.Models.Formats
                             // Por ejemplo, podrías guardar la imagen como byte[] en tu modelo
                             byte[] imageBytes = Convert.FromBase64String(field.Value?.ToString());
                             field.Value = imageBytes;
+                            break;
+                        case "Attachment":
+                            // Aquí puedes manejar la lógica para el tipo de campo "Image"
+                            // Puedes guardar la imagen, validar el formato, etc.
+                            // Por ejemplo, podrías guardar la imagen como byte[] en tu modelo
+                            
                             break;
 
                         // Puedes agregar más casos según tus necesidades

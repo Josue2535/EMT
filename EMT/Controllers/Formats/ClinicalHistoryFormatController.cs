@@ -65,7 +65,7 @@ namespace EMT.Controllers
             
         }
 
-        [HttpPost(Name = "CreateClinicalHistoryFormat")]
+        [HttpPost]
         public IActionResult Post([FromBody] JsonObject json)
         {
             try

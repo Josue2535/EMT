@@ -35,7 +35,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("ClinicalHistory", "Get"))
+                if (!hasAccess("ClinicalHistory", "get"))
                 {
                     return Unauthorized();
                 }
@@ -55,7 +55,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("ClinicalHistory", "Get"))
+                if (!hasAccess("ClinicalHistory", "get"))
                 {
                     return Unauthorized();
                 }
@@ -79,7 +79,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("ClinicalHistory", "Get"))
+                if (!hasAccess("ClinicalHistory", "get"))
                 {
                     return Unauthorized();
                 }
@@ -106,7 +106,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("ClinicalHistory", "Post"))
+                if (!hasAccess("ClinicalHistory", "post"))
                 {
                     return Unauthorized();
                 }
@@ -168,7 +168,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("ClinicalHistory", "Post"))
+                if (!hasAccess("ClinicalHistory", "post"))
                 {
                     return Unauthorized();
                 }
@@ -183,7 +183,7 @@ namespace EMT.Controllers.Info
                     return Ok();
                 }
                 
-                return NoContent();
+                return BadRequest("Error en el formato");
             }
             catch (Exception ex)
             {
@@ -198,7 +198,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("ClinicalHistory", "Delete"))
+                if (!hasAccess("ClinicalHistory", "delete"))
                 {
                     return Unauthorized();
                 }

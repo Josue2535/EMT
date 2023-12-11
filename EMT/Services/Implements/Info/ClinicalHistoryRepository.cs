@@ -23,7 +23,8 @@ namespace EMT.Services.Implements.Info
 
         public ClinicalHistory GetById(string id)
         {
-            return _collection.Find(ch => ch.Id == id).FirstOrDefault();
+
+            return _collection.Find(f => f.Id.Equals(id)).FirstOrDefault();
         }
 
         public IEnumerable<ClinicalHistory> GetAll()
@@ -50,25 +51,17 @@ namespace EMT.Services.Implements.Info
             }
         }
 
-        public void Update(string id, ClinicalHistory clinicalHistory)
+        public void Update( ClinicalHistory clinicalHistory)
         {
-            _collection.ReplaceOne(ch => ch.Id == id, clinicalHistory);
+            _collection.ReplaceOne(f => f.Id.Equals(clinicalHistory.Id), clinicalHistory);
         }
 
         public void Delete(string id)
         {
-            _collection.DeleteOne(ch => ch.Id == id);
+            _collection.DeleteOne(f => f.Id.Equals(id));
         }
 
-        public void AddAttachet(string json)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update(ClinicalHistory entity)
-        {
-            throw new NotImplementedException();
-        }
+        
 
         public ClinicalHistory GetByUserId(string userId)
         {
