@@ -103,7 +103,7 @@ const FormatoInformacionPersonal = () => {
         );
       }
   
-      // If editing or creating is successful, reload the list of formats
+      // Si la edición o creación es exitosa, recargamos la lista de formatos
       const updatedFormatosResponse = await fetch('https://localhost:7208/api/PersonalInformationFormat', {
         headers: {
           Accept: 'application/json',
@@ -118,11 +118,11 @@ const FormatoInformacionPersonal = () => {
       const updatedFormatosData = await updatedFormatosResponse.json();
       setFormatos(updatedFormatosData);
   
-      // Close the creation modal and reset form fields
+      // Cerramos el modal de creación y restablecemos los campos del formulario
       setIsModalVisible(false);
       form.resetFields();
   
-      // Reset formatoData state for new creations
+      // Restablecemos el estado formatoData para nuevas creaciones
       if (!formatoData.id) {
         setFormatoData({
           id: '',
@@ -134,6 +134,7 @@ const FormatoInformacionPersonal = () => {
       console.error(`Error al ${formatoData.id ? 'editar' : 'crear'} el formato:`, error);
     }
   };
+  
   const handleCancel = () => {
     setIsModalVisible(false);
     form.resetFields();
@@ -146,7 +147,7 @@ const FormatoInformacionPersonal = () => {
       });
     }
   };
-
+  
   const handleAddField = () => {
     setFormatoData((prevData) => ({
       ...prevData,
@@ -160,7 +161,7 @@ const FormatoInformacionPersonal = () => {
       fieldOptions: [''],
     });
   };
-
+  
   const handleChangeField = (e, index, field) => {
     const { value } = e.target;
     const updatedFields = [...formatoData.validFields];
@@ -170,16 +171,22 @@ const FormatoInformacionPersonal = () => {
       validFields: updatedFields,
     }));
   };
-
+  
   const handleAddOption = (index) => {
-    const updatedFields = [...formatoData.validFields];
-    updatedFields[index].fieldOptions.push('');
     setFormatoData((prevData) => ({
       ...prevData,
-      validFields: updatedFields,
+      validFields: [
+        ...prevData.validFields,
+        {
+          fieldType: 'String', // Asignar fieldType 'String' para el nuevo campo de texto
+          fieldName: '',
+          isOptional: false,
+          fieldOptions: [''],
+        },
+      ],
     }));
   };
-
+  
   const handleChangeOption = (fieldIndex, optionIndex, value) => {
     const updatedFields = [...formatoData.validFields];
     updatedFields[fieldIndex].fieldOptions[optionIndex] = value;
@@ -188,7 +195,7 @@ const FormatoInformacionPersonal = () => {
       validFields: updatedFields,
     }));
   };
-
+  
   const handleDeleteOption = (fieldIndex, optionIndex) => {
     const updatedFields = [...formatoData.validFields];
     updatedFields[fieldIndex].fieldOptions.splice(optionIndex, 1);
@@ -197,7 +204,7 @@ const FormatoInformacionPersonal = () => {
       validFields: updatedFields,
     }));
   };
-
+  
   const handleDeleteField = (index) => {
     const updatedFields = [...formatoData.validFields];
     updatedFields.splice(index, 1);
@@ -206,7 +213,7 @@ const FormatoInformacionPersonal = () => {
       validFields: updatedFields,
     }));
   };
-
+  
   const handleEdit = (index) => {
     const editedFormato = formatos[index];
     setFormatoData({
@@ -216,38 +223,37 @@ const FormatoInformacionPersonal = () => {
     });
     showModal(editedFormato);
   };
-
+  
   const handleDelete = async (index) => {
     try {
       const formatToDelete = formatos[index];
-
-      // Show confirmation dialog before deletion
+  
+      // Mostrar un cuadro de diálogo de confirmación antes de la eliminación
       const confirmDelete = window.confirm('¿Estás seguro de que deseas eliminar este formato?');
-
+  
       if (!confirmDelete) {
-        return; // If the user cancels the deletion, do nothing
+        return; // Si el usuario cancela la eliminación, no hacer nada
       }
-
-      // Send a request to delete the format using the format ID and Keycloak token
+  
+      // Enviar una solicitud para eliminar el formato usando el ID del formato y el token de Keycloak
       const deleteResponse = await fetch(`https://localhost:7208/api/PersonalInformationFormat/${formatToDelete.id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${keycloak.token}`,
         },
       });
-
+  
       if (!deleteResponse.ok) {
         throw new Error(`Error al eliminar el formato: ${deleteResponse.statusText}`);
       }
-
-      // If deletion is successful, update the list of formats
+  
+      // Si la eliminación es exitosa, actualizar la lista de formatos
       setFormatos(formatos.filter((formato, i) => i !== index));
     } catch (error) {
       console.error('Error al eliminar el formato:', error);
     }
   };
   
-
   const columns = [
     {
       title: 'Fecha de Creación',
@@ -265,7 +271,7 @@ const FormatoInformacionPersonal = () => {
       ),
     },
   ];
-
+  
   return (
     <div>
       <h2>Formato de Información Personal</h2>
@@ -276,9 +282,9 @@ const FormatoInformacionPersonal = () => {
       >
         Crear
       </Button>
-
+  
       <Table dataSource={formatos} columns={columns} rowKey={(record, index) => index} />
-
+  
       <Modal
         title="Crear/Editar Formato"
         visible={isModalVisible}
@@ -315,25 +321,36 @@ const FormatoInformacionPersonal = () => {
                 />
               </Form.Item>
               <Form.Item label="Opciones" name="fieldOptions">
-                {field.fieldOptions.map((option, optionIndex) => (
-                  <div key={optionIndex}>
-                    <Input
-                      type="text"
-                      value={option}
-                      onChange={(e) => handleChangeOption(index, optionIndex, e.target.value)}
-                    />
-                    <Button onClick={() => handleDeleteOption(index, optionIndex)}>
-                      Eliminar Opción
-                    </Button>
-                  </div>
-                ))}
-                <Button onClick={() => handleAddOption(index)}>Añadir Opción</Button>
+                {field.fieldType === 'String' ? (
+                  // Si el tipo de campo es 'String', renderizar un campo de texto en lugar de opciones
+                  <Input
+                    value={field.fieldOptions[0]} // Usar fieldOptions[0] para 'String'
+                    onChange={(e) => handleChangeOption(index, 0, e.target.value)}
+                  />
+                ) : (
+                  // Renderizar opciones para otros tipos de campo
+                  <>
+                    {field.fieldOptions.map((option, optionIndex) => (
+                      <div key={optionIndex}>
+                        <Input
+                          type="text"
+                          value={option}
+                          onChange={(e) => handleChangeOption(index, optionIndex, e.target.value)}
+                        />
+                        <Button onClick={() => handleDeleteOption(index, optionIndex)}>
+                          Eliminar Opción
+                        </Button>
+                      </div>
+                    ))}
+                    <Button onClick={() => handleAddOption(index)}>Añadir Opción</Button>
+                  </>
+                )}
               </Form.Item>
               <Button onClick={() => handleDeleteField(index)}>Eliminar Campo</Button>
             </div>
           ))}
           <Button onClick={handleAddField}>Añadir Campo</Button>
-
+  
           <Form.Item>
             <Button type="primary" htmlType="submit">
               Guardar
@@ -347,6 +364,5 @@ const FormatoInformacionPersonal = () => {
     </div>
   );
 };
-
 
 export default FormatoInformacionPersonal;

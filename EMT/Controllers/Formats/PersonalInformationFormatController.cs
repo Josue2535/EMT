@@ -121,9 +121,10 @@ namespace EMT.Controllers.Formats
             }
 
             // Actualiza las propiedades necesarias
-            existingFormat = PersonalInformationFormat.GetFromJson(json);
+            var personalInformation = PersonalInformationFormat.GetFromJson(json);
+            personalInformation.Id = existingFormat.Id;
 
-            _repository.Update(existingFormat);
+            _repository.Update(personalInformation);
 
             return NoContent();
         }

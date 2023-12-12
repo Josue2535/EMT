@@ -51,7 +51,10 @@ namespace EMT.Services.Implements.Formats
             throw new NotImplementedException();
         }
 
-        
+        public PersonalInformationFormat GetFirst()
+        {
+            return _collection.Find(p => true).FirstOrDefault();
+        }
     }
 
 }

@@ -8,6 +8,8 @@ using System.Text.Json.Nodes;
 using EMT.Services.Implements.Formats;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
+using EMT.Services.Interface.Formats;
+using Microsoft.IdentityModel.Tokens;
 
 namespace EMT.Controllers.Info
 {
@@ -18,10 +20,12 @@ namespace EMT.Controllers.Info
     {
         private readonly IPersonalInformationRepository _repository;
         private readonly IRoleRepository _RoleRepository;
-        public PersonalInformationController(IPersonalInformationRepository repository, IRoleRepository roleRepository)
+        private readonly IPersonalInformationFormatRepository _format;
+        public PersonalInformationController(IPersonalInformationRepository repository, IRoleRepository roleRepository, IPersonalInformationFormatRepository format)
         {
             _repository = repository;
             _RoleRepository = roleRepository;
+            _format = format;
         }
 
         // GET: api/PersonalInformation
@@ -30,7 +34,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("PersonalInformation", "Get"))
+                if (!hasAccess("PersonalInformation", "get"))
                 {
                     return Unauthorized();
                 }
@@ -52,7 +56,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("PersonalInformation", "Get"))
+                if (!hasAccess("PersonalInformation", "get"))
                 {
                     return Unauthorized();
                 }
@@ -76,13 +80,19 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("PersonalInformation", "Post"))
+                if (!hasAccess("PersonalInformation", "post"))
                 {
                     return Unauthorized();
                 }
                 var personalInformation = PersonalInformation.FromJson(personalInformationJson);
-                _repository.Create(personalInformation);
-                return CreatedAtRoute("GetPersonalInformation", new { id = personalInformation.Id }, personalInformation);
+                if (personalInformation.IsValid(_format.GetFirst()) && !personalInformation.FieldList.IsNullOrEmpty()
+                    )
+                {
+                    _repository.Create(personalInformation);
+                    return CreatedAtRoute("GetPersonalInformation", new { id = personalInformation.Id }, personalInformation);
+                }
+                
+                return BadRequest("JSON INVALIDO");
             }
             catch (Exception ex)
             {
@@ -97,7 +107,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("PersonalInformation", "Put"))
+                if (!hasAccess("PersonalInformation", "put"))
                 {
                     return Unauthorized();
                 }
@@ -124,7 +134,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("PersonalInformation", "Delete"))
+                if (!hasAccess("PersonalInformation", "delete"))
                 {
                     return Unauthorized();
                 }

@@ -1,4 +1,5 @@
-﻿using EMT.Models.Implements;
+﻿using EMT.Models.Formats;
+using EMT.Models.Implements;
 using EMT.Services.Interface.Formats;
 using EMT.Services.Interface.Info;
 using MongoDB.Bson;
@@ -43,7 +44,14 @@ namespace EMT.Services.Implements.Info
         {
             _collection.DeleteOne(p => p.Id.Equals(id));
         }
-
+        public IEnumerable<PersonalInformation> SearchByField(string fieldName, string value)
+        {
+            // Implementación de la búsqueda por campo específico
+            var filter = new Field();
+            filter.Name = fieldName;
+            filter.Value = value;
+            return _collection.Find(p => p.FieldList.Contains(filter)).ToList();
+        }
     }
 
 }

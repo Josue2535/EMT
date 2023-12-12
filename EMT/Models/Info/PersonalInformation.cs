@@ -62,5 +62,68 @@ namespace EMT.Models.Implements
                 return null;
             }
         }
+        public bool IsValid(PersonalInformationFormat format)
+        {
+            try
+            {
+                foreach (var field in FieldList)
+                {
+                    var validField = format.ValidFields.FirstOrDefault(vf => vf.FieldName == field.Name);
+
+                    if (validField == null)
+                    {
+                        Console.WriteLine($"Campo no válido: {field.Name}");
+                        return false;
+                    }
+
+                    if (!IsValidFieldType(field, validField))
+                    {
+                        return false;
+                    }
+
+                    if (!IsValidFieldValue(field, validField))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al validar el formato del paciente: {ex.Message}");
+                return false;
+            }
+        }
+
+        private bool IsValidFieldType(Field field, FieldsFormat validField)
+        {
+            var ret = field.IsValidFieldType(field, validField);
+            return ret;
+        }
+
+        private bool IsValidFieldValue(Field field, FieldsFormat validField)
+        {
+            try
+            {
+                var fieldValueString = field.Value?.ToString();
+
+                if (!string.IsNullOrEmpty(fieldValueString) && validField.FieldOptions != null && validField.FieldOptions.Any())
+                {
+                    if (!validField.FieldOptions.Contains(fieldValueString))
+                    {
+                        Console.WriteLine($"Valor no válido para {field.Name}. Se esperaba uno de {string.Join(", ", validField.FieldOptions)} pero se encontró {fieldValueString}");
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al validar el valor del campo para {field.Name}: {ex.Message}");
+                return false;
+            }
+        }
     }
 }

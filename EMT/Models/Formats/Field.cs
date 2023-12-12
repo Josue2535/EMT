@@ -103,7 +103,7 @@ namespace EMT.Models.Formats
             }
             else if (jsonNode is JsonValue jsonStringValue)
             {
-                return jsonStringValue.GetValue<object>();
+                return jsonStringValue.GetValue<string>();
             }
             else
             {

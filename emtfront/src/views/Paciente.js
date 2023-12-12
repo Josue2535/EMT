@@ -244,7 +244,7 @@ const Paciente = () => {
                     </Select>
                   ) : field.fieldType === 'String' ? (
                     <Input />
-                  ) : field.fieldType === 'Integer' ? (
+                  ) : field.fieldType === 'Integer' ||  field.fieldType === 'Number'? (
                     <Input type="number" />
                   ) : field.fieldType === 'LocalDate' ? (
                     <Input type="date" />
