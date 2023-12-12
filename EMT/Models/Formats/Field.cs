@@ -69,28 +69,28 @@ namespace EMT.Models.Formats
 
                 foreach (var item in (JsonArray)jsonNode)
                 {
-                    if (!item["fields"].AsArray().IsNullOrEmpty())
+                    if (item is JsonObject jsonObject)
                     {
-                        List<Field> fields = new List<Field>();
-                        var fieldsJsonArray = item["fields"].AsArray();
-                        foreach (var fieldJson in fieldsJsonArray)
+                        if (jsonObject.ContainsKey("fields") && !jsonObject["fields"].AsArray().IsNullOrEmpty())
                         {
-                            // Procesa cada campo y crea un objeto Field
-                            Field field = Field.FromJson((JsonObject)fieldJson);
-                            fields.Add(field);
+                            List<Field> fields = new List<Field>();
+                            var fieldsJsonArray = jsonObject["fields"].AsArray();
+                            foreach (var fieldJson in fieldsJsonArray)
+                            {
+                                // Process each field and create a Field object
+                                Field field = Field.FromJson((JsonObject)fieldJson);
+                                fields.Add(field);
+                            }
+                            values.Add(fields);
                         }
-                        values.Add(fields);
-                    }
-                        else if (item is JsonObject fieldObject)
-                    {
-                        
-                            values.Add(ConvertJsonValue(fieldObject));
-                        
+                        else
+                        {
+                            values.Add(ConvertJsonValue(jsonObject));
 
-                        // Recursivamente convierte los objetos de la lista
-                        
+                            // Recursively convert objects in the list if needed
+                        }
                     }
-                    if (item is JsonValue jsonValue)
+                    else if (item is JsonValue jsonValue)
                     {
                         // Especifica el tipo al extraer el valor
                         values.Add(jsonValue.GetValue<string>());
