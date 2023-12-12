@@ -70,6 +70,18 @@ namespace EMT.Models.Formats
 
                 foreach (var item in (JsonArray)jsonNode)
                 {
+                    if (item is JsonArray) {
+                        List<object> fields = new List<object>();
+                        foreach (var f in (JsonArray)item) {
+                            List<Object> fieldL = new List<object>();
+                            var nameF = ConvertJsonValue(f["Name"], "");
+                            var valueF = ConvertJsonValue(f["Value"], "");
+                            fieldL.Add(nameF);
+                            fieldL.Add(valueF);
+                            fields.Add(fieldL);
+                        }
+                        values.Add(fields);
+                    }
                     if (item is JsonObject jsonObject)
                     {
                         if (jsonObject.ContainsKey("fields") && !jsonObject["fields"].AsArray().IsNullOrEmpty())

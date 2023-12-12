@@ -6,7 +6,6 @@ using System.Text.Json.Serialization;
 
 namespace EMT.Models.Formats
 {
-    [JsonConverter(typeof(Attached))]
     public class Attached
     {
         public string id { get; set; }
