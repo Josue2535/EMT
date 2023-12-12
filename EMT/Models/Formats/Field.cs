@@ -1,5 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
@@ -55,7 +56,7 @@ namespace EMT.Models.Formats
                 return null;
             }
         }
-        private static object ConvertJsonValue(JsonNode jsonNode,String name)
+        private static object ConvertJsonValue(JsonNode jsonNode, String name)
         {
 
             if (jsonNode is JsonObject)
@@ -73,13 +74,16 @@ namespace EMT.Models.Formats
                     {
                         if (jsonObject.ContainsKey("fields") && !jsonObject["fields"].AsArray().IsNullOrEmpty())
                         {
-                            List<Field> fields = new List<Field>();
+                            List<object> fields = new List<object>();
                             var fieldsJsonArray = jsonObject["fields"].AsArray();
                             foreach (var fieldJson in fieldsJsonArray)
                             {
-                                // Process each field and create a Field object
-                                Field field = Field.FromJson((JsonObject)fieldJson);
-                                fields.Add(field);
+                                List<Object> fieldL = new List<object>();
+                                var nameF = ConvertJsonValue(fieldJson["Name"], "");
+                                var valueF = ConvertJsonValue(fieldJson["Value"], "");
+                                fieldL.Add(nameF);
+                                fieldL.Add(valueF);
+                                fields.Add(fieldL);
                             }
                             values.Add(fields);
                         }
@@ -95,7 +99,7 @@ namespace EMT.Models.Formats
                         // Especifica el tipo al extraer el valor
                         values.Add(jsonValue.GetValue<string>());
                     }
-                    
+
                     // Puedes agregar lógica adicional aquí para otros tipos si es necesario
                 }
 
@@ -103,6 +107,12 @@ namespace EMT.Models.Formats
             }
             else if (jsonNode is JsonValue jsonStringValue)
             {
+                if (int.TryParse(jsonStringValue.ToString(), out int numericValue))
+                {
+                    return numericValue;
+                }
+
+                // Si el parsing como número no es exitoso, devolver el valor como cadena
                 return jsonStringValue.GetValue<string>();
             }
             else
@@ -224,7 +234,7 @@ namespace EMT.Models.Formats
                             // Aquí puedes manejar la lógica para el tipo de campo "Image"
                             // Puedes guardar la imagen, validar el formato, etc.
                             // Por ejemplo, podrías guardar la imagen como byte[] en tu modelo
-                            
+
                             break;
 
                         // Puedes agregar más casos según tus necesidades

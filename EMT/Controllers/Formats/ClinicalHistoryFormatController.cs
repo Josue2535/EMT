@@ -34,6 +34,21 @@ namespace EMT.Controllers
             if (hasAccess("ClinicHistoryFormat", "get"))
             {
                 // Implementa la lógica para obtener todos los formatos
+                var formats = _clinicalHistoryFormatRepository.GetAll();
+                return formats;
+            }
+            else
+            {
+                return null;
+
+            }
+        }
+        [HttpGet("GetByRole")]
+        public IEnumerable<ClinicalHistoryFormat> GetByRole()
+        {
+            if (hasAccess("ClinicHistoryFormat", "get"))
+            {
+                // Implementa la lógica para obtener todos los formatos
                 var formats = _clinicalHistoryFormatRepository.GetAll(GetFormats());
                 return formats;
             }
