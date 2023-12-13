@@ -83,7 +83,7 @@ namespace EMT.Controllers.Info
                 {
                     return Unauthorized();
                 }
-                var clinicalHistories = _repository.GetByUserId(id);
+                var clinicalHistories = _repository.GetByPacientId(id);
 
                 if (clinicalHistories == null)
                 {
@@ -177,7 +177,7 @@ namespace EMT.Controllers.Info
                 var format = _clinicalHistoryFormatRepository.GetByName(attached.NameFormat);
                
                 if (attached.IsValid(format)) {
-                    var ch = _repository.GetById(id);
+                    var ch = _repository.GetByPacientId(id);
                     ch.Attachments.Add(attached);
                     _repository.Update(ch);
                     return Ok();

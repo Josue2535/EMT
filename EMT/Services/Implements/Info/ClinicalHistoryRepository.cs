@@ -63,10 +63,12 @@ namespace EMT.Services.Implements.Info
 
         
 
-        public ClinicalHistory GetByUserId(string userId)
+        public ClinicalHistory GetByPacientId(string userId)
         {
             return _collection.Find(ch => ch.PatientId == userId).FirstOrDefault();
         }
+
+        
     }
 
 }
