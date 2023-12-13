@@ -86,10 +86,19 @@ namespace EMT.Services.Implements.Info
         public IEnumerable<Pacient> SearchByField(string fieldName, string value)
         {
             // Implementación de la búsqueda por campo específico
-            var filter = new Field();
-            filter.Name = fieldName;
-            filter.Value = value;   
-            return _collection.Find(p => p.FieldsList.Contains(filter)).ToList();
+            var isNumeric = double.TryParse(value, out double numericValue);
+
+            if (isNumeric)
+            {
+                // Buscar por campo numérico
+                return _collection.Find(p => p.FieldsList.Any(f => f.Name == fieldName && (f.Value.Equals(numericValue)|| f.Value.Equals(value)))).ToList();
+            }
+            else
+            {
+                // Buscar por campo de texto
+                return _collection.Find(p => p.FieldsList.Any(f => f.Name == fieldName && f.Value.Equals(value) )).ToList();
+            }
         }
+
     }
 }
