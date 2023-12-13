@@ -7,10 +7,9 @@ const HistoriaClinica = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [editingHistoria, setEditingHistoria] = useState(null);
-  const [formFilter] = Form.useForm();
-  const { keycloak } = useKeycloak();
   const [formatos, setFormatos] = useState([]);
   const [selectedField, setSelectedField] = useState(null);
+  const { keycloak } = useKeycloak();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,10 +76,66 @@ const HistoriaClinica = () => {
     setSelectedField(selectedField);
   };
 
+  const getFieldValueInput = () => {
+    if (!selectedField) {
+      return <Input />;
+    }
+
+    if (selectedField.fieldOptions.length > 0) {
+      return (
+        <Select placeholder={`Seleccione ${selectedField.fieldName}`}>
+          {selectedField.fieldOptions.map((option) => (
+            <Select.Option key={option} value={option}>
+              {option}
+            </Select.Option>
+          ))}
+        </Select>
+      );
+    }
+
+    return <Input placeholder={`Ingrese ${selectedField.fieldName}`} />;
+  };
+
+  const handleSearch = async () => {
+    try {
+      const searchValue = form.getFieldValue('Value');
+      const fieldName = selectedField ? selectedField.fieldName : 'Name';
+  
+      const url = `https://localhost:7208/api/Pacient/GetByField`;
+  
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          Name: fieldName,
+          value: searchValue, // Cambiado a 'value' en lugar de 'Valor'
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Error al realizar la búsqueda: ${response.statusText}`);
+      }
+  
+      const historiasData = await response.json();
+      setHistoriasClinicas(historiasData);
+  
+      console.log('Resultado de la búsqueda:', historiasData);
+    } catch (error) {
+      console.error('Error al realizar la búsqueda:', error);
+    }
+  };
+  
+  
+  
+  
+
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id' },
-    { title: 'Fecha de Creación', dataIndex: 'creationDate', key: 'creationDate' },
-    { title: 'Descripción', dataIndex: 'description', key: 'description' },
+    { title: 'Fecha de Creación', dataIndex: 'created', key: 'created' },
+    { title: 'Descripción', dataIndex: 'role', key: 'role' },
     {
       title: 'Acciones',
       dataIndex: 'acciones',
@@ -102,7 +157,7 @@ const HistoriaClinica = () => {
     <div>
       <h2>Historia Clínica</h2>
 
-      <Form form={formFilter} layout="inline">
+      <Form layout="inline">
         <Form.Item label="Filtrar por">
           <Select style={{ width: 200 }} placeholder="Seleccione un campo" onChange={handleFieldChange}>
             {formatos.length > 0 &&
@@ -113,24 +168,13 @@ const HistoriaClinica = () => {
               ))}
           </Select>
         </Form.Item>
-        {selectedField && selectedField.fieldOptions.length > 0 && (
-          <Form.Item label="Valor">
-            <Select placeholder={`Seleccione ${selectedField.fieldName}`}>
-              {selectedField.fieldOptions.map((option) => (
-                <Select.Option key={option} value={option}>
-                  {option}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-        )}
-        {!selectedField && (
-          <Form.Item label="Valor">
-            <Input />
-          </Form.Item>
-        )}
+        <Form.Item label="Valor" name="Value">
+          {getFieldValueInput()}
+        </Form.Item>
         <Form.Item>
-          <Button type="primary">Buscar</Button>
+          <Button type="primary" onClick={handleSearch}>
+            Buscar
+          </Button>
         </Form.Item>
       </Form>
 

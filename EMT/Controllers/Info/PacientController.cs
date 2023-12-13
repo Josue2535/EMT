@@ -94,7 +94,7 @@ namespace EMT.Controllers.Info
                 return StatusCode(500, "Internal Server Error");
             }
         }
-        [HttpGet("GetByField")]
+        [HttpPost("GetByField")]
         public IActionResult GetByField([FromBody] JsonObject filter)
         {
             try
