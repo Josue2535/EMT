@@ -1,11 +1,40 @@
-import React, { useState } from 'react';
-import { Button, Table, Modal, Form, Input,  message } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Button, Table, Modal, Form, Input, message, Select } from 'antd';
+import { useKeycloak } from '@react-keycloak/web';
 
 const HistoriaClinica = () => {
   const [historiasClinicas, setHistoriasClinicas] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [editingHistoria, setEditingHistoria] = useState(null);
+  const [formFilter] = Form.useForm();
+  const { keycloak } = useKeycloak();
+  const [formatos, setFormatos] = useState([]);
+  const [selectedField, setSelectedField] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('https://localhost:7208/api/PacientFormat', {
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${keycloak.token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error al obtener datos: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setFormatos(data);
+      } catch (error) {
+        console.error('Error al obtener datos:', error);
+      }
+    };
+
+    fetchData();
+  }, [keycloak.token]);
 
   const handleCreate = () => {
     setEditingHistoria(null);
@@ -26,13 +55,11 @@ const HistoriaClinica = () => {
   const handleModalOk = () => {
     form.validateFields().then((values) => {
       if (editingHistoria) {
-        // Editar Historia Clínica existente
         setHistoriasClinicas((prevHistorias) =>
           prevHistorias.map((historia) => (historia.id === editingHistoria.id ? { ...historia, ...values } : historia))
         );
         message.success('Historia Clínica actualizada exitosamente');
       } else {
-        // Crear nueva Historia Clínica
         setHistoriasClinicas((prevHistorias) => [...prevHistorias, { id: Date.now().toString(), ...values }]);
         message.success('Historia Clínica creada exitosamente');
       }
@@ -43,6 +70,11 @@ const HistoriaClinica = () => {
   const handleModalCancel = () => {
     setModalVisible(false);
     form.resetFields();
+  };
+
+  const handleFieldChange = (value) => {
+    const selectedField = formatos[0].validFields.find((field) => field.fieldName === value);
+    setSelectedField(selectedField);
   };
 
   const columns = [
@@ -69,9 +101,39 @@ const HistoriaClinica = () => {
   return (
     <div>
       <h2>Historia Clínica</h2>
-      <Button type="primary" onClick={handleCreate} style={{ marginBottom: '16px' }}>
-        Crear Historia Clínica
-      </Button>
+
+      <Form form={formFilter} layout="inline">
+        <Form.Item label="Filtrar por">
+          <Select style={{ width: 200 }} placeholder="Seleccione un campo" onChange={handleFieldChange}>
+            {formatos.length > 0 &&
+              formatos[0].validFields.map((field) => (
+                <Select.Option key={field.fieldName} value={field.fieldName}>
+                  {field.fieldName}
+                </Select.Option>
+              ))}
+          </Select>
+        </Form.Item>
+        {selectedField && selectedField.fieldOptions.length > 0 && (
+          <Form.Item label="Valor">
+            <Select placeholder={`Seleccione ${selectedField.fieldName}`}>
+              {selectedField.fieldOptions.map((option) => (
+                <Select.Option key={option} value={option}>
+                  {option}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        )}
+        {!selectedField && (
+          <Form.Item label="Valor">
+            <Input />
+          </Form.Item>
+        )}
+        <Form.Item>
+          <Button type="primary">Buscar</Button>
+        </Form.Item>
+      </Form>
+
       <Table dataSource={historiasClinicas} columns={columns} rowKey="id" />
 
       <Modal
@@ -88,7 +150,6 @@ const HistoriaClinica = () => {
           >
             <Input />
           </Form.Item>
-          {/* Agrega lógica para manejar los campos válidos */}
         </Form>
       </Modal>
     </div>
