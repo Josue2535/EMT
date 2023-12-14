@@ -21,14 +21,20 @@ const VerHistoriaClinica = () => {
           Authorization: `Bearer ${keycloak.token}`,
         },
       });
-
+  
       if (!responseHistoriaClinica.ok) {
-        throw new Error(`Error al obtener datos de la historia clínica: ${responseHistoriaClinica.statusText}`);
+        // Si es un error 404, interpretamos que la historia clínica no existe y la creamos
+        if (responseHistoriaClinica.status === 404) {
+          await createClinicalHistory();
+        } else {
+          // En caso de otros errores, lanzamos una excepción
+          throw new Error(`Error al obtener datos de la historia clínica: ${responseHistoriaClinica.statusText}`);
+        }
       }
-
+  
       const dataHistoriaClinica = await responseHistoriaClinica.json();
       console.log('Data recibida de la historia clínica:', dataHistoriaClinica);
-
+  
       // Mapear datos de la historia clínica
       const formattedData = {
         id: dataHistoriaClinica.id,
@@ -41,9 +47,9 @@ const VerHistoriaClinica = () => {
           nameFormat: attachment.nameFormat,
         })),
       };
-
+  
       setHistoriaClinica(formattedData);
-
+  
       // Configurar opciones para el select (dropdown)
       const options = formattedData.attachments.map((attachment) => ({
         value: attachment.id,
@@ -54,6 +60,7 @@ const VerHistoriaClinica = () => {
       console.error('Error al obtener datos de la historia clínica:', error);
     }
   };
+  
 
   const fetchClinicalHistoryFormats = async () => {
     try {
