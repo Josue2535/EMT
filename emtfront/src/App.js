@@ -19,6 +19,7 @@ import { ReactKeycloakProvider } from "@react-keycloak/web";
 import userImage from './assets/images/6326055.png';
 import PrivateRoute from './PrivateRoute';
 import Nav from './components/Nav';
+import VerHistoriaClinica from './views/VerHistoriaClinica';
 const { Header, Sider, Content } = Layout;
 
 const App = () => {
@@ -161,6 +162,7 @@ const App = () => {
                   <Route path="/Pacient" element={<PrivateRoute><Paciente /></PrivateRoute>} />
                   <Route path="/PersonalInformation" element={<PrivateRoute><InformacionPersonal /></PrivateRoute>} />
                   <Route path="/User" element={<PrivateRoute><Usuario /></PrivateRoute>} />
+                  <Route path="/ver-historia-clinica" element={<PrivateRoute><VerHistoriaClinica /></PrivateRoute>} />
                   </Routes>
             </Content>
          

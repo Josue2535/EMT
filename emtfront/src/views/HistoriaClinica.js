@@ -54,7 +54,7 @@ const HistoriaClinica = () => {
   };
 
   const handleEdit = (historia) => {
-    navigate('/home');
+    navigate('/ver-historia-clinica', { state: { pacienteId: historia.id } });
   };
 
   
