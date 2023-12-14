@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Input, Checkbox, Table, Space, Form } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useKeycloak } from '@react-keycloak/web';
+import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';
 
 const FormatoPaciente = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);

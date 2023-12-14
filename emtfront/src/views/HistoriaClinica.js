@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Table, Modal, Form, Input, message, Select } from 'antd';
 import { useKeycloak } from '@react-keycloak/web';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 const HistoriaClinica = () => {
   const [historiasClinicas, setHistoriasClinicas] = useState([]);
@@ -10,8 +11,11 @@ const HistoriaClinica = () => {
   const [formatos, setFormatos] = useState([]);
   const [selectedField, setSelectedField] = useState(null);
   const { keycloak } = useKeycloak();
-
+  const initialValues = {
+    Value: '',
+  };
   useEffect(() => {
+    form.setFieldsValue(initialValues);
     const fetchData = async () => {
       try {
         const response = await fetch('https://localhost:7208/api/PacientFormat', {
@@ -40,10 +44,16 @@ const HistoriaClinica = () => {
     setModalVisible(true);
   };
 
-  const handleEdit = (historia) => {
+  const navigate = useNavigate();
+  
+  const handleEditOld = (historia) => {
     setEditingHistoria(historia);
     form.setFieldsValue(historia);
     setModalVisible(true);
+  };
+  const handleEdit = (historia) => {
+    alert("Going some HERE")
+    navigate("/home");
   };
 
   const handleDelete = (historiaId) => {
@@ -51,7 +61,8 @@ const HistoriaClinica = () => {
     message.success('Historia Clínica eliminada exitosamente');
   };
 
-  const handleModalOk = () => {
+  const handleModalOkOld = () => {
+
     form.validateFields().then((values) => {
       if (editingHistoria) {
         setHistoriasClinicas((prevHistorias) =>
@@ -65,7 +76,10 @@ const HistoriaClinica = () => {
       setModalVisible(false);
     });
   };
-
+  const handleModalOk = () => {
+    
+   return  <Navigate to="/home" />
+  };
   const handleModalCancel = () => {
     setModalVisible(false);
     form.resetFields();
@@ -80,10 +94,13 @@ const HistoriaClinica = () => {
     if (!selectedField) {
       return <Input />;
     }
-
+  
     if (selectedField.fieldOptions.length > 0) {
       return (
-        <Select placeholder={`Seleccione ${selectedField.fieldName}`}>
+        <Select
+          placeholder={`Seleccione ${selectedField.fieldName}`}
+          onChange={(value) => form.setFieldsValue({ 'Value': value })}
+        >
           {selectedField.fieldOptions.map((option) => (
             <Select.Option key={option} value={option}>
               {option}
@@ -92,15 +109,23 @@ const HistoriaClinica = () => {
         </Select>
       );
     }
-
-    return <Input placeholder={`Ingrese ${selectedField.fieldName}`} />;
+  
+    return (
+      <Input
+        placeholder={`Ingrese ${selectedField.fieldName}`}
+        onChange={(e) => form.setFieldsValue({ 'Value': e.target.value })}
+      />
+    );
   };
 
   const handleSearch = async () => {
     try {
+      const values = await form.validateFields();
       const searchValue = form.getFieldValue('Value');
       const fieldName = selectedField ? selectedField.fieldName : 'Name';
-  
+      console.log("Values" , initialValues.Value)
+      console.log('Search Value:', searchValue);
+      console.log('Field Name:', fieldName);
       const url = `https://localhost:7208/api/Pacient/GetByField`;
   
       const response = await fetch(url, {
@@ -118,6 +143,32 @@ const HistoriaClinica = () => {
       if (!response.ok) {
         throw new Error(`Error al realizar la búsqueda: ${response.statusText}`);
       }
+      
+  
+      const historiasData = await response.json();
+      setHistoriasClinicas(historiasData);
+  
+      console.log('Resultado de la búsqueda:', historiasData);
+    } catch (error) {
+      console.error('Error al realizar la búsqueda:', error);
+    }
+  };
+  const handleSearchByRole = async () => {
+    try {
+      const url = `https://localhost:7208/api/Pacient/GetByRole`;
+  
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Error al realizar la búsqueda: ${response.statusText}`);
+      }
+      
   
       const historiasData = await response.json();
       setHistoriasClinicas(historiasData);
@@ -168,12 +219,17 @@ const HistoriaClinica = () => {
               ))}
           </Select>
         </Form.Item>
-        <Form.Item label="Valor" name="Value">
+        <Form.Item label="Valor" name="Value" placeholder="Ingrese $">
           {getFieldValueInput()}
         </Form.Item>
         <Form.Item>
           <Button type="primary" onClick={handleSearch}>
             Buscar
+          </Button>
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" onClick={handleSearchByRole}>
+            Buscar por rol
           </Button>
         </Form.Item>
       </Form>
