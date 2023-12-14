@@ -14,6 +14,7 @@ const HistoriaClinica = () => {
   const initialValues = {
     Value: '',
   };
+
   useEffect(() => {
     form.setFieldsValue(initialValues);
     const fetchData = async () => {
@@ -45,41 +46,23 @@ const HistoriaClinica = () => {
   };
 
   const navigate = useNavigate();
-  
+
   const handleEditOld = (historia) => {
     setEditingHistoria(historia);
     form.setFieldsValue(historia);
     setModalVisible(true);
   };
+
   const handleEdit = (historia) => {
-    alert("Going some HERE")
-    navigate("/home");
+    navigate('/home');
   };
 
-  const handleDelete = (historiaId) => {
-    setHistoriasClinicas((prevHistorias) => prevHistorias.filter((historia) => historia.id !== historiaId));
-    message.success('Historia Clínica eliminada exitosamente');
-  };
+  
 
-  const handleModalOkOld = () => {
-
-    form.validateFields().then((values) => {
-      if (editingHistoria) {
-        setHistoriasClinicas((prevHistorias) =>
-          prevHistorias.map((historia) => (historia.id === editingHistoria.id ? { ...historia, ...values } : historia))
-        );
-        message.success('Historia Clínica actualizada exitosamente');
-      } else {
-        setHistoriasClinicas((prevHistorias) => [...prevHistorias, { id: Date.now().toString(), ...values }]);
-        message.success('Historia Clínica creada exitosamente');
-      }
-      setModalVisible(false);
-    });
-  };
   const handleModalOk = () => {
-    
-   return  <Navigate to="/home" />
+    return <Navigate to="/home" />;
   };
+
   const handleModalCancel = () => {
     setModalVisible(false);
     form.resetFields();
@@ -94,12 +77,12 @@ const HistoriaClinica = () => {
     if (!selectedField) {
       return <Input />;
     }
-  
+
     if (selectedField.fieldOptions.length > 0) {
       return (
         <Select
           placeholder={`Seleccione ${selectedField.fieldName}`}
-          onChange={(value) => form.setFieldsValue({ 'Value': value })}
+          onChange={(value) => form.setFieldsValue({ Value: value })}
         >
           {selectedField.fieldOptions.map((option) => (
             <Select.Option key={option} value={option}>
@@ -109,11 +92,11 @@ const HistoriaClinica = () => {
         </Select>
       );
     }
-  
+
     return (
       <Input
         placeholder={`Ingrese ${selectedField.fieldName}`}
-        onChange={(e) => form.setFieldsValue({ 'Value': e.target.value })}
+        onChange={(e) => form.setFieldsValue({ Value: e.target.value })}
       />
     );
   };
@@ -123,11 +106,11 @@ const HistoriaClinica = () => {
       const values = await form.validateFields();
       const searchValue = form.getFieldValue('Value');
       const fieldName = selectedField ? selectedField.fieldName : 'Name';
-      console.log("Values" , initialValues.Value)
+      console.log('Values', initialValues.Value);
       console.log('Search Value:', searchValue);
       console.log('Field Name:', fieldName);
       const url = `https://localhost:7208/api/Pacient/GetByField`;
-  
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -136,27 +119,27 @@ const HistoriaClinica = () => {
         },
         body: JSON.stringify({
           Name: fieldName,
-          value: searchValue, // Cambiado a 'value' en lugar de 'Valor'
+          value: searchValue,
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error(`Error al realizar la búsqueda: ${response.statusText}`);
       }
-      
-  
+
       const historiasData = await response.json();
       setHistoriasClinicas(historiasData);
-  
+
       console.log('Resultado de la búsqueda:', historiasData);
     } catch (error) {
       console.error('Error al realizar la búsqueda:', error);
     }
   };
+
   const handleSearchByRole = async () => {
     try {
       const url = `https://localhost:7208/api/Pacient/GetByRole`;
-  
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -164,29 +147,66 @@ const HistoriaClinica = () => {
           'Content-Type': 'application/json',
         },
       });
-  
+
       if (!response.ok) {
         throw new Error(`Error al realizar la búsqueda: ${response.statusText}`);
       }
-      
-  
+
       const historiasData = await response.json();
       setHistoriasClinicas(historiasData);
-  
+
       console.log('Resultado de la búsqueda:', historiasData);
     } catch (error) {
       console.error('Error al realizar la búsqueda:', error);
     }
   };
-  
-  
-  
-  
 
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id' },
-    { title: 'Fecha de Creación', dataIndex: 'created', key: 'created' },
-    { title: 'Descripción', dataIndex: 'role', key: 'role' },
+    { title: 'Rol', dataIndex: 'role', key: 'role' },
+    {
+      title: 'Nombre del Paciente',
+      dataIndex: 'fieldsList',
+      key: 'nombre',
+      render: (fieldsList) => {
+        const pacienteField = fieldsList.find((field) => field.name === 'firstName');
+        return pacienteField ? pacienteField.value : null;
+      },
+    },{
+      title: 'Apellido del Paciente',
+      dataIndex: 'fieldsList',
+      key: 'apellido',
+      render: (fieldsList) => {
+        const pacienteField = fieldsList.find((field) => field.name === 'lastName');
+        return pacienteField ? pacienteField.value : null;
+      },
+    },
+    {
+      title: 'Tipo de documento',
+      dataIndex: 'fieldsList',
+      key: 'documentType',
+      render: (fieldsList) => {
+        const pacienteField = fieldsList.find((field) => field.name === 'idType');
+        return pacienteField ? pacienteField.value : null;
+      },
+    },{
+      title: 'Número de documento',
+      dataIndex: 'fieldsList',
+      key: 'documentType',
+      render: (fieldsList) => {
+        const pacienteField = fieldsList.find((field) => field.name === 'idNumber');
+        return pacienteField ? pacienteField.value : null;
+      },
+    },
+    {
+      title: 'Edad del Paciente',
+      dataIndex: 'fieldsList',
+      key: 'edad',
+      render: (fieldsList) => {
+        const pacienteField = fieldsList.find((field) => field.name === 'age');
+        return pacienteField ? pacienteField.value : null;
+      },
+    },
     {
       title: 'Acciones',
       dataIndex: 'acciones',
@@ -194,10 +214,7 @@ const HistoriaClinica = () => {
       render: (_, record) => (
         <>
           <Button type="primary" size="small" onClick={() => handleEdit(record)}>
-            Editar
-          </Button>
-          <Button type="danger" size="small" onClick={() => handleDelete(record.id)} style={{ marginLeft: '8px' }}>
-            Eliminar
+            Ver Historia Clinica
           </Button>
         </>
       ),
