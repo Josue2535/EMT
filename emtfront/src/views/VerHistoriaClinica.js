@@ -8,41 +8,83 @@ const VerHistoriaClinica = () => {
   const pacienteId = location.state?.pacienteId;
   const { keycloak } = useKeycloak();
   const [historiaClinica, setHistoriaClinica] = useState(null);
+  const [clinicalHistoryFormats, setClinicalHistoryFormats] = useState([]);
   const [selectOptions, setSelectOptions] = useState([]);
   const [selectedAttachment, setSelectedAttachment] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`https://localhost:7208/api/ClinicalHistory/user/${pacienteId}`, {
+        // Obtener datos de la historia clínica
+        const responseHistoriaClinica = await fetch(`https://localhost:7208/api/ClinicalHistory/user/${pacienteId}`, {
           headers: {
             Accept: 'application/json',
             Authorization: `Bearer ${keycloak.token}`,
           },
         });
 
-        if (!response.ok) {
-          throw new Error(`Error al obtener datos: ${response.statusText}`);
+        if (!responseHistoriaClinica.ok) {
+          throw new Error(`Error al obtener datos de la historia clínica: ${responseHistoriaClinica.statusText}`);
         }
 
-        const data = await response.json();
-        setHistoriaClinica(data);
+        const dataHistoriaClinica = await responseHistoriaClinica.json();
+        console.log('Data recibida de la historia clínica:', dataHistoriaClinica);
 
-        const options = data.attachments.map((attachment) => ({
+        // Mapear datos de la historia clínica
+        const formattedData = {
+          id: dataHistoriaClinica.id,
+          created: dataHistoriaClinica.created,
+          patientId: dataHistoriaClinica.patientId,
+          attachments: dataHistoriaClinica.attachments.map((attachment) => ({
+            id: attachment.id,
+            created: attachment.created,
+            fields: attachment.fields,
+            nameFormat: attachment.nameFormat,
+          })),
+        };
+
+        setHistoriaClinica(formattedData);
+
+        // Configurar opciones para el select (dropdown)
+        const options = formattedData.attachments.map((attachment) => ({
           value: attachment.id,
           label: attachment.nameFormat,
         }));
         setSelectOptions(options);
       } catch (error) {
-        console.error('Error al obtener datos:', error);
+        console.error('Error al obtener datos de la historia clínica:', error);
+      }
+    };
+
+    const fetchClinicalHistoryFormats = async () => {
+      try {
+        // Obtener datos de los formatos de historia clínica
+        const responseClinicalHistoryFormats = await fetch('https://localhost:7208/ClinicalHistoryFormat/GetByRole', {
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${keycloak.token}`,
+          },
+        });
+
+        if (!responseClinicalHistoryFormats.ok) {
+          throw new Error(`Error al obtener datos de los formatos de historia clínica: ${responseClinicalHistoryFormats.statusText}`);
+        }
+
+        const dataClinicalHistoryFormats = await responseClinicalHistoryFormats.json();
+        console.log('Data recibida de los formatos de historia clínica:', dataClinicalHistoryFormats);
+
+        // Mapear datos de los formatos de historia clínica
+        setClinicalHistoryFormats(dataClinicalHistoryFormats);
+      } catch (error) {
+        console.error('Error al obtener datos de los formatos de historia clínica:', error);
       }
     };
 
     fetchData();
+    fetchClinicalHistoryFormats();
   }, [pacienteId, keycloak.token]);
 
   const columns = [
-    // Definición de tus columnas
     {
       title: 'Nombre del Adjunto',
       dataIndex: 'nameFormat',
@@ -57,7 +99,7 @@ const VerHistoriaClinica = () => {
       title: 'Acciones',
       key: 'acciones',
       render: (_, record) => (
-        <Button type="primary" size="small" onClick={() => handleViewAttachment(record)}>
+        <Button type="primary" size="large" onClick={() => handleViewAttachment(record)}>
           Ver Adjunto
         </Button>
       ),
@@ -66,24 +108,28 @@ const VerHistoriaClinica = () => {
 
   const handleCreate = (value) => {
     console.log('Crear nueva entrada con ID:', value);
-    // Lógica para crear una nueva entrada (puedes redirigir a una nueva pantalla o mostrar un modal, etc.)
   };
 
   const handleViewAttachment = (attachment) => {
     setSelectedAttachment(attachment);
-    Modal.info({
-      title: 'Detalles del Adjunto',
-      content: (
-        <div>
-          <p>ID: {attachment.id}</p>
-          <p>Fecha de Creación: {attachment.created}</p>
-          {/* Agrega aquí la lógica para mostrar los campos del attachment */}
+  };
+
+  const renderFieldValue = (value) => {
+    if (value instanceof Array) {
+      return value.map((list, index) => (
+        <div key={index}>
+          {list.map(([name, val]) => (
+            <div key={name}>
+              <p style={{ marginLeft: '16px', fontSize: '16px' }}>{name}: {renderFieldValue(val)}</p>
+            </div>
+          ))}
         </div>
-      ),
-      onOk() {
-        setSelectedAttachment(null);
-      },
-    });
+      ));
+    } else if (typeof value === 'object' && value !== null) {
+      return renderFieldValue(value.value);
+    } else {
+      return value;
+    }
   };
 
   if (!historiaClinica) {
@@ -92,17 +138,18 @@ const VerHistoriaClinica = () => {
 
   return (
     <div>
-      <h2>Historia Clínica</h2>
-      <p>ID del Paciente: {pacienteId}</p>
-      <p>Fecha de Creación: {historiaClinica.created}</p>
+      <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>Historia Clínica</h2>
+      <p style={{ fontSize: '18px' }}>ID del Paciente: {pacienteId}</p>
+      <p style={{ fontSize: '18px' }}>Fecha de Creación: {historiaClinica.created}</p>
 
-      <Select
-        style={{ width: 120 }}
-        options={selectOptions}
-        placeholder="Seleccionar"
-        onChange={handleCreate}
-      >
-        Crear
+      
+
+      <Select style={{ width: 300 }} placeholder="Seleccione un formato">
+        {clinicalHistoryFormats.map((format) => (
+          <Select.Option key={format.id} value={format.id}>
+            {format.name}
+          </Select.Option>
+        ))}
       </Select>
 
       <Table dataSource={historiaClinica.attachments} columns={columns} rowKey="id" />
@@ -114,9 +161,16 @@ const VerHistoriaClinica = () => {
           onOk={() => setSelectedAttachment(null)}
           onCancel={() => setSelectedAttachment(null)}
         >
-          <p>ID: {selectedAttachment.id}</p>
-          <p>Fecha de Creación: {selectedAttachment.created}</p>
-          {/* Agrega aquí la lógica para mostrar los campos del attachment */}
+          <p style={{ fontSize: '18px', fontWeight: 'bold' }}>ID: {selectedAttachment.id}</p>
+          <p style={{ fontSize: '18px', fontWeight: 'bold' }}>Fecha de Creación: {selectedAttachment.created}</p>
+          <p style={{ fontSize: '18px', fontWeight: 'bold' }}>Nombre del Formato: {selectedAttachment.nameFormat}</p>
+          <p style={{ fontSize: '18px', fontWeight: 'bold' }}>Campos:</p>
+          {selectedAttachment.fields.map((field) => (
+            <div key={field.name}>
+              <p style={{ fontSize: '16px', fontWeight: 'bold' }}>{field.name}</p>
+              <p style={{ fontSize: '16px' }}>{renderFieldValue(field.value)}</p>
+            </div>
+          ))}
         </Modal>
       )}
     </div>
