@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Select, Table, Button, Modal, Input } from 'antd';
 import { useKeycloak } from '@react-keycloak/web';
 
@@ -11,9 +11,14 @@ const VerHistoriaClinica = () => {
   const [clinicalHistoryFormats, setClinicalHistoryFormats] = useState([]);
   const [selectOptions, setSelectOptions] = useState([]);
   const [selectedAttachment, setSelectedAttachment] = useState(null);
-
+  const navigate = useNavigate();
   const fetchData = async () => {
     try {
+      console.log('Valor de pacienteId:', pacienteId);
+      if (pacienteId=== undefined) {
+        // Si pacienteId no existe, navegar a la ruta clinicalhistory
+        navigate('/clinicalhistory');
+      }else{
       // Obtener datos de la historia clínica
       const responseHistoriaClinica = await fetch(`https://localhost:7208/api/ClinicalHistory/user/${pacienteId}`, {
         headers: {
@@ -56,6 +61,7 @@ const VerHistoriaClinica = () => {
         label: attachment.nameFormat,
       }));
       setSelectOptions(options);
+    }
     } catch (error) {
       console.error('Error al obtener datos de la historia clínica:', error);
     }
