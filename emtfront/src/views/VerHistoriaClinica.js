@@ -19,53 +19,53 @@ const VerHistoriaClinica = () => {
   const fetchData = async () => {
     try {
       console.log('Valor de pacienteId:', pacienteId);
-      if (pacienteId === undefined) {
+      if (pacienteId=== undefined) {
         // Si pacienteId no existe, navegar a la ruta clinicalhistory
         navigate('/clinicalhistory');
-      } else {
-        // Obtener datos de la historia clínica
-        const responseHistoriaClinica = await fetch(`https://localhost:7208/api/ClinicalHistory/user/${pacienteId}`, {
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${keycloak.token}`,
-          },
-        });
-
-        if (!responseHistoriaClinica.ok) {
-          // Si es un error 404, interpretamos que la historia clínica no existe y la creamos
-          if (responseHistoriaClinica.status === 404) {
-            await createClinicalHistory();
-          } else {
-            // En caso de otros errores, lanzamos una excepción
-            throw new Error(`Error al obtener datos de la historia clínica: ${responseHistoriaClinica.statusText}`);
-          }
+      }else{
+      // Obtener datos de la historia clínica
+      const responseHistoriaClinica = await fetch(`https://localhost:7208/api/ClinicalHistory/user/${pacienteId}`, {
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+      });
+  
+      if (!responseHistoriaClinica.ok) {
+        // Si es un error 404, interpretamos que la historia clínica no existe y la creamos
+        if (responseHistoriaClinica.status === 404) {
+          await createClinicalHistory();
+        } else {
+          // En caso de otros errores, lanzamos una excepción
+          throw new Error(`Error al obtener datos de la historia clínica: ${responseHistoriaClinica.statusText}`);
         }
-
-        const dataHistoriaClinica = await responseHistoriaClinica.json();
-        console.log('Data recibida de la historia clínica:', dataHistoriaClinica);
-
-        // Mapear datos de la historia clínica
-        const formattedData = {
-          id: dataHistoriaClinica.id,
-          created: dataHistoriaClinica.created,
-          patientId: dataHistoriaClinica.patientId,
-          attachments: dataHistoriaClinica.attachments.map((attachment) => ({
-            id: attachment.id,
-            created: attachment.created,
-            fields: attachment.fields,
-            nameFormat: attachment.nameFormat,
-          })),
-        };
-
-        setHistoriaClinica(formattedData);
-
-        // Configurar opciones para el select (dropdown)
-        const options = formattedData.attachments.map((attachment) => ({
-          value: attachment.id,
-          label: attachment.nameFormat,
-        }));
-        setSelectOptions(options);
       }
+  
+      const dataHistoriaClinica = await responseHistoriaClinica.json();
+      console.log('Data recibida de la historia clínica:', dataHistoriaClinica);
+  
+      // Mapear datos de la historia clínica
+      const formattedData = {
+        id: dataHistoriaClinica.id,
+        created: dataHistoriaClinica.created,
+        patientId: dataHistoriaClinica.patientId,
+        attachments: dataHistoriaClinica.attachments.map((attachment) => ({
+          id: attachment.id,
+          created: attachment.created,
+          fields: attachment.fields,
+          nameFormat: attachment.nameFormat,
+        })),
+      };
+  
+      setHistoriaClinica(formattedData);
+  
+      // Configurar opciones para el select (dropdown)
+      const options = formattedData.attachments.map((attachment) => ({
+        value: attachment.id,
+        label: attachment.nameFormat,
+      }));
+      setSelectOptions(options);
+    }
     } catch (error) {
       console.error('Error al obtener datos de la historia clínica:', error);
     }
@@ -164,7 +164,25 @@ const VerHistoriaClinica = () => {
 
   const createClinicalHistory = async () => {
     try {
-      // ... (lógica para crear la historia clínica, similar a la lógica en el componente de Paciente)
+      const response = await fetch('https://localhost:7208/api/ClinicalHistory', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+        body: JSON.stringify({
+          patientId: pacienteId,
+          attachments: [],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al crear la historia clínica: ${response.statusText}`);
+      }
+
+      // Después de crear la historia clínica, volver a cargar la información
+      fetchData();
     } catch (error) {
       console.error('Error al crear la historia clínica:', error);
     }
