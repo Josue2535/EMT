@@ -85,6 +85,10 @@ const FormatoPaciente = () => {
         : 'https://localhost:7208/api/PacientFormat';
       const method = formatoData.id ? 'PUT' : 'POST';
   
+      formatoData.validFields.forEach(validField => {
+        validField.fieldOptions = validField.fieldOptions.filter(option => option !== '');
+      });
+
       const requestBody = {
         validFields: formatoData.validFields,
       };

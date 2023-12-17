@@ -1,8 +1,8 @@
 import Keycloak from "keycloak-js";
 const keycloak = new Keycloak({
- url: "http://localhost:8080/auth",
- realm: "EMT",
- clientId: "frontend",
-});
+    url: "http://localhost:9080",
+    realm: "emt",
+    clientId: "emr_web_app",
+})
 
-export default keycloak;
+export default keycloak

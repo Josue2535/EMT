@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\juana\\OneDrive\\Documentos\\GitHub\\EMT\\EMT\\EMT.csproj": {}
+    "C:\\Users\\Carlos\\Desktop\\EMT\\EMT\\EMT.csproj": {}
   },
   "projects": {
-    "C:\\Users\\juana\\OneDrive\\Documentos\\GitHub\\EMT\\EMT\\EMT.csproj": {
+    "C:\\Users\\Carlos\\Desktop\\EMT\\EMT\\EMT.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\juana\\OneDrive\\Documentos\\GitHub\\EMT\\EMT\\EMT.csproj",
+        "projectUniqueName": "C:\\Users\\Carlos\\Desktop\\EMT\\EMT\\EMT.csproj",
         "projectName": "EMT",
-        "projectPath": "C:\\Users\\juana\\OneDrive\\Documentos\\GitHub\\EMT\\EMT\\EMT.csproj",
-        "packagesPath": "C:\\Users\\juana\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\juana\\OneDrive\\Documentos\\GitHub\\EMT\\EMT\\obj\\",
+        "projectPath": "C:\\Users\\Carlos\\Desktop\\EMT\\EMT\\EMT.csproj",
+        "packagesPath": "C:\\Users\\Carlos\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Carlos\\Desktop\\EMT\\EMT\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\juana\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Carlos\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,7 +22,6 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\sdk\\7.0.302\\Sdks\\Microsoft.NET.Sdk.Web\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -85,7 +84,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.402\\RuntimeIdentifierGraph.json"
         }
       }
     }

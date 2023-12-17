@@ -49,21 +49,21 @@ builder.Services.AddScoped<IMongoDatabase>(provider =>
 });
 builder.Services.AddScoped<IClinicalHistoryFormatRepository>(provider =>
 {
-    var connectionString = "mongodb://adminEMT:passwordEMT@localhost:27017/";
+    var connectionString = "mongodb://localhost:27017";
     var databaseName = "EMT";
     var collectionName = "ClinicalHistoryFormat";
     return new ClinicalHistoryFormatRepository(connectionString, databaseName, collectionName);
 });
 builder.Services.AddScoped<IPacientFormatRepository>(provider =>
 {
-    var connectionString = "mongodb://adminEMT:passwordEMT@localhost:27017/";
+    var connectionString = "mongodb://localhost:27017";
     var databaseName = "EMT";
     var collectionName = "PacientFormat";
     return new PacientFormatRepository(connectionString, databaseName, collectionName);
 });
 builder.Services.AddScoped<IPersonalInformationFormatRepository>(provider =>
 {
-    var connectionString = "mongodb://adminEMT:passwordEMT@localhost:27017/";
+    var connectionString = "mongodb://localhost:27017";
     var databaseName = "EMT";
     var collectionName = "PersonalInformationFormat";
     return new PersonalInformationFormatRepository(connectionString, databaseName, collectionName);
@@ -71,7 +71,7 @@ builder.Services.AddScoped<IPersonalInformationFormatRepository>(provider =>
 
 builder.Services.AddScoped<IRoleRepository>(provider =>
 {
-    var connectionString = "mongodb://adminEMT:passwordEMT@localhost:27017/";
+    var connectionString = "mongodb://localhost:27017";
     var databaseName = "EMT";
     var collectionName = "Role";
     return new RoleRepository(connectionString, databaseName, collectionName);
@@ -79,28 +79,28 @@ builder.Services.AddScoped<IRoleRepository>(provider =>
 
 builder.Services.AddScoped<IClinicalHistoryRepository>(provider =>
 {
-    var connectionString = "mongodb://adminEMT:passwordEMT@localhost:27017/";
+    var connectionString = "mongodb://localhost:27017";
     var databaseName = "EMT";
     var collectionName = "ClinicalHistory";
     return new ClinicalHistoryRepository(connectionString, databaseName, collectionName);
 });
 builder.Services.AddScoped<IPacientRepository>(provider =>
 {
-    var connectionString = "mongodb://adminEMT:passwordEMT@localhost:27017/";
+    var connectionString = "mongodb://localhost:27017";
     var databaseName = "EMT";
     var collectionName = "Pacient";
     return new PacientRepository(connectionString, databaseName, collectionName);
 });
 builder.Services.AddScoped<IPersonalInformationRepository>(provider =>
 {
-    var connectionString = "mongodb://adminEMT:passwordEMT@localhost:27017/";
+    var connectionString = "mongodb://localhost:27017";
     var databaseName = "EMT";
     var collectionName = "PersonalInformation";
     return new PersonalInformationRepository(connectionString, databaseName, collectionName);
 });
 builder.Services.AddScoped<IUserRepository>(provider =>
 {
-    var connectionString = "mongodb://adminEMT:passwordEMT@localhost:27017/";
+    var connectionString = "mongodb://localhost:27017";
     var databaseName = "EMT";
     var collectionName = "User";
     return new UserRepository(connectionString, databaseName, collectionName);

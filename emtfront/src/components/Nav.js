@@ -15,8 +15,7 @@ const Nav = () => {
   useEffect(() => {
     const fetchRolesAndRenderMenu = async () => {
       try {
-        const keycloakRoles = keycloak.tokenParsed?.roles || [];
-        
+        const keycloakRoles = keycloak.tokenParsed.realm_access.roles || [];
         const rolesPromises = keycloakRoles.map(async roleName => {
           const roleInfo = await fetchRoleInfo(roleName, keycloak.token);
           return roleInfo;
