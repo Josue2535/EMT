@@ -11,8 +11,27 @@ const Rol = () => {
   const [visible, setVisible] = useState(false);
   const [form] = Form.useForm();
   const [editingRole, setEditingRole] = useState(null);
-
+  const [formatOptions, setFormatOptions] = useState([]);
   useEffect(() => {
+    const fetchFormats = async () => {
+      try {
+        const response = await fetch('https://localhost:7208/ClinicalHistoryFormat', {
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${keycloak.token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error al obtener formatos: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setFormatOptions(data.map((format) => format.name));
+      } catch (error) {
+        console.error('Error al obtener formatos:', error);
+      }
+    };
     const fetchRoles = async () => {
       try {
         const response = await fetch('https://localhost:7208/api/Role', {
@@ -32,9 +51,10 @@ const Rol = () => {
         console.error('Error al obtener roles:', error);
       }
     };
-
+    fetchFormats();
     fetchRoles();
   }, [keycloak.token]);
+  
 
   const showModal = (role) => {
     setEditingRole(role);
@@ -214,10 +234,15 @@ const Rol = () => {
                         style={{ display: 'inline-block', marginLeft: '8px', width: '200px' }}
                       >
                         <Select mode="multiple" placeholder="Seleccione acciones" style={{ width: '100%', overflow: 'auto' }}>
+                          <Option value="get">get</Option>
                           <Option value="post">post</Option>
                           <Option value="put">put</Option>
                           <Option value="delete">delete</Option>
-                          <Option value="get">get</Option>
+                          {formatOptions.map((format) => (
+                            <Option key={format} value={format}>
+                              {format}
+                            </Option>
+                          ))}
                         </Select>
                       </Form.Item>
                       <Button type="link" onClick={() => remove(name)} icon={<DeleteOutlined />} />
