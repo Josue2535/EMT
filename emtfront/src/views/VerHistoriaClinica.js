@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Select, Table, Button, Modal, Form, Input, InputNumber, DatePicker, message } from 'antd';
 import { useKeycloak } from '@react-keycloak/web';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+
 
 const VerHistoriaClinica = () => {
   const location = useLocation();
@@ -72,6 +75,55 @@ const VerHistoriaClinica = () => {
     }
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      const attachmentDetails = selectedAttachment;
+  
+      // Crear un contenedor para el HTML que deseas convertir a PDF
+      const container = document.createElement('div');
+  
+      // Agregar la información del JSON al contenedor
+      container.innerHTML = `
+        <h2>${attachmentDetails.nameFormat}</h2>
+        <p>ID: ${attachmentDetails.id}</p>
+        <p>Fecha de Creación: ${attachmentDetails.created}</p>
+        <p>Campos:</p>
+        <ul>
+          ${attachmentDetails.fields.map((field) => `<li>${field.name}: ${field.value}</li>`).join('')}
+        </ul>
+      `;
+  
+      // Esperar a que el contenedor esté en el DOM antes de utilizar html2canvas
+      document.body.appendChild(container);
+  
+      // Utilizar html2canvas para capturar el contenido del contenedor como una imagen
+      const canvas = await html2canvas(container, { scale: 15 });
+  
+      // Crear un objeto jsPDF y agregar la imagen como una página
+      const pdf = new jsPDF({ unit: 'mm', format: 'A4' }); // Ajusta el formato según tus necesidades
+      pdf.setFontSize(18);
+      pdf.setTextColor(0, 18, 13);
+      pdf.text('HISTORIA CLINICA', 105, 15, { align: 'center' }); // Ajusta la posición según tus necesidades
+  
+      // Iterar sobre los campos y agregarlos al PDF
+      let currentY = 40; // Ajusta la posición inicial según tus necesidades
+      attachmentDetails.fields.forEach((field) => {
+        pdf.text(`${field.name}: ${field.value}`, 10, currentY);
+        currentY += 10; // Ajusta el espaciado vertical según tus necesidades
+      });
+  
+      // Descargar el PDF con el nombre deseado
+      pdf.save('formulario.pdf');
+  
+      setSelectedAttachment(null);
+  
+      // Remover el contenedor del DOM después de usarlo si es necesario
+      document.body.removeChild(container);
+    } catch (error) {
+      console.error('Error al generar el PDF:', error);
+    }
+  };
+  
   const fetchClinicalHistoryFormats = async () => {
     try {
       // Obtener datos de los formatos de historia clínica
@@ -567,7 +619,8 @@ const VerHistoriaClinica = () => {
       <Modal
         title="Crear Historia Clínica"
         visible={createModalVisible}
-        onOk={handleCreateOk}
+        onOk={handleCreateOk} 
+        okText="Guardar"
         onCancel={handleCreateCancel}
       >
         {/* Renderizar el formulario con el formato seleccionado */}
@@ -589,7 +642,8 @@ const VerHistoriaClinica = () => {
         <Modal
           title="Detalles del Adjunto"
           visible={true}
-          onOk={() => setSelectedAttachment(null)}
+          onOk={() => handleDownloadPDF()}
+          okText = "Descargar PDF"
           onCancel={() => setSelectedAttachment(null)}
         >
           <p style={{ fontSize: '18px', fontWeight: 'bold' }}>ID: {selectedAttachment.id}</p>
