@@ -14,7 +14,7 @@ const VerHistoriaClinica = () => {
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const navigate = useNavigate();
   const [attachmentsList, setAttachmentsList] = useState([{ campos: [] }]);
-
+  const [fieldValues, setFieldValues] = useState({});
   const [form] = Form.useForm();
 
   const fetchData = async () => {
@@ -177,7 +177,13 @@ const VerHistoriaClinica = () => {
   };
 
 
-
+  const handleFieldChange = (value, fieldName) => {
+    // Almacena el valor en el estado local (fieldValues)
+    setFieldValues((prevValues) => ({
+      ...prevValues,
+      [`${fieldName}value`]: value,
+    }));
+  };
   const handleDeleteAttachmentSet = (field) => {
     const attachmentsList = form.getFieldValue(field.fieldName) || [];
 
@@ -194,54 +200,59 @@ const VerHistoriaClinica = () => {
     try {
       // Validar los campos del formulario antes de obtener sus valores
       await form.validateFields();
-  
+      const values = await form.validateFields();
       // Obtener el valor del campo 'selectedFormat'
       const selectedFormatId = form.getFieldValue('selectedFormat');
-  
+      const formValues = form.getFieldsValue();
+      const combinedValues = { ...formValues, ...fieldValues };
       // Encontrar los detalles del formato seleccionado
       const selectedFormat = clinicalHistoryFormats.find((format) => format.id === selectedFormatId);
-  
+
       // Verificar si selectedFormat es indefinido
       if (!selectedFormat) {
         throw new Error('Selected format is undefined');
       }
-  
+
       // Inicializar la estructura JSON
       const jsonPayload = {
         nameFormat: selectedFormat.name,
         fields: [],
       };
-  
+
       // Iterar a través de los campos válidos del formato seleccionado
       for (const field of selectedFormat.validFields) {
         const fieldName = field.fieldName;
-  
+
         // Obtener el valor del campo del objeto formValues
-        const fieldValue = form.getFieldValue(fieldName);
-  
+        let fieldValue;
+
+        if (field.fieldType === 'Attachment' && fieldName === 'Adjuntos') {
+          fieldValue = form.getFieldValue(fieldName) || [];
+        } else {
+          fieldValue = combinedValues[fieldName + 'value'];
+        }
         console.log(`Processing field ${fieldName}, value:`, fieldValue); // Log field values for debugging
-  
+
         // Verificar si fieldValue es indefinido o nulo
         if (fieldValue !== undefined && fieldValue !== null) {
           // Determinar el tipo de campo y formatear según sea necesario
           if (field.fieldType === 'Attachment' && fieldName === 'Adjuntos') {
             // Manejar el campo Adjuntos
-            const attachmentList = fieldValue.map((set) => {
-              return {
-                campos: set.campos.map((campo) => ({
-                  nombreCampo: campo.nombreCampo,
-                  valorCampo: campo.valorCampo,
-                })),
-              };
+            const attachmentsList = form.getFieldValue(field.fieldName) || [];
+            const attachmentList = attachmentsList.map((set) => {
+              return set.campos.map((campo) => ({
+                name: campo.nombreCampo,
+                value: campo.valorCampo,
+              }));
             });
-            jsonPayload.fields.push({ name: fieldName, value: attachmentList });
+            jsonPayload.fields.push({ name: field.fieldName, value: attachmentList });
           } else {
             // Manejar otros tipos de campos (String, Number, Integer, etc.)
             jsonPayload.fields.push({ name: fieldName, value: fieldValue });
           }
         }
       }
-  
+
       // Esperar a que fetchData se complete antes de continuar
       await fetchData();
       console.log('JSON Payload:', jsonPayload);
@@ -255,29 +266,29 @@ const VerHistoriaClinica = () => {
         },
         body: JSON.stringify(jsonPayload),
       });
-  
+
       if (!response.ok) {
         throw new Error(`Error while creating clinical history: ${response.statusText}`);
       }
-  
+
       // Después de la creación exitosa, recargar la información (fetchData se llama nuevamente para obtener datos actualizados)
       await fetchData();
-  
+
       // Limpiar los campos del formulario
       form.resetFields();
-  
+
       // Cerrar el modal después de la creación exitosa
       setCreateModalVisible(false);
-  
+
       // Lógica adicional si es necesario
-  
+
     } catch (error) {
       console.error('Error while handling create ok action:', error);
     }
   };
-  
 
-  
+
+
 
 
 
@@ -373,16 +384,41 @@ const VerHistoriaClinica = () => {
   const renderFieldValueCreate = (field) => {
     switch (field.fieldType) {
       case 'String':
-        return <Input />;
+        return (
+          <Form.Item
+            label={field.fieldName}
+            name={field.fieldName + 'value'}
+            key={field.fieldName + 'value'}
+            rules={[{ required: true, message: `Please input ${field.fieldName}!` }]}
+          >
+            <Input onChange={(e) => handleFieldChange(e.target.value, field.fieldName)} />
+          </Form.Item>
+        );
       case 'Number':
       case 'Integer':
-        return <InputNumber />;
+        return (
+          <Form.Item
+            label={field.fieldName}
+            name={field.fieldName + 'value'}
+            key={field.fieldName + 'value'}
+            rules={[{ required: true, message: `Please input ${field.fieldName}!` }]}
+          >
+            <InputNumber onChange={(value) => handleFieldChange(value, field.fieldName)} />
+          </Form.Item>
+        );
       case 'LocalDate':
-        return <DatePicker />;
+        return (
+          <Form.Item label={field.fieldName}
+            name={field.fieldName + 'value'}
+            key={field.fieldName + 'value'}
+            rules={[{ required: true, message: `Please input ${field.fieldName}!` }]}>
+            <DatePicker onChange={(e) => handleFieldChange(e, field.fieldName)} />
+          </Form.Item>
+        );
       case 'Attachment':
         if (field.fieldName === 'Adjuntos') {
           const attachmentsList = form.getFieldValue(field.fieldName) || [];
-  
+
           return (
             <div>
               <Button
@@ -392,7 +428,7 @@ const VerHistoriaClinica = () => {
               >
                 Añadir Adjunto
               </Button>
-  
+
               {attachmentsList.map((set, currentSetIndex) => (
                 <div key={currentSetIndex} style={{ border: '1px solid #ccc', padding: '8px', marginBottom: '8px' }}>
                   <Button
@@ -402,7 +438,7 @@ const VerHistoriaClinica = () => {
                   >
                     Eliminar Adjunto
                   </Button>
-  
+
                   <Button
                     type="primary"
                     onClick={() => handleAddCampo(currentSetIndex)}
@@ -410,7 +446,7 @@ const VerHistoriaClinica = () => {
                   >
                     Añadir Campo
                   </Button>
-  
+
                   {set.campos && set.campos.map((campo, campoIndex) => (
                     <div key={campoIndex} style={{ display: 'flex', marginBottom: '8px' }}>
                       <Form.Item
@@ -455,7 +491,7 @@ const VerHistoriaClinica = () => {
           );
         } else {
           return (
-            <Form.Item label={field.fieldName} name={field.fieldName}>
+            <Form.Item label={field.fieldName}>
               <Input />
             </Form.Item>
           );
@@ -475,7 +511,7 @@ const VerHistoriaClinica = () => {
         return null;
     }
   };
-  
+
 
 
   // Agrega esta función en tu componente
@@ -543,8 +579,6 @@ const VerHistoriaClinica = () => {
                 <div key={field.fieldName}>
                   <h3>{field.fieldName}</h3>
                   {renderFieldValueCreate(field)}
-
-
                 </div>
               ))}
           </>
