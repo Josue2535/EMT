@@ -14,7 +14,7 @@ const VerHistoriaClinica = () => {
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const navigate = useNavigate();
   const [attachmentsList, setAttachmentsList] = useState([{ campos: [] }]);
-  
+
   const [form] = Form.useForm();
 
   const fetchData = async () => {
@@ -98,10 +98,10 @@ const VerHistoriaClinica = () => {
   const handleRemoveAttachmentSet = (setIndex) => {
     // Crear una copia del estado actual
     const currentAttachmentsList = [...attachmentsList];
-  
+
     // Eliminar el conjunto seleccionado
     currentAttachmentsList.splice(setIndex, 1);
-  
+
     // Actualizar el estado local y el valor del campo en el formulario
     setAttachmentsList(currentAttachmentsList);
     form.setFieldsValue({
@@ -110,18 +110,20 @@ const VerHistoriaClinica = () => {
   };
   const [attachmentSets, setAttachmentSets] = useState(1);
   const handleAddAttachmentField = () => {
+
+    console.log(attachmentSets);
     // Incrementar el número de conjuntos
     setAttachmentSets((prevSets) => prevSets + 1);
-  
+
     // Añadir un nuevo conjunto vacío al estado local del formulario
     setAttachmentsList((prevList) => [...prevList, { campos: [] }]);
-  
+
     // Actualizar el valor del campo en el formulario
     form.setFieldsValue({
       'Adjuntos': [...attachmentsList, { campos: [] }],
     });
   };
-  
+
 
 
   useEffect(() => {
@@ -190,24 +192,109 @@ const VerHistoriaClinica = () => {
 
   const handleCreateOk = async () => {
     try {
-      // Obtener los valores del formulario después de hacer clic en "OK"
-      const formData = form.getFieldsValue();
-
-      // Lógica para manejar la creación de la historia clínica con formData
-      // ... (aquí deberías añadir la lógica necesaria)
-
-      // Limpiar los campos del formulario
+      // Get the selected format ID from the form
+      const selectedFormatId = form.getFieldValue('selectedFormat');
+  
+      // Find the selected format details
+      const selectedFormat = clinicalHistoryFormats.find((format) => format.id === selectedFormatId);
+  
+      // Check if selectedFormat is undefined
+      if (!selectedFormat) {
+        throw new Error('Selected format is undefined');
+      }
+  
+      // Initialize the JSON structure
+      const jsonPayload = {
+        nameFormat: selectedFormat.name,
+        fields: [],
+      };
+  
+      // Use form.getFieldsValue() to get all form values
+      const formValues = form.getFieldsValue();
+  
+      console.log('formValues:', formValues); // Log form values for debugging
+  
+      // Iterate through the valid fields of the selected format
+      for (const field of selectedFormat.validFields) {
+        const fieldName = field.fieldName;
+  
+        // Get the field value from the formValues object
+        const fieldValue = formValues[fieldName];
+  
+        console.log(`Processing field ${fieldName}, value:`, fieldValue); // Log field values for debugging
+  
+        // Check if fieldValue is undefined or null
+        if (fieldValue !== undefined && fieldValue !== null) {
+          // Determine the type of field and format accordingly
+          if (field.fieldType === 'Attachment' && fieldName === 'Adjuntos') {
+            // Handle Attachment field
+            const attachmentList = fieldValue.map((set) => {
+              // Check if set.campos is an array before using map
+              if (Array.isArray(set.campos)) {
+                return set.campos.map((campo) => {
+                  // Check if campo is an array before using reduce
+                  if (Array.isArray(campo)) {
+                    return campo.reduce((acc, { nombreCampo, valorCampo }) => {
+                      acc.push({ name: nombreCampo, value: valorCampo });
+                      return acc;
+                    }, []);
+                  } else {
+                    console.error('Invalid campo format:', campo);
+                    return [];
+                  }
+                });
+              } else {
+                console.error('Invalid set.campos format:', set.campos);
+                return [];
+              }
+            });
+  
+            jsonPayload.fields.push({ name: fieldName, value: attachmentList });
+          } else {
+            // Handle other field types (String, Number, Integer, etc.)
+            jsonPayload.fields.push({ name: fieldName, value: fieldValue });
+          }
+        }
+      }
+  
+      // Wait for fetchData to complete before proceeding
+      await fetchData();
+      console.log('JSON Payload:', jsonPayload);
+      // Send the data to the server
+      const response = await fetch(`https://localhost:7208/api/ClinicalHistory/${pacienteId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+        body: JSON.stringify(jsonPayload),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Error while creating clinical history: ${response.statusText}`);
+      }
+  
+      // After successful creation, reload the information (fetchData is called again to get updated data)
+      await fetchData();
+  
+      // Clear the form fields
       form.resetFields();
-
-      // Cerrar el modal después de la creación exitosa
+  
+      // Close the modal after successful creation
       setCreateModalVisible(false);
-
-      // Puedes realizar alguna lógica adicional si es necesario
-
+  
+      // Additional logic if needed
+  
     } catch (error) {
       console.error('Error while handling create ok action:', error);
     }
   };
+  
+
+  
+
+
 
 
 
@@ -267,36 +354,35 @@ const VerHistoriaClinica = () => {
   const handleAddCampo = (setIndex) => {
     // Crear una copia del estado actual
     const currentAttachmentsList = [...attachmentsList];
-  
+
     // Asegurar que el campo "campos" esté inicializado
     currentAttachmentsList[setIndex].campos = currentAttachmentsList[setIndex].campos || [];
-  
+
     // Añadir un nuevo campo al conjunto seleccionado
     currentAttachmentsList[setIndex].campos.push({ nombreCampo: '', valorCampo: '' });
-  
+
     // Actualizar el estado local y el valor del campo en el formulario
     setAttachmentsList(currentAttachmentsList);
     form.setFieldsValue({
       'Adjuntos': currentAttachmentsList,
     });
   };
-  
-  
+
+
 
   const handleRemoveCampo = (setIndex, campoIndex) => {
     // Crear una copia del estado actual
     const currentAttachmentsList = [...attachmentsList];
-  
+
     // Eliminar el campo del conjunto seleccionado
     currentAttachmentsList[setIndex].campos.splice(campoIndex, 1);
-  
+
     // Actualizar el estado local y el valor del campo en el formulario
     setAttachmentsList(currentAttachmentsList);
     form.setFieldsValue({
       'Adjuntos': currentAttachmentsList,
     });
   };
-  
 
 
   const renderFieldValueCreate = (field) => {
@@ -311,62 +397,76 @@ const VerHistoriaClinica = () => {
       case 'Attachment':
         if (field.fieldName === 'Adjuntos') {
           const attachmentsList = form.getFieldValue(field.fieldName) || [];
-
+  
           return (
             <div>
-            <Button
-              type="primary"
-              onClick={() => handleAddAttachmentField(field)}
-              style={{ marginBottom: '8px' }}
-            >
-              Añadir Adjunto
-            </Button>
-
-            {attachmentsList.map((set, currentSetIndex) => (
-              <div key={currentSetIndex} style={{ border: '1px solid #ccc', padding: '8px', marginBottom: '8px' }}>
-                <Button
-                  type="danger"
-                  onClick={() => handleRemoveAttachmentSet(currentSetIndex)}
-                  style={{ marginBottom: '8px' }}
-                >
-                  Eliminar Adjunto
-                </Button>
-
-                <Button
-                  type="primary"
-                  onClick={() => handleAddCampo(currentSetIndex)}
-                  style={{ marginRight: '8px' }}
-                >
-                  Añadir Campo
-                </Button>
-
-                {set.campos && set.campos.map((campo, campoIndex) => (
-                  <div key={campoIndex} style={{ display: 'flex', marginBottom: '8px' }}>
-                    <Form.Item
-                      label="Nombre del Campo"
-                      name={`campoNombre-${currentSetIndex}-${campoIndex}`}
-                      style={{ marginRight: '8px', flex: 1 }}
-                    >
-                      <Input />
-                    </Form.Item>
-                    <Form.Item
-                      label="Valor del Campo"
-                      name={`campoValor-${currentSetIndex}-${campoIndex}`}
-                      style={{ marginRight: '8px', flex: 1 }}
-                    >
-                      <Input />
-                    </Form.Item>
-                    <Button
-                      type="danger"
-                      onClick={() => handleRemoveCampo(currentSetIndex, campoIndex)}
-                    >
-                      Eliminar Campo
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
+              <Button
+                type="primary"
+                onClick={() => handleAddAttachmentField(field)}
+                style={{ marginBottom: '8px' }}
+              >
+                Añadir Adjunto
+              </Button>
+  
+              {attachmentsList.map((set, currentSetIndex) => (
+                <div key={currentSetIndex} style={{ border: '1px solid #ccc', padding: '8px', marginBottom: '8px' }}>
+                  <Button
+                    type="danger"
+                    onClick={() => handleRemoveAttachmentSet(currentSetIndex)}
+                    style={{ marginBottom: '8px' }}
+                  >
+                    Eliminar Adjunto
+                  </Button>
+  
+                  <Button
+                    type="primary"
+                    onClick={() => handleAddCampo(currentSetIndex)}
+                    style={{ marginRight: '8px' }}
+                  >
+                    Añadir Campo
+                  </Button>
+  
+                  {set.campos && set.campos.map((campo, campoIndex) => (
+                    <div key={campoIndex} style={{ display: 'flex', marginBottom: '8px' }}>
+                      <Form.Item
+                        label="Nombre del Campo"
+                        name={`campoNombre-${currentSetIndex}-${campoIndex}`}
+                        style={{ marginRight: '8px', flex: 1 }}
+                      >
+                        <Input
+                          onChange={(e) => {
+                            // Manejar el cambio de valor y actualizar el estado local
+                            const newValues = [...attachmentsList];
+                            newValues[currentSetIndex].campos[campoIndex].nombreCampo = e.target.value;
+                            setAttachmentsList(newValues);
+                          }}
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        label="Valor del Campo"
+                        name={`campoValor-${currentSetIndex}-${campoIndex}`}
+                        style={{ marginRight: '8px', flex: 1 }}
+                      >
+                        <Input
+                          onChange={(e) => {
+                            // Manejar el cambio de valor y actualizar el estado local
+                            const newValues = [...attachmentsList];
+                            newValues[currentSetIndex].campos[campoIndex].valorCampo = e.target.value;
+                            setAttachmentsList(newValues);
+                          }}
+                        />
+                      </Form.Item>
+                      <Button
+                        type="danger"
+                        onClick={() => handleRemoveCampo(currentSetIndex, campoIndex)}
+                      >
+                        Eliminar Campo
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           );
         } else {
           return (
@@ -390,7 +490,7 @@ const VerHistoriaClinica = () => {
         return null;
     }
   };
-
+  
 
 
   // Agrega esta función en tu componente

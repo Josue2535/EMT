@@ -70,6 +70,9 @@ namespace EMT.Models.Formats
         {
             try
             {
+                if (Fields.IsNullOrEmpty()) { 
+                    return false;
+                }
                 foreach (var field in Fields)
                 {
                     var validField = format.ValidFields.FirstOrDefault(vf => vf.FieldName == field.Name);
