@@ -10,6 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 using EMT.Services.Interface.Formats;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using System.Xml.Linq;
 
 namespace EMT.Controllers.Info
 {
@@ -258,27 +259,33 @@ namespace EMT.Controllers.Info
                 var claims = jsonToken.Claims;
 
                 // Encuentra la claim que contiene los roles
-                var rolesClaim = claims.Where(c => c.Type == "roles").ToList();
+                var rolesClaim = claims.Where(c => c.Type == "realm_access").ToList();
 
                 if (rolesClaim != null)
                 {
 
 
-                    
 
-                    // Iterar a través de los roles del usuario
                     foreach (var role in rolesClaim)
                     {
-                        var rol = _RoleRepository.GetByName(role.Value);
-                        if (rol != null)
+                        var array = role.Value.Replace("\"", "").Replace("roles", "").Replace("\\", "").Replace(":", "")
+                            .Replace("{", "").Replace("}", "").Replace("[", "").Replace("]", "").Split(",");
+                        foreach (var realmRole in array)
                         {
-                            // Obtener los pacientes asociados a este rol
-                            var pacientsForRole = _repository.GetByRole(rol.Name);
+                            var rol = _RoleRepository.GetByName(realmRole);
+                            
 
-                            // Agregar los pacientes a la lista general
-                            pacientsByUserRole.AddRange(pacientsForRole);
+                            if (rol != null)
+                            {
+                                // Obtener los pacientes asociados a este rol
+                                var pacientsForRole = _repository.GetByRole(rol.Name);
+
+                                // Agregar los pacientes a la lista general
+                                pacientsByUserRole.AddRange(pacientsForRole);
+                            }
                         }
                     }
+                   
 
                 }
 

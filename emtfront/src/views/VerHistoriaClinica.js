@@ -13,59 +13,60 @@ const VerHistoriaClinica = () => {
   const [selectedAttachment, setSelectedAttachment] = useState(null);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const navigate = useNavigate();
-
+  const [attachmentsList, setAttachmentsList] = useState([{ campos: [] }]);
+  
   const [form] = Form.useForm();
 
   const fetchData = async () => {
     try {
       console.log('Valor de pacienteId:', pacienteId);
-      if (pacienteId=== undefined) {
+      if (pacienteId === undefined) {
         // Si pacienteId no existe, navegar a la ruta clinicalhistory
         navigate('/clinicalhistory');
-      }else{
-      // Obtener datos de la historia clínica
-      const responseHistoriaClinica = await fetch(`https://localhost:7208/api/ClinicalHistory/user/${pacienteId}`, {
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${keycloak.token}`,
-        },
-      });
-  
-      if (!responseHistoriaClinica.ok) {
-        // Si es un error 404, interpretamos que la historia clínica no existe y la creamos
-        if (responseHistoriaClinica.status === 404) {
-          await createClinicalHistory();
-        } else {
-          // En caso de otros errores, lanzamos una excepción
-          throw new Error(`Error al obtener datos de la historia clínica: ${responseHistoriaClinica.statusText}`);
+      } else {
+        // Obtener datos de la historia clínica
+        const responseHistoriaClinica = await fetch(`https://localhost:7208/api/ClinicalHistory/user/${pacienteId}`, {
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${keycloak.token}`,
+          },
+        });
+
+        if (!responseHistoriaClinica.ok) {
+          // Si es un error 404, interpretamos que la historia clínica no existe y la creamos
+          if (responseHistoriaClinica.status === 404) {
+            await createClinicalHistory();
+          } else {
+            // En caso de otros errores, lanzamos una excepción
+            throw new Error(`Error al obtener datos de la historia clínica: ${responseHistoriaClinica.statusText}`);
+          }
         }
+
+        const dataHistoriaClinica = await responseHistoriaClinica.json();
+        console.log('Data recibida de la historia clínica:', dataHistoriaClinica);
+
+        // Mapear datos de la historia clínica
+        const formattedData = {
+          id: dataHistoriaClinica.id,
+          created: dataHistoriaClinica.created,
+          patientId: dataHistoriaClinica.patientId,
+          attachments: dataHistoriaClinica.attachments.map((attachment) => ({
+            id: attachment.id,
+            created: attachment.created,
+            fields: attachment.fields,
+            nameFormat: attachment.nameFormat,
+          })),
+        };
+
+        setHistoriaClinica(formattedData);
+
+        // Configurar opciones para el select (dropdown)
+        const options = formattedData.attachments.map((attachment) => ({
+          value: attachment.id,
+          label: attachment.nameFormat,
+        }));
+        setSelectOptions(options);
       }
-  
-      const dataHistoriaClinica = await responseHistoriaClinica.json();
-      console.log('Data recibida de la historia clínica:', dataHistoriaClinica);
-  
-      // Mapear datos de la historia clínica
-      const formattedData = {
-        id: dataHistoriaClinica.id,
-        created: dataHistoriaClinica.created,
-        patientId: dataHistoriaClinica.patientId,
-        attachments: dataHistoriaClinica.attachments.map((attachment) => ({
-          id: attachment.id,
-          created: attachment.created,
-          fields: attachment.fields,
-          nameFormat: attachment.nameFormat,
-        })),
-      };
-  
-      setHistoriaClinica(formattedData);
-  
-      // Configurar opciones para el select (dropdown)
-      const options = formattedData.attachments.map((attachment) => ({
-        value: attachment.id,
-        label: attachment.nameFormat,
-      }));
-      setSelectOptions(options);
-    }
     } catch (error) {
       console.error('Error al obtener datos de la historia clínica:', error);
     }
@@ -94,6 +95,34 @@ const VerHistoriaClinica = () => {
       console.error('Error al obtener datos de los formatos de historia clínica:', error);
     }
   };
+  const handleRemoveAttachmentSet = (setIndex) => {
+    // Crear una copia del estado actual
+    const currentAttachmentsList = [...attachmentsList];
+  
+    // Eliminar el conjunto seleccionado
+    currentAttachmentsList.splice(setIndex, 1);
+  
+    // Actualizar el estado local y el valor del campo en el formulario
+    setAttachmentsList(currentAttachmentsList);
+    form.setFieldsValue({
+      'Adjuntos': currentAttachmentsList,
+    });
+  };
+  const [attachmentSets, setAttachmentSets] = useState(1);
+  const handleAddAttachmentField = () => {
+    // Incrementar el número de conjuntos
+    setAttachmentSets((prevSets) => prevSets + 1);
+  
+    // Añadir un nuevo conjunto vacío al estado local del formulario
+    setAttachmentsList((prevList) => [...prevList, { campos: [] }]);
+  
+    // Actualizar el valor del campo en el formulario
+    form.setFieldsValue({
+      'Adjuntos': [...attachmentsList, { campos: [] }],
+    });
+  };
+  
+
 
   useEffect(() => {
     fetchData();
@@ -126,26 +155,49 @@ const VerHistoriaClinica = () => {
     try {
       const selectedFormatId = form.getFieldValue('selectedFormat');
       const formatInfo = clinicalHistoryFormats.find((format) => format.id === selectedFormatId);
-  
+
       // Configurar los valores iniciales del formulario
       const initialValues = {};
       formatInfo.validFields.forEach((field) => {
         initialValues[field.fieldName] = field.defaultValue || null;
       });
-  
+
+      // Agregar un conjunto vacío para el campo Attachment
+      initialValues['attachmentsList'] = [{}];
+
       form.setFieldsValue(initialValues);
-  
+
       // Abre el modal de creación con el formato seleccionado
       setCreateModalVisible(true);
     } catch (error) {
       console.error('Error al crear la historia clínica:', error);
     }
   };
-  
+
+
+
+  const handleDeleteAttachmentSet = (field) => {
+    const attachmentsList = form.getFieldValue(field.fieldName) || [];
+
+    // Eliminar el último conjunto
+    attachmentsList.pop();
+
+    // Actualizar el campo de adjuntos en el formulario
+    form.setFieldsValue({
+      [field.fieldName]: attachmentsList,
+    });
+  };
 
   const handleCreateOk = async () => {
     try {
-      // Lógica para manejar la creación de la historia clínica con el formato seleccionado
+      // Obtener los valores del formulario después de hacer clic en "OK"
+      const formData = form.getFieldsValue();
+
+      // Lógica para manejar la creación de la historia clínica con formData
+      // ... (aquí deberías añadir la lógica necesaria)
+
+      // Limpiar los campos del formulario
+      form.resetFields();
 
       // Cerrar el modal después de la creación exitosa
       setCreateModalVisible(false);
@@ -156,6 +208,8 @@ const VerHistoriaClinica = () => {
       console.error('Error while handling create ok action:', error);
     }
   };
+
+
 
   const handleCreateCancel = () => {
     // Cierra el modal si se cancela la creación
@@ -209,6 +263,42 @@ const VerHistoriaClinica = () => {
       return value;
     }
   };
+
+  const handleAddCampo = (setIndex) => {
+    // Crear una copia del estado actual
+    const currentAttachmentsList = [...attachmentsList];
+  
+    // Asegurar que el campo "campos" esté inicializado
+    currentAttachmentsList[setIndex].campos = currentAttachmentsList[setIndex].campos || [];
+  
+    // Añadir un nuevo campo al conjunto seleccionado
+    currentAttachmentsList[setIndex].campos.push({ nombreCampo: '', valorCampo: '' });
+  
+    // Actualizar el estado local y el valor del campo en el formulario
+    setAttachmentsList(currentAttachmentsList);
+    form.setFieldsValue({
+      'Adjuntos': currentAttachmentsList,
+    });
+  };
+  
+  
+
+  const handleRemoveCampo = (setIndex, campoIndex) => {
+    // Crear una copia del estado actual
+    const currentAttachmentsList = [...attachmentsList];
+  
+    // Eliminar el campo del conjunto seleccionado
+    currentAttachmentsList[setIndex].campos.splice(campoIndex, 1);
+  
+    // Actualizar el estado local y el valor del campo en el formulario
+    setAttachmentsList(currentAttachmentsList);
+    form.setFieldsValue({
+      'Adjuntos': currentAttachmentsList,
+    });
+  };
+  
+
+
   const renderFieldValueCreate = (field) => {
     switch (field.fieldType) {
       case 'String':
@@ -218,53 +308,73 @@ const VerHistoriaClinica = () => {
         return <InputNumber />;
       case 'LocalDate':
         return <DatePicker />;
-        case 'Attachment':
-          if (field.fieldName === 'attachmentsList') {
-            const attachmentsList = form.getFieldValue(field.fieldName) || [];
-    
-            return (
-              <div>
-                {attachmentsList.map((attachment, index) => (
-                  <div key={index}>
-                    {field.value.map((subfield) => (
-                      <Form.Item
-                        key={`${field.fieldName}-${index}-${subfield.name}`}
-                        label={`${field.fieldName} - ${index + 1} - ${subfield.name}`}
-                        name={`${field.fieldName}-${index}-${subfield.name}`}
-                        rules={[
-                          { required: !subfield.isOptional, message: `Por favor ingrese ${subfield.name}` },
-                        ]}
-                      >
-                        {renderFieldValueCreate(subfield)}
-                      </Form.Item>
-                    ))}
+      case 'Attachment':
+        if (field.fieldName === 'Adjuntos') {
+          const attachmentsList = form.getFieldValue(field.fieldName) || [];
+
+          return (
+            <div>
+            <Button
+              type="primary"
+              onClick={() => handleAddAttachmentField(field)}
+              style={{ marginBottom: '8px' }}
+            >
+              Añadir Adjunto
+            </Button>
+
+            {attachmentsList.map((set, currentSetIndex) => (
+              <div key={currentSetIndex} style={{ border: '1px solid #ccc', padding: '8px', marginBottom: '8px' }}>
+                <Button
+                  type="danger"
+                  onClick={() => handleRemoveAttachmentSet(currentSetIndex)}
+                  style={{ marginBottom: '8px' }}
+                >
+                  Eliminar Adjunto
+                </Button>
+
+                <Button
+                  type="primary"
+                  onClick={() => handleAddCampo(currentSetIndex)}
+                  style={{ marginRight: '8px' }}
+                >
+                  Añadir Campo
+                </Button>
+
+                {set.campos && set.campos.map((campo, campoIndex) => (
+                  <div key={campoIndex} style={{ display: 'flex', marginBottom: '8px' }}>
+                    <Form.Item
+                      label="Nombre del Campo"
+                      name={`campoNombre-${currentSetIndex}-${campoIndex}`}
+                      style={{ marginRight: '8px', flex: 1 }}
+                    >
+                      <Input />
+                    </Form.Item>
+                    <Form.Item
+                      label="Valor del Campo"
+                      name={`campoValor-${currentSetIndex}-${campoIndex}`}
+                      style={{ marginRight: '8px', flex: 1 }}
+                    >
+                      <Input />
+                    </Form.Item>
+                    <Button
+                      type="danger"
+                      onClick={() => handleRemoveCampo(currentSetIndex, campoIndex)}
+                    >
+                      Eliminar Campo
+                    </Button>
                   </div>
                 ))}
-                <Button
-                  type="dashed"
-                  onClick={() => {
-                    form.setFieldsValue({
-                      [field.fieldName]: [
-                        ...attachmentsList,
-                        field.value.reduce((acc, subfield) => {
-                          acc[subfield.name] = subfield.defaultValue || null;
-                          return acc;
-                        }, {}),
-                      ],
-                    });
-                  }}
-                >
-                  Agregar Conjunto
-                </Button>
               </div>
-            );
-          } else {
-            return (
-              <Form.Item label={field.fieldName} name={field.fieldName}>
-                <Input />
-              </Form.Item>
-            );
-          }
+            ))}
+          </div>
+          );
+        } else {
+          return (
+            <Form.Item label={field.fieldName} name={field.fieldName}>
+              <Input />
+            </Form.Item>
+          );
+        }
       case 'List':
         return field.value.map((item, index) => (
           <Form.Item
@@ -280,9 +390,26 @@ const VerHistoriaClinica = () => {
         return null;
     }
   };
-  
-  
-  
+
+
+
+  // Agrega esta función en tu componente
+  const handleAddAttachment = () => {
+    const attachmentsList = form.getFieldValue('Adjuntos') || [];
+
+    // Añadir un nuevo conjunto vacío
+    attachmentsList.push({ campos: [] });
+
+    // Actualizar el valor del campo en el formulario
+    form.setFieldsValue({
+      'Adjuntos': attachmentsList,
+    });
+  };
+
+
+
+
+
 
   if (!historiaClinica) {
     return <p>Cargando...</p>;
@@ -308,8 +435,8 @@ const VerHistoriaClinica = () => {
           </Select>
         </Form.Item>
 
-        <Button type="primary" htmlType="submit">
-          Crear
+        <Button type="primary" onClick={handleCreate} style={{ marginBottom: '16px' }}>
+          Crear Historia Clinica
         </Button>
       </Form>
 
@@ -317,42 +444,27 @@ const VerHistoriaClinica = () => {
 
       {/* Modal para la creación */}
       <Modal
-  title="Crear Historia Clínica"
-  visible={createModalVisible}
-  onOk={handleCreateOk}
-  onCancel={handleCreateCancel}
->
-  {/* Renderizar el formulario con el formato seleccionado */}
-  {form.getFieldValue('selectedFormat') && (
-    <>
-      {clinicalHistoryFormats
-        .find((format) => format.id === form.getFieldValue('selectedFormat'))
-        .validFields.map((field) => (
-          <div key={field.fieldName}>
-            <h3>{field.fieldName}</h3>
-            {renderFieldValueCreate(field)}
+        title="Crear Historia Clínica"
+        visible={createModalVisible}
+        onOk={handleCreateOk}
+        onCancel={handleCreateCancel}
+      >
+        {/* Renderizar el formulario con el formato seleccionado */}
+        {form.getFieldValue('selectedFormat') && (
+          <>
+            {clinicalHistoryFormats
+              .find((format) => format.id === form.getFieldValue('selectedFormat'))
+              .validFields.map((field) => (
+                <div key={field.fieldName}>
+                  <h3>{field.fieldName}</h3>
+                  {renderFieldValueCreate(field)}
 
-            {/* Agregar botón para agregar conjunto */}
-            {field.fieldType === 'Attachment' && (
-              <Button
-                type="dashed"
-                onClick={() => {
-                  form.setFieldsValue({
-                    [field.fieldName]: [
-                      ...(form.getFieldValue(field.fieldName) || []),
-                      [],
-                    ],
-                  });
-                }}
-              >
-                Agregar Conjunto
-              </Button>
-            )}
-          </div>
-        ))}
-    </>
-  )}
-</Modal>
+
+                </div>
+              ))}
+          </>
+        )}
+      </Modal>
 
       {selectedAttachment && (
         <Modal

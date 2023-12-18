@@ -163,7 +163,7 @@ namespace EMT.Controllers
                 var claims = jsonToken.Claims;
 
                 // Encuentra la claim que contiene los roles
-                var rolesClaim = claims.Where(c => c.Type == "roles").ToList();
+                var rolesClaim = claims.Where(c => c.Type == "realm_access").ToList();
 
                 if (rolesClaim != null)
                 {
@@ -172,12 +172,17 @@ namespace EMT.Controllers
                     // Ahora, roles contiene un array de strings con los roles del usuario
                     foreach (var role in rolesClaim)
                     {
-                        var rol = _RoleRepository.GetByName(role.Value);
-                        if (rol != null && rol.IsFieldEnabled(name, field))
+                        var array = role.Value.Replace("\"", "").Replace("roles", "").Replace("\\", "").Replace(":", "")
+                            .Replace("{", "").Replace("}", "").Replace("[", "").Replace("]", "").Split(",");
+                        foreach (var realmRole in array)
                         {
-                            return true;
+                            var rol = _RoleRepository.GetByName(realmRole);
+                            if (rol != null && rol.IsFieldEnabled(name, field))
+                            {
+                                return true;
+                            }
+                            Console.WriteLine($"Rol: {realmRole}");
                         }
-                        Console.WriteLine($"Rol: {role.Value}");
                     }
 
                 }
@@ -199,7 +204,7 @@ namespace EMT.Controllers
                 var claims = jsonToken.Claims;
 
                 // Encuentra la claim que contiene los roles
-                var rolesClaim = claims.Where(c => c.Type == "roles").ToList();
+                var rolesClaim = claims.Where(c => c.Type == "realm_access").ToList();
 
                 if (rolesClaim != null)
                 {
@@ -210,15 +215,20 @@ namespace EMT.Controllers
                         // Ahora, roles contiene un array de strings con los roles del usuario
                         foreach (var role in rolesClaim)
                         {
-                            var rol = _RoleRepository.GetByName(role.Value);
-
-                            if (rol != null)
+                            var array = role.Value.Replace("\"", "").Replace("roles", "").Replace("\\", "").Replace(":", "")
+                           .Replace("{", "").Replace("}", "").Replace("[", "").Replace("]", "").Split(",");
+                            foreach (var realmRole in array)
                             {
-                                // Agrega los valores únicos de ValidFields al resultado
-                                uniqueValues.AddRange(rol.formats());
+                                var rol = _RoleRepository.GetByName(realmRole);
+
+                                if (rol != null)
+                                {
+                                    // Agrega los valores únicos de ValidFields al resultado
+                                    uniqueValues.AddRange(rol.formats());
 
 
-                                Console.WriteLine($"Rol: {role.Value}");
+                                    Console.WriteLine($"Rol: {role.Value}");
+                                }
                             }
                         }
 

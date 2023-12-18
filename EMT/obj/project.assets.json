@@ -1691,40 +1691,24 @@
     ]
   },
   "packageFolders": {
-<<<<<<< HEAD
-    "C:\\Users\\Carlos\\.nuget\\packages\\": {}
-=======
     "C:\\Users\\Josue\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
->>>>>>> 7a89b50395620fab6643dd0956cc7f75eab1af79
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-<<<<<<< HEAD
-      "projectUniqueName": "C:\\Users\\Carlos\\Desktop\\EMT\\EMT\\EMT.csproj",
-      "projectName": "EMT",
-      "projectPath": "C:\\Users\\Carlos\\Desktop\\EMT\\EMT\\EMT.csproj",
-      "packagesPath": "C:\\Users\\Carlos\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Carlos\\Desktop\\EMT\\EMT\\obj\\",
-=======
       "projectUniqueName": "C:\\Users\\Josue\\Documents\\Proyectos\\EMT\\EMT\\EMT.csproj",
       "projectName": "EMT",
       "projectPath": "C:\\Users\\Josue\\Documents\\Proyectos\\EMT\\EMT\\EMT.csproj",
       "packagesPath": "C:\\Users\\Josue\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\Josue\\Documents\\Proyectos\\EMT\\EMT\\obj\\",
->>>>>>> 7a89b50395620fab6643dd0956cc7f75eab1af79
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-<<<<<<< HEAD
-        "C:\\Users\\Carlos\\AppData\\Roaming\\NuGet\\NuGet.Config",
-=======
         "C:\\Users\\Josue\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
->>>>>>> 7a89b50395620fab6643dd0956cc7f75eab1af79
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -1732,10 +1716,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-<<<<<<< HEAD
-=======
         "C:\\Program Files\\dotnet\\library-packs": {},
->>>>>>> 7a89b50395620fab6643dd0956cc7f75eab1af79
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -1798,12 +1779,16 @@
             "privateAssets": "all"
           }
         },
-<<<<<<< HEAD
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.402\\RuntimeIdentifierGraph.json"
-=======
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.401\\RuntimeIdentifierGraph.json"
->>>>>>> 7a89b50395620fab6643dd0956cc7f75eab1af79
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Problema al leer el archivo de caché C:\\Users\\Josue\\Documents\\Proyectos\\EMT\\EMT\\obj\\project.nuget.cache : Invalid property identifier character: <. Path 'version', line 3, position 0."
+    }
+  ]
 }
