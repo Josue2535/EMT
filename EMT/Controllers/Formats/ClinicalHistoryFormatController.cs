@@ -31,7 +31,7 @@ namespace EMT.Controllers
         [HttpGet(Name = "GetClinicalHistoryFormats")]
         public IEnumerable<ClinicalHistoryFormat> Get()
         {
-            if (hasAccess("ClinicHistoryFormat", "get"))
+            if (hasAccess("ClinicalHistoryFormat", "get"))
             {
                 // Implementa la lógica para obtener todos los formatos
                 var formats = _clinicalHistoryFormatRepository.GetAll();
@@ -46,7 +46,7 @@ namespace EMT.Controllers
         [HttpGet("GetByRole")]
         public IEnumerable<ClinicalHistoryFormat> GetByRole()
         {
-            if (hasAccess("ClinicHistoryFormat", "get"))
+            if (hasAccess("ClinicalHistoryFormat", "get"))
             {
                 // Implementa la lógica para obtener todos los formatos
                 var formats = _clinicalHistoryFormatRepository.GetAll(GetFormats());
@@ -62,7 +62,7 @@ namespace EMT.Controllers
         [HttpGet("{id}", Name = "GetClinicalHistoryFormatById")]
         public IActionResult Get(string id)
         {
-            if (hasAccess("ClinicHistoryFormat", "get"))
+            if (hasAccess("ClinicalHistoryFormat", "get"))
             {
 
                 // Implementa la lógica para obtener un formato por su ID
@@ -85,7 +85,7 @@ namespace EMT.Controllers
         {
             try
             {
-                if (hasAccess("ClinicHistoryFormat", "post"))
+                if (hasAccess("ClinicalHistoryFormat", "post"))
                 {
                     // Convierte manualmente el JSON a un objeto ClinicalHistoryFormat
                     var clinicalHistoryFormat = ClinicalHistoryFormat.GetFromJson(json);
@@ -110,7 +110,7 @@ namespace EMT.Controllers
         [HttpPut("{id}", Name = "UpdateClinicalHistoryFormat")]
         public IActionResult Put(string id, [FromBody] JsonObject json)
         {
-            if (hasAccess("ClinicHistoryFormat", "put"))
+            if (hasAccess("ClinicalHistoryFormat", "put"))
             {
                 // Implementa la lógica para actualizar un formato existente
                 var existingFormat = _clinicalHistoryFormatRepository.GetById(id);

@@ -35,7 +35,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Pacient", "get")) 
+                if (!hasAccess("Patient", "get")) 
                 { 
                     return Unauthorized();
                 }
@@ -55,7 +55,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Pacient", "get"))
+                if (!hasAccess("Patient", "get"))
                 {
                     return Unauthorized();
                 }
@@ -78,7 +78,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Pacient", "get"))
+                if (!hasAccess("Patient", "get"))
                 {
                     return Unauthorized();
                 }
@@ -100,7 +100,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Pacient", "get"))
+                if (!hasAccess("Patient", "get"))
                 {
                     return Unauthorized();
                 }
@@ -126,7 +126,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Pacient", "post"))
+                if (!hasAccess("Patient", "post"))
                 {
                     return Unauthorized();
                 }
@@ -152,7 +152,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Pacient", "put"))
+                if (!hasAccess("Patient", "put"))
                 {
                     return Unauthorized();
                 }
@@ -183,7 +183,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Pacient", "delete"))
+                if (!hasAccess("Patient", "delete"))
                 {
                     return Unauthorized();
                 }

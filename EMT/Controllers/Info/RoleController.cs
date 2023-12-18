@@ -85,7 +85,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Role", "Post"))
+                if (!hasAccess("Role", "post"))
                 {
                     return Unauthorized();
                 }
@@ -106,7 +106,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Role", "Put"))
+                if (!hasAccess("Role", "put"))
                 {
                     return Unauthorized();
                 }
@@ -133,7 +133,7 @@ namespace EMT.Controllers.Info
         {
             try
             {
-                if (!hasAccess("Role", "Delete"))
+                if (!hasAccess("Role", "delete"))
                 {
                     return Unauthorized();
                 }

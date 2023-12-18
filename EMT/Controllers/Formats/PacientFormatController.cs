@@ -33,7 +33,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (hasAccess("PacientFormat", "get"))
+                if (hasAccess("PatientFormat", "get"))
                 {
                     var formats = _repository.GetAll();
                     return Ok(formats);
@@ -55,7 +55,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (hasAccess("PacientFormat", "get"))
+                if (hasAccess("PatientFormat", "get"))
                 {
                     var format = _repository.GetById(id);
                     if (format == null)
@@ -81,7 +81,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (hasAccess("PacientFormat", "post"))
+                if (hasAccess("PatientFormat", "post"))
                 {
                     if (_repository.GetAll().ToList().IsNullOrEmpty())
                     {
@@ -112,7 +112,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (hasAccess("PacientFormat", "put"))
+                if (hasAccess("PatientFormat", "put"))
                 {
                     var updatePacientFormat = PacientFormat.GetFromJson(updatedFormat);
                     var existingFormat = _repository.GetById(id);
@@ -143,7 +143,7 @@ namespace EMT.Controllers.Formats
         {
             try
             {
-                if (hasAccess("PacientFormat", "put"))
+                if (hasAccess("PatientFormat", "put"))
                 {
                     var format = _repository.GetById(id);
                     if (format == null)

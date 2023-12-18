@@ -6,6 +6,11 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 
+const date = new Intl.DateTimeFormat('es-CO', {
+  dateStyle: 'full',
+  timeStyle: 'short',
+})
+
 const VerHistoriaClinica = () => {
   const location = useLocation();
   const pacienteId = location.state?.pacienteId;
@@ -592,7 +597,7 @@ const VerHistoriaClinica = () => {
     <div>
       <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>Historia Clínica</h2>
       <p style={{ fontSize: '18px' }}>ID del Paciente: {pacienteId}</p>
-      <p style={{ fontSize: '18px' }}>Fecha de Creación: {historiaClinica.created}</p>
+      <p style={{ fontSize: '18px' }}>Fecha de Creación: {date.format(new Date(historiaClinica.created))}</p>
 
       <Form form={form} onFinish={handleCreate}>
         <Form.Item

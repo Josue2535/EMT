@@ -1,12 +1,11 @@
-// src/index.js o tu archivo de entrada principal
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import Routes from './routes/routes'
+import { ReactKeycloakProvider } from '@react-keycloak/web'
+import keycloak from './util/keycloak'
 
-
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <ReactKeycloakProvider authClient={keycloak}>
+    <Routes />
+  </ReactKeycloakProvider>
+)
