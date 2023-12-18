@@ -192,75 +192,60 @@ const VerHistoriaClinica = () => {
 
   const handleCreateOk = async () => {
     try {
-      // Get the selected format ID from the form
+      // Validar los campos del formulario antes de obtener sus valores
+      await form.validateFields();
+  
+      // Obtener el valor del campo 'selectedFormat'
       const selectedFormatId = form.getFieldValue('selectedFormat');
   
-      // Find the selected format details
+      // Encontrar los detalles del formato seleccionado
       const selectedFormat = clinicalHistoryFormats.find((format) => format.id === selectedFormatId);
   
-      // Check if selectedFormat is undefined
+      // Verificar si selectedFormat es indefinido
       if (!selectedFormat) {
         throw new Error('Selected format is undefined');
       }
   
-      // Initialize the JSON structure
+      // Inicializar la estructura JSON
       const jsonPayload = {
         nameFormat: selectedFormat.name,
         fields: [],
       };
   
-      // Use form.getFieldsValue() to get all form values
-      const formValues = form.getFieldsValue();
-  
-      console.log('formValues:', formValues); // Log form values for debugging
-  
-      // Iterate through the valid fields of the selected format
+      // Iterar a través de los campos válidos del formato seleccionado
       for (const field of selectedFormat.validFields) {
         const fieldName = field.fieldName;
   
-        // Get the field value from the formValues object
-        const fieldValue = formValues[fieldName];
+        // Obtener el valor del campo del objeto formValues
+        const fieldValue = form.getFieldValue(fieldName);
   
         console.log(`Processing field ${fieldName}, value:`, fieldValue); // Log field values for debugging
   
-        // Check if fieldValue is undefined or null
+        // Verificar si fieldValue es indefinido o nulo
         if (fieldValue !== undefined && fieldValue !== null) {
-          // Determine the type of field and format accordingly
+          // Determinar el tipo de campo y formatear según sea necesario
           if (field.fieldType === 'Attachment' && fieldName === 'Adjuntos') {
-            // Handle Attachment field
+            // Manejar el campo Adjuntos
             const attachmentList = fieldValue.map((set) => {
-              // Check if set.campos is an array before using map
-              if (Array.isArray(set.campos)) {
-                return set.campos.map((campo) => {
-                  // Check if campo is an array before using reduce
-                  if (Array.isArray(campo)) {
-                    return campo.reduce((acc, { nombreCampo, valorCampo }) => {
-                      acc.push({ name: nombreCampo, value: valorCampo });
-                      return acc;
-                    }, []);
-                  } else {
-                    console.error('Invalid campo format:', campo);
-                    return [];
-                  }
-                });
-              } else {
-                console.error('Invalid set.campos format:', set.campos);
-                return [];
-              }
+              return {
+                campos: set.campos.map((campo) => ({
+                  nombreCampo: campo.nombreCampo,
+                  valorCampo: campo.valorCampo,
+                })),
+              };
             });
-  
             jsonPayload.fields.push({ name: fieldName, value: attachmentList });
           } else {
-            // Handle other field types (String, Number, Integer, etc.)
+            // Manejar otros tipos de campos (String, Number, Integer, etc.)
             jsonPayload.fields.push({ name: fieldName, value: fieldValue });
           }
         }
       }
   
-      // Wait for fetchData to complete before proceeding
+      // Esperar a que fetchData se complete antes de continuar
       await fetchData();
       console.log('JSON Payload:', jsonPayload);
-      // Send the data to the server
+      // Enviar los datos al servidor
       const response = await fetch(`https://localhost:7208/api/ClinicalHistory/${pacienteId}`, {
         method: 'POST',
         headers: {
@@ -275,16 +260,16 @@ const VerHistoriaClinica = () => {
         throw new Error(`Error while creating clinical history: ${response.statusText}`);
       }
   
-      // After successful creation, reload the information (fetchData is called again to get updated data)
+      // Después de la creación exitosa, recargar la información (fetchData se llama nuevamente para obtener datos actualizados)
       await fetchData();
   
-      // Clear the form fields
+      // Limpiar los campos del formulario
       form.resetFields();
   
-      // Close the modal after successful creation
+      // Cerrar el modal después de la creación exitosa
       setCreateModalVisible(false);
   
-      // Additional logic if needed
+      // Lógica adicional si es necesario
   
     } catch (error) {
       console.error('Error while handling create ok action:', error);
