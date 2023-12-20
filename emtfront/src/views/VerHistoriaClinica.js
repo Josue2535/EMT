@@ -198,6 +198,11 @@ const VerHistoriaClinica = () => {
       title: 'Fecha de Creación',
       dataIndex: 'created',
       key: 'created',
+      render: (text) => (
+        <span>
+          {date.format((new Date(text)))}
+        </span>
+      ),
     },
     {
       title: 'Acciones',
@@ -283,7 +288,7 @@ const VerHistoriaClinica = () => {
         // Obtener el valor del campo del objeto formValues
         let fieldValue;
 
-        if (field.fieldType === 'Attachment' && fieldName === 'Adjuntos') {
+        if (field.fieldType === 'Attachment' ) {
           fieldValue = form.getFieldValue(fieldName) || [];
         } else {
           fieldValue = combinedValues[fieldName + 'value'];
@@ -293,7 +298,7 @@ const VerHistoriaClinica = () => {
         // Verificar si fieldValue es indefinido o nulo
         if (fieldValue !== undefined && fieldValue !== null) {
           // Determinar el tipo de campo y formatear según sea necesario
-          if (field.fieldType === 'Attachment' && fieldName === 'Adjuntos') {
+          if (field.fieldType === 'Attachment') {
             // Manejar el campo Adjuntos
             const attachmentsList = form.getFieldValue(field.fieldName) || [];
             const attachmentList = attachmentsList.map((set) => {
@@ -596,7 +601,6 @@ const VerHistoriaClinica = () => {
   return (
     <div>
       <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>Historia Clínica</h2>
-      <p style={{ fontSize: '18px' }}>ID del Paciente: {pacienteId}</p>
       <p style={{ fontSize: '18px' }}>Fecha de Creación: {date.format(new Date(historiaClinica.created))}</p>
 
       <Form form={form} onFinish={handleCreate}>

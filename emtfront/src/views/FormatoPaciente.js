@@ -2,13 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Input, Checkbox, Table, Space, Form } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useKeycloak } from '@react-keycloak/web';
+import { Select } from 'antd';
 import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';
-
+const date = new Intl.DateTimeFormat('es-CO', {
+  dateStyle: 'full',
+  timeStyle: 'short',
+})
 const FormatoPaciente = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [formatos, setFormatos] = useState([]);
   const { keycloak } = useKeycloak();
-
+  const { Option } = Select;
   const [form] = Form.useForm();
 
   const [formatoData, setFormatoData] = useState({
@@ -18,7 +22,10 @@ const FormatoPaciente = () => {
     description: '',
     validFields: [],
   });
-
+  const date = new Intl.DateTimeFormat('es-CO', {
+    dateStyle: 'full',
+    timeStyle: 'short',
+  })
   const [newField, setNewField] = useState({
     fieldType: '',
     fieldName: '',
@@ -84,7 +91,7 @@ const FormatoPaciente = () => {
         ? `https://localhost:7208/api/PacientFormat/${formatoData.id}`
         : 'https://localhost:7208/api/PacientFormat';
       const method = formatoData.id ? 'PUT' : 'POST';
-  
+
       formatoData.validFields.forEach(validField => {
         validField.fieldOptions = validField.fieldOptions.filter(option => option !== '');
       });
@@ -92,7 +99,7 @@ const FormatoPaciente = () => {
       const requestBody = {
         validFields: formatoData.validFields,
       };
-  
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -101,13 +108,13 @@ const FormatoPaciente = () => {
         },
         body: JSON.stringify(requestBody),
       });
-  
+
       if (!response.ok) {
         throw new Error(
           `Error al ${formatoData.id ? 'editar' : 'crear'} el formato: ${response.statusText}`
         );
       }
-  
+
       // If editing or creating is successful, reload the list of formats
       const updatedFormatosResponse = await fetch('https://localhost:7208/api/PacientFormat', {
         headers: {
@@ -115,18 +122,18 @@ const FormatoPaciente = () => {
           Authorization: `Bearer ${keycloak.token}`,
         },
       });
-  
+
       if (!updatedFormatosResponse.ok) {
         throw new Error(`Error al obtener datos: ${updatedFormatosResponse.statusText}`);
       }
-  
+
       const updatedFormatosData = await updatedFormatosResponse.json();
       setFormatos(updatedFormatosData);
-  
+
       // Close the creation modal and reset form fields
       setIsModalVisible(false);
       form.resetFields();
-  
+
       // Reset formatoData state for new creations
       if (!formatoData.id) {
         setFormatoData({
@@ -167,14 +174,21 @@ const FormatoPaciente = () => {
   };
 
   const handleChangeField = (e, index, field) => {
-    const { value } = e.target;
+    const { value, checked } = e.target;
     const updatedFields = [...formatoData.validFields];
-    updatedFields[index][field] = value;
+
+    if (field === 'isOptional') {
+      updatedFields[index][field] = checked;
+    } else {
+      updatedFields[index][field] = value;
+    }
+
     setFormatoData((prevData) => ({
       ...prevData,
       validFields: updatedFields,
     }));
   };
+
 
   const handleAddOption = (index) => {
     const updatedFields = [...formatoData.validFields];
@@ -184,6 +198,7 @@ const FormatoPaciente = () => {
       validFields: updatedFields,
     }));
   };
+
 
   const handleChangeOption = (fieldIndex, optionIndex, value) => {
     const updatedFields = [...formatoData.validFields];
@@ -251,13 +266,18 @@ const FormatoPaciente = () => {
       console.error('Error al eliminar el formato:', error);
     }
   };
-  
+
 
   const columns = [
     {
       title: 'Fecha de Creación',
       dataIndex: 'creationDate',
       key: 'creationDate',
+      render: (text) => (
+        <span>
+          {date.format((new Date(text)))}
+        </span>
+      ),
     },
     {
       title: 'Acciones',
@@ -307,16 +327,21 @@ const FormatoPaciente = () => {
                 />
               </Form.Item>
               <Form.Item label="Tipo de Campo" required>
-                <Input
+                <Select
                   value={field.fieldType}
-                  onChange={(e) => handleChangeField(e, index, 'fieldType')}
-                  placeholder="Tipo de Campo"
-                />
+                  onChange={(value) => handleChangeField({ target: { value } }, index, 'fieldType')}
+                  placeholder="Seleccionar Tipo de Campo"
+                >
+                  <Option value="String">Texto</Option>
+                  <Option value="LocalDate">Fecha</Option>
+                  <Option value="Number">Números</Option>
+                </Select>
               </Form.Item>
-              <Form.Item label="Opcional" name="isOptional" valuePropName="checked">
+              <Form.Item label="Opcional">
                 <Checkbox
                   checked={field.isOptional}
                   onChange={(e) => handleChangeField(e, index, 'isOptional')}
+                  name={`isOptional-${index}`} // Use a unique name for each checkbox
                 />
               </Form.Item>
               <Form.Item label="Opciones" name="fieldOptions">

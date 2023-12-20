@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Button, Modal, Form, Input, Table, Space, Select, Popconfirm, message } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useKeycloak } from '@react-keycloak/web';
+import { Select as AntSelect } from 'antd';
 
+const { Option: AntOption } = AntSelect;
 const { Option } = Select;
-
 const Rol = () => {
   const { keycloak } = useKeycloak();
   const [roles, setRoles] = useState([]);
@@ -222,9 +223,17 @@ const Rol = () => {
                         {...restField}
                         name={[name, 'name']}
                         fieldKey={[fieldKey, 'name']}
-                        rules={[{ required: true, message: 'Ingrese el nombre del campo válido' }]}
+                        rules={[{ required: true, message: 'Seleccione al menos una acción' }]}
+                        style={{ display: 'inline-block', marginLeft: '8px', width: '200px' }}
                       >
-                        <Input placeholder="Nombre del Campo" />
+                        <Select  placeholder="Seleccione acciones" style={{ width: '100%', overflow: 'auto' }}>
+                          <Option value="ClinicalHistoryFormat">Formato Historia Clinica</Option>
+                          <Option value="ClinicalHistory">Historia Clinica</Option>
+                          <Option value="PatientFormat">Formato Paciente</Option>
+                          <Option value="Patient">Paciente</Option>
+                          <Option value="Role">Role</Option>
+                          <Option value="formats">Formatos</Option>
+                        </Select>
                       </Form.Item>
                       <Form.Item
                         {...restField}

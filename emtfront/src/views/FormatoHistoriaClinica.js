@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Input, Checkbox, Table, Space, Form } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Select } from 'antd';
 import { useKeycloak } from '@react-keycloak/web';
+import AddIcon from '@mui/icons-material/Add';
 
 const FormatoHistoriaClinica = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [formatos, setFormatos] = useState([]);
   const { keycloak } = useKeycloak();
-
+  const { Option } = Select;
   const [form] = Form.useForm();
 
   const [formatoData, setFormatoData] = useState({
@@ -89,13 +91,13 @@ const FormatoHistoriaClinica = () => {
         ? `https://localhost:7208/ClinicalHistoryFormat/${formatoData.id}`
         : 'https://localhost:7208/ClinicalHistoryFormat';
       const method = formatoData.id ? 'PUT' : 'POST';
-  
+
       const requestBody = {
         validFields: formatoData.validFields,
         name: values.name,
         description: values.description,
       };
-  
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -104,13 +106,13 @@ const FormatoHistoriaClinica = () => {
         },
         body: JSON.stringify(requestBody),
       });
-  
+
       if (!response.ok) {
         throw new Error(
           `Error al ${formatoData.id ? 'editar' : 'crear'} el formato: ${response.statusText}`
         );
       }
-  
+
       // If editing or creating is successful, reload the list of formats
       const updatedFormatosResponse = await fetch('https://localhost:7208/ClinicalHistoryFormat', {
         headers: {
@@ -118,18 +120,18 @@ const FormatoHistoriaClinica = () => {
           Authorization: `Bearer ${keycloak.token}`,
         },
       });
-  
+
       if (!updatedFormatosResponse.ok) {
         throw new Error(`Error al obtener datos: ${updatedFormatosResponse.statusText}`);
       }
-  
+
       const updatedFormatosData = await updatedFormatosResponse.json();
       setFormatos(updatedFormatosData);
-  
+
       // Close the creation modal and reset form fields
       setIsModalVisible(false);
       form.resetFields();
-  
+
       // Reset formatoData state for new creations
       if (!formatoData.id) {
         setFormatoData({
@@ -234,7 +236,7 @@ const FormatoHistoriaClinica = () => {
   const handleDelete = async (index) => {
     try {
       const formatToDelete = formatos[index];
-  
+
       // Send a request to delete the format using the format ID and Keycloak token
       const deleteResponse = await fetch(`https://localhost:7208/ClinicalHistoryFormat/${formatToDelete.id}`, {
         method: 'DELETE',
@@ -242,18 +244,18 @@ const FormatoHistoriaClinica = () => {
           Authorization: `Bearer ${keycloak.token}`,
         },
       });
-  
+
       if (!deleteResponse.ok) {
         throw new Error(`Error al eliminar el formato: ${deleteResponse.statusText}`);
       }
-  
+
       // If deletion is successful, update the list of formats
       setFormatos(formatos.filter((formato, i) => i !== index));
     } catch (error) {
       console.error('Error al eliminar el formato:', error);
     }
   };
-  
+
 
   const columns = [
     {
@@ -281,7 +283,7 @@ const FormatoHistoriaClinica = () => {
   return (
     <div>
       <h2>Formato de Historia Clínica</h2>
-      <Button type="primary" onClick={() => showModal()}>
+      <Button type="primary" onClick={() => showModal()} >
         Crear
       </Button>
 
@@ -325,11 +327,17 @@ const FormatoHistoriaClinica = () => {
                 />
               </Form.Item>
               <Form.Item label="Tipo de Campo" required>
-                <Input
+                <Select
                   value={field.fieldType}
-                  onChange={(e) => handleChangeField(e, index, 'fieldType')}
-                  placeholder="Tipo de Campo"
-                />
+                  onChange={(value) => handleChangeField({ target: { value } }, index, 'fieldType')}
+                  placeholder="Seleccionar Tipo de Campo"
+                >
+                  <Option value="String">Texto</Option>
+                  <Option value="LocalDate">Fecha</Option>
+                  <Option value="Number">Números</Option>
+                  <Option value="Image">Imagen</Option>
+                  <Option value="Attachment">Adjuntos</Option>
+                </Select>
               </Form.Item>
               <Form.Item label="Opcional" name="isOptional" valuePropName="checked">
                 <Checkbox

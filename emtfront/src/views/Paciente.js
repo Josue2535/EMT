@@ -3,7 +3,10 @@ import { Table, Button, Modal, Form, Input, message, Space, Select } from 'antd'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useKeycloak } from '@react-keycloak/web';
 import { getPacientes, createPaciente, updatePaciente, deletePaciente, getPacientFormat } from '../api';
-
+const date = new Intl.DateTimeFormat('es-CO', {
+  dateStyle: 'full',
+  timeStyle: 'short',
+})
 const Paciente = () => {
   const { keycloak } = useKeycloak();
   const [pacientes, setPacientes] = useState([]);
@@ -70,16 +73,20 @@ const Paciente = () => {
 
   const handleEdit = async (paciente) => {
     setEditingPaciente(paciente);
-    form.setFieldsValue({
+    const fieldsValue = {
       id: paciente.id,
-      created: paciente.created,
+      created: paciente.created ? new Date(paciente.created).toISOString().split('T')[0] : null,
       role: paciente.role,
       isEnabled: paciente.isEnabled,
       ...paciente.fieldsList.reduce((acc, field) => {
         acc[field.name] = field.value;
+        if (field.fieldType === 'LocalDate') {
+          acc[field.name] = field.value ? new Date(field.value).toISOString().split('T')[0] : null;
+        }
         return acc;
       }, {}),
-    });
+    };
+    form.setFieldsValue(fieldsValue);
     setModalVisible(true);
   };
 
@@ -124,7 +131,7 @@ const Paciente = () => {
       }));
 
       const pacienteData = {
-        Role: values.role,
+        Role: values.role,  // Asegúrate de que 'role' esté presente en formatoPaciente
         FieldsList: fieldsList,
         PersonalInformationId: "someId",  // Cambia "someId" según sea necesario
         IsEnabled: values.isEnabled,
@@ -181,8 +188,13 @@ const Paciente = () => {
   };
 
   const columns = [
-    { title: 'ID', dataIndex: 'id', key: 'id' },
-    { title: 'Fecha de Creación', dataIndex: 'created', key: 'created' },
+    {
+      title: 'Fecha de Creación', dataIndex: 'created', key: 'created', render: (text) => (
+        <span>
+          {date.format((new Date(text)))}
+        </span>
+      ),
+    },
     { title: 'Rol', dataIndex: 'role', key: 'role' },
     { title: 'Habilitado', dataIndex: 'isEnabled', key: 'isEnabled', render: (isEnabled) => isEnabled ? 'Sí' : 'No' },
     {
@@ -214,19 +226,19 @@ const Paciente = () => {
         <Form form={form} layout="vertical" name="paciente_form">
           {formatoPaciente.length > 0 && (
             <>
-              {!editingPaciente && (
-                <>
-                  <Form.Item name="role" label="Rol">
-                    <Input />
-                  </Form.Item>
-                  <Form.Item name="isEnabled" label="Habilitado">
-                    <Select>
-                      <Select.Option value={true}>Sí</Select.Option>
-                      <Select.Option value={false}>No</Select.Option>
-                    </Select>
-                  </Form.Item>
-                </>
-              )}
+
+              <>
+                <Form.Item name="role" label="Rol">
+                  <Input />
+                </Form.Item>
+                <Form.Item name="isEnabled" label="Habilitado">
+                  <Select>
+                    <Select.Option value={true}>Sí</Select.Option>
+                    <Select.Option value={false}>No</Select.Option>
+                  </Select>
+                </Form.Item>
+              </>
+
               {formatoPaciente.map((field) => (
                 <Form.Item
                   key={field.fieldName}
@@ -244,10 +256,13 @@ const Paciente = () => {
                     </Select>
                   ) : field.fieldType === 'String' ? (
                     <Input />
-                  ) : field.fieldType === 'Integer' ||  field.fieldType === 'Number'? (
+                  ) : field.fieldType === 'Integer' || field.fieldType === 'Number' ? (
                     <Input type="number" />
                   ) : field.fieldType === 'LocalDate' ? (
-                    <Input type="date" />
+                    <Input
+                      type="date"
+                      
+                    />
                   ) : null}
                 </Form.Item>
               ))}
