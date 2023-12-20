@@ -83,10 +83,10 @@ const VerHistoriaClinica = () => {
   const handleDownloadPDF = async () => {
     try {
       const attachmentDetails = selectedAttachment;
-  
+
       // Crear un contenedor para el HTML que deseas convertir a PDF
       const container = document.createElement('div');
-  
+
       // Agregar la información del JSON al contenedor
       container.innerHTML = `
         <h2>${attachmentDetails.nameFormat}</h2>
@@ -97,38 +97,38 @@ const VerHistoriaClinica = () => {
           ${attachmentDetails.fields.map((field) => `<li>${field.name}: ${field.value}</li>`).join('')}
         </ul>
       `;
-  
+
       // Esperar a que el contenedor esté en el DOM antes de utilizar html2canvas
       document.body.appendChild(container);
-  
+
       // Utilizar html2canvas para capturar el contenido del contenedor como una imagen
       const canvas = await html2canvas(container, { scale: 15 });
-  
+
       // Crear un objeto jsPDF y agregar la imagen como una página
       const pdf = new jsPDF({ unit: 'mm', format: 'A4' }); // Ajusta el formato según tus necesidades
       pdf.setFontSize(18);
       pdf.setTextColor(0, 18, 13);
       pdf.text('HISTORIA CLINICA', 105, 15, { align: 'center' }); // Ajusta la posición según tus necesidades
-  
+
       // Iterar sobre los campos y agregarlos al PDF
       let currentY = 40; // Ajusta la posición inicial según tus necesidades
       attachmentDetails.fields.forEach((field) => {
         pdf.text(`${field.name}: ${field.value}`, 10, currentY);
         currentY += 10; // Ajusta el espaciado vertical según tus necesidades
       });
-  
+
       // Descargar el PDF con el nombre deseado
       pdf.save('formulario.pdf');
-  
+
       setSelectedAttachment(null);
-  
+
       // Remover el contenedor del DOM después de usarlo si es necesario
       document.body.removeChild(container);
     } catch (error) {
       console.error('Error al generar el PDF:', error);
     }
   };
-  
+
   const fetchClinicalHistoryFormats = async () => {
     try {
       // Obtener datos de los formatos de historia clínica
@@ -288,7 +288,7 @@ const VerHistoriaClinica = () => {
         // Obtener el valor del campo del objeto formValues
         let fieldValue;
 
-        if (field.fieldType === 'Attachment' ) {
+        if (field.fieldType === 'Attachment') {
           fieldValue = form.getFieldValue(fieldName) || [];
         } else {
           fieldValue = combinedValues[fieldName + 'value'];
@@ -405,10 +405,40 @@ const VerHistoriaClinica = () => {
     } else if (typeof value === 'object' && value !== null) {
       return renderFieldValue(value.value);
     } else {
-      return value;
+      if (isBase64(value)) {
+        try {
+          // Intentar convertir el valor a una imagen
+          const imageElement = (
+            <img
+              src={`data:image/png;base64,${value}`}
+              alt="Attachment Image"
+              style={{ maxWidth: '100%', maxHeight: '400px', marginBottom: '8px' }}
+            />
+          );
+
+          // Si la conversión tiene éxito, mostrar la imagen
+          return imageElement;
+        } catch (error) {
+          // Si hay un error, retornar el valor original
+          return (
+            <p style={{ marginLeft: '16px', fontSize: '16px' }}>{value}</p>
+          );
+        }
+      } else {
+        // Si no es una cadena base64, mostrar el valor original
+        return value;
+      }
     }
   };
-
+  const isBase64 = (value) => {
+    try {
+      // Decodificar la cadena base64 y luego codificarla nuevamente
+      // Si la cadena decodificada y codificada es igual a la cadena original, es válida
+      return btoa(atob(value)) === value;
+    } catch (error) {
+      return false; // Si hay un error al decodificar/codificar, la cadena no es base64 válida
+    }
+  };
   const handleAddCampo = (setIndex) => {
     // Crear una copia del estado actual
     const currentAttachmentsList = [...attachmentsList];
@@ -558,19 +588,41 @@ const VerHistoriaClinica = () => {
             </Form.Item>
           );
         }
-      case 'List':
-        return field.value.map((item, index) => (
+      case 'Image':
+        return (
           <Form.Item
-            key={`${field.fieldName}-${index}`}
-            label={`${field.fieldName} - ${index + 1}`}
-            name={`${field.fieldName}-${index}`}
+            label={field.fieldName}
+            name={field.fieldName + 'value'}
+            key={field.fieldName + 'value'}
+            rules={[{ required: true, message: `Please upload ${field.fieldName}!` }]}
           >
-            <Input />
+            <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, field.fieldName)} />
           </Form.Item>
-        ));
+        );
       // Añadir casos adicionales según sea necesario
       default:
         return null;
+    }
+  };
+  const handleImageUpload = async (e, fieldName) => {
+    try {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        // Convertir la imagen a cadena Base64 y almacenarla en el estado local (fieldValues)
+        const base64String = reader.result.split(',')[1];
+        setFieldValues((prevValues) => ({
+          ...prevValues,
+          [`${fieldName}value`]: base64String,
+        }));
+      };
+
+      if (file) {
+        reader.readAsDataURL(file);
+      }
+    } catch (error) {
+      console.error('Error al cargar la imagen:', error);
     }
   };
 
@@ -628,7 +680,7 @@ const VerHistoriaClinica = () => {
       <Modal
         title="Crear Historia Clínica"
         visible={createModalVisible}
-        onOk={handleCreateOk} 
+        onOk={handleCreateOk}
         okText="Guardar"
         onCancel={handleCreateCancel}
       >
@@ -652,7 +704,7 @@ const VerHistoriaClinica = () => {
           title="Detalles del Adjunto"
           visible={true}
           onOk={() => handleDownloadPDF()}
-          okText = "Descargar PDF"
+          okText="Descargar PDF"
           onCancel={() => setSelectedAttachment(null)}
         >
           <p style={{ fontSize: '18px', fontWeight: 'bold' }}>ID: {selectedAttachment.id}</p>

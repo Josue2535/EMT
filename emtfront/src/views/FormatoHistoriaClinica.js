@@ -176,9 +176,15 @@ const FormatoHistoriaClinica = () => {
   };
 
   const handleChangeField = (e, index, field) => {
-    const { value } = e.target;
+    const { value, checked } = e.target;
     const updatedFields = [...formatoData.validFields];
-    updatedFields[index][field] = value;
+
+    if (field === 'isOptional') {
+      updatedFields[index][field] = checked;
+    } else {
+      updatedFields[index][field] = value;
+    }
+
     setFormatoData((prevData) => ({
       ...prevData,
       validFields: updatedFields,
@@ -339,10 +345,11 @@ const FormatoHistoriaClinica = () => {
                   <Option value="Attachment">Adjuntos</Option>
                 </Select>
               </Form.Item>
-              <Form.Item label="Opcional" name="isOptional" valuePropName="checked">
+              <Form.Item label="Opcional">
                 <Checkbox
                   checked={field.isOptional}
                   onChange={(e) => handleChangeField(e, index, 'isOptional')}
+                  name={`isOptional-${index}`} // Use a unique name for each checkbox
                 />
               </Form.Item>
               <Form.Item label="Opciones" name="fieldOptions">
