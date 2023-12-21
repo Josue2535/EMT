@@ -3,6 +3,12 @@ import { Table, Button, Modal, Form, Input, message, Space, Select } from 'antd'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useKeycloak } from '@react-keycloak/web';
 import { getPacientes, createPaciente, updatePaciente, deletePaciente, getPacientFormat } from '../api';
+import FabActionButton from '../components/FabActionButton';
+import AddIcon from '@mui/icons-material/Add';
+import CancelIcon from '@mui/icons-material/Cancel';
+import SaveIcon from '@mui/icons-material/Save';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 const date = new Intl.DateTimeFormat('es-CO', {
   dateStyle: 'full',
   timeStyle: 'short',
@@ -202,8 +208,8 @@ const Paciente = () => {
       key: 'acciones',
       render: (_, record) => (
         <Space>
-          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-          <Button icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)} />
+          <FabActionButton icon={<EditIcon />} handleClick={() => handleEdit(record)} color={"info"}/>
+          <FabActionButton icon={<DeleteIcon />} handleClick={() => handleDelete(record.id)} color={"error"} />
         </Space>
       ),
     },
@@ -212,15 +218,14 @@ const Paciente = () => {
   return (
     <div>
       <h2>Pacientes</h2>
-      <Button type="primary" onClick={handleCreate} style={{ marginBottom: '16px' }}>
-        Crear Paciente
-      </Button>
+      <FabActionButton icon={<AddIcon></AddIcon>} handleClick={handleCreate} color={"secondary"}/>
+        
       <Table dataSource={pacientes} columns={columns} rowKey="id" />
 
       <Modal
         title={editingPaciente ? 'Editar Paciente' : 'Crear Paciente'}
         visible={modalVisible}
-        onOk={handleModalOk}
+        footer={null}
         onCancel={handleModalCancel}
       >
         <Form form={form} layout="vertical" name="paciente_form">
@@ -269,6 +274,22 @@ const Paciente = () => {
             </>
           )}
         </Form>
+        {/* Botones personalizados */}
+        <div style={{ textAlign: 'right' }}>
+
+          <FabActionButton
+            color="error" // O ajusta el color deseado
+            handleClick={
+              handleModalCancel
+            }
+            icon={<CancelIcon />} // Ajusta el ícono deseado
+          />
+          <FabActionButton
+            color="info" // O ajusta el color deseado
+            handleClick={handleModalOk}
+            icon={<SaveIcon />} // Ajusta el ícono deseado
+          />
+        </div>
       </Modal>
     </div>
   );

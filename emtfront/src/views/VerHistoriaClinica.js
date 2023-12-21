@@ -4,7 +4,13 @@ import { Select, Table, Button, Modal, Form, Input, InputNumber, DatePicker, mes
 import { useKeycloak } from '@react-keycloak/web';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-
+import FabActionButton from '../components/FabActionButton';
+import AddIcon from '@mui/icons-material/Add';
+import CancelIcon from '@mui/icons-material/Cancel';
+import SaveIcon from '@mui/icons-material/Save';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Visibility from '@mui/icons-material/Visibility';
 
 const date = new Intl.DateTimeFormat('es-CO', {
   dateStyle: 'full',
@@ -208,9 +214,7 @@ const VerHistoriaClinica = () => {
       title: 'Acciones',
       key: 'acciones',
       render: (_, record) => (
-        <Button type="primary" size="large" onClick={() => handleViewAttachment(record)}>
-          Ver Adjunto
-        </Button>
+        <FabActionButton handleClick={() => handleViewAttachment(record)} icon={<Visibility></Visibility>} color={"info"}/>
       ),
     },
   ];
@@ -513,31 +517,25 @@ const VerHistoriaClinica = () => {
 
           return (
             <div>
-              <Button
-                type="primary"
-                onClick={() => handleAddAttachmentField(field)}
-                style={{ marginBottom: '8px' }}
-              >
-                Añadir Adjunto
-              </Button>
+              <FabActionButton
+               
+                handleClick={() => handleAddAttachmentField(field)}
+                color={"secondary"}
+                icon={<AddIcon></AddIcon>}/>
 
               {attachmentsList.map((set, currentSetIndex) => (
                 <div key={currentSetIndex} style={{ border: '1px solid #ccc', padding: '8px', marginBottom: '8px' }}>
-                  <Button
-                    type="danger"
-                    onClick={() => handleRemoveAttachmentSet(currentSetIndex)}
-                    style={{ marginBottom: '8px' }}
-                  >
-                    Eliminar Adjunto
-                  </Button>
+                  <FabActionButton
 
-                  <Button
-                    type="primary"
-                    onClick={() => handleAddCampo(currentSetIndex)}
-                    style={{ marginRight: '8px' }}
-                  >
-                    Añadir Campo
-                  </Button>
+                    handleClick={() => handleRemoveAttachmentSet(currentSetIndex)}
+                    color={"error"}
+                    icon={<DeleteIcon></DeleteIcon>}
+                  />
+
+                  <FabActionButton
+                    handleClick={() => handleAddCampo(currentSetIndex)}
+                    color={"secondary"}
+                    icon={<AddIcon></AddIcon>}/>
 
                   {set.campos && set.campos.map((campo, campoIndex) => (
                     <div key={campoIndex} style={{ display: 'flex', marginBottom: '8px' }}>
@@ -669,9 +667,7 @@ const VerHistoriaClinica = () => {
           </Select>
         </Form.Item>
 
-        <Button type="primary" onClick={handleCreate} style={{ marginBottom: '16px' }}>
-          Crear Historia Clinica
-        </Button>
+        <FabActionButton icon={<AddIcon></AddIcon>} handleClick={handleCreate} color={"secondary"} />
       </Form>
 
       <Table dataSource={historiaClinica.attachments} columns={columns} rowKey="id" />
@@ -680,6 +676,7 @@ const VerHistoriaClinica = () => {
       <Modal
         title="Crear Historia Clínica"
         visible={createModalVisible}
+        footer={null}
         onOk={handleCreateOk}
         okText="Guardar"
         onCancel={handleCreateCancel}
@@ -697,6 +694,20 @@ const VerHistoriaClinica = () => {
               ))}
           </>
         )}
+        {/* Botones personalizados */}
+        <div style={{ textAlign: 'right' }}>
+
+          <FabActionButton
+            color="error" // O ajusta el color deseado
+            handleClick={handleCreateCancel}
+            icon={<CancelIcon />} // Ajusta el ícono deseado
+          />
+          <FabActionButton
+            color="info" // O ajusta el color deseado
+            handleClick={handleCreateOk}
+            icon={<SaveIcon />} // Ajusta el ícono deseado
+          />
+        </div>
       </Modal>
 
       {selectedAttachment && (
@@ -705,6 +716,7 @@ const VerHistoriaClinica = () => {
           visible={true}
           onOk={() => handleDownloadPDF()}
           okText="Descargar PDF"
+          footer={null}
           onCancel={() => setSelectedAttachment(null)}
         >
           <p style={{ fontSize: '18px', fontWeight: 'bold' }}>ID: {selectedAttachment.id}</p>
@@ -717,6 +729,20 @@ const VerHistoriaClinica = () => {
               <p style={{ fontSize: '16px' }}>{renderFieldValue(field.value)}</p>
             </div>
           ))}
+          {/* Botones personalizados */}
+          <div style={{ textAlign: 'right' }}>
+
+            <FabActionButton
+              color="error" // O ajusta el color deseado
+              handleClick={() => setSelectedAttachment(null)}
+              icon={<CancelIcon />} // Ajusta el ícono deseado
+            />
+            <FabActionButton
+              color="info" // O ajusta el color deseado
+              handleClick={handleDownloadPDF}
+              icon={<SaveIcon />} // Ajusta el ícono deseado
+            />
+          </div>
         </Modal>
       )}
     </div>

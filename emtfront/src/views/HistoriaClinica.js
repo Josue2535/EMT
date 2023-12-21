@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Button, Table, Modal, Form, Input, message, Select } from 'antd';
 import { useKeycloak } from '@react-keycloak/web';
 import { Navigate, useNavigate } from 'react-router-dom';
-
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import FabActionButton from '../components/FabActionButton';
 const HistoriaClinica = () => {
   const [historiasClinicas, setHistoriasClinicas] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -212,9 +213,7 @@ const HistoriaClinica = () => {
       key: 'acciones',
       render: (_, record) => (
         <>
-          <Button type="primary" size="small" onClick={() => handleEdit(record)}>
-            Ver Historia Clinica
-          </Button>
+          <FabActionButton  handleClick={() => handleEdit(record)} icon={<VisibilityIcon></VisibilityIcon>} color={"info"}/>
         </>
       ),
     },

@@ -3,8 +3,13 @@ import { Modal, Button, Input, Checkbox, Table, Space, Form } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Select } from 'antd';
 import { useKeycloak } from '@react-keycloak/web';
+import FabSubmitButton from '../components/FabSubmitButton';
+import FabActionButton from '../components/FabActionButton';
 import AddIcon from '@mui/icons-material/Add';
-
+import CancelIcon from '@mui/icons-material/Cancel';
+import SaveIcon from '@mui/icons-material/Save';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 const FormatoHistoriaClinica = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [formatos, setFormatos] = useState([]);
@@ -240,6 +245,11 @@ const FormatoHistoriaClinica = () => {
   };
 
   const handleDelete = async (index) => {
+    const confirmDelete = window.confirm('¿Estás seguro de que deseas eliminar este formato?');
+
+      if (!confirmDelete) {
+        return; // If the user cancels the deletion, do nothing
+      }
     try {
       const formatToDelete = formatos[index];
 
@@ -279,8 +289,8 @@ const FormatoHistoriaClinica = () => {
       key: 'actions',
       render: (_, record, index) => (
         <Space size="middle">
-          <Button icon={<EditOutlined />} onClick={() => handleEdit(index)} />
-          <Button icon={<DeleteOutlined />} onClick={() => handleDelete(index)} />
+          <FabActionButton icon={<EditIcon />} handleClick={() => handleEdit(index)} color={"info"}/>
+          <FabActionButton icon={<DeleteIcon />} handleClick={() => handleDelete(index)} color={"error"} />
         </Space>
       ),
     },
@@ -289,9 +299,7 @@ const FormatoHistoriaClinica = () => {
   return (
     <div>
       <h2>Formato de Historia Clínica</h2>
-      <Button type="primary" onClick={() => showModal()} >
-        Crear
-      </Button>
+      <FabActionButton  handleClick={() => showModal()} color={"secondary"} icon={<AddIcon></AddIcon>}/>
 
       <Table dataSource={formatos} columns={columns} rowKey={(record, index) => index} />
 
@@ -360,25 +368,21 @@ const FormatoHistoriaClinica = () => {
                       value={option}
                       onChange={(e) => handleChangeOption(index, optionIndex, e.target.value)}
                     />
-                    <Button onClick={() => handleDeleteOption(index, optionIndex)}>
-                      Eliminar Opción
-                    </Button>
+                    <FabActionButton handleClick={() => handleDeleteOption(index, optionIndex)}color={"error"} icon={<DeleteIcon></DeleteIcon>}/>
+                     
                   </div>
                 ))}
-                <Button onClick={() => handleAddOption(index)}>Añadir Opción</Button>
+                <FabActionButton handleClick={() => handleAddOption(index)} icon={<AddIcon/>}color={"secondary"}/>
               </Form.Item>
-              <Button onClick={() => handleDeleteField(index)}>Eliminar Campo</Button>
+              <FabActionButton handleClick={() => handleDeleteField(index)} color={"error"} icon={<DeleteIcon></DeleteIcon>}/>
             </div>
           ))}
-          <Button onClick={handleAddField}>Añadir Campo</Button>
+          <FabActionButton handleClick={handleAddField} icon={<AddIcon/>} color={"secondary"}/>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Guardar
-            </Button>
-            <Button onClick={handleCancel} style={{ marginLeft: 8 }}>
-              Cancelar
-            </Button>
+            <FabSubmitButton color={"info"} />
+            <FabActionButton handleClick={handleCancel} color={"error"} icon={<CancelIcon/>}/>
+             
           </Form.Item>
         </Form>
       </Modal>

@@ -3,7 +3,12 @@ import { Button, Modal, Form, Input, Table, Space, Select, Popconfirm, message }
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useKeycloak } from '@react-keycloak/web';
 import { Select as AntSelect } from 'antd';
-
+import FabActionButton from '../components/FabActionButton';
+import AddIcon from '@mui/icons-material/Add';
+import CancelIcon from '@mui/icons-material/Cancel';
+import SaveIcon from '@mui/icons-material/Save';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 const { Option: AntOption } = AntSelect;
 const { Option } = Select;
 const Rol = () => {
@@ -55,7 +60,7 @@ const Rol = () => {
     fetchFormats();
     fetchRoles();
   }, [keycloak.token]);
-  
+
 
   const showModal = (role) => {
     setEditingRole(role);
@@ -85,7 +90,7 @@ const Rol = () => {
         ? `https://localhost:7208/api/Role/${editingRole.id}`
         : 'https://localhost:7208/api/Role'; // Cambiar la URL según sea necesario
       const method = editingRole ? 'PUT' : 'POST';
-  
+
       const roleData = {
         Name: form.getFieldValue('name'),
         ValidFields: form.getFieldValue('validFields').map((field) => ({
@@ -93,13 +98,13 @@ const Rol = () => {
           Value: field.value,
         })),
       };
-  
+
       // Si estás creando un nuevo rol, omite id y creationDate
       if (!editingRole) {
         delete roleData.id;
         delete roleData.creationDate;
       }
-  
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -109,11 +114,11 @@ const Rol = () => {
         },
         body: JSON.stringify(roleData),
       });
-  
+
       if (!response.ok) {
         throw new Error(`Error al ${editingRole ? 'editar' : 'crear'} el rol: ${response.statusText}`);
       }
-  
+
       // Obtener la lista actualizada después de la operación exitosa
       const updatedRolesResponse = await fetch('https://localhost:7208/api/Role', {
         headers: {
@@ -121,14 +126,14 @@ const Rol = () => {
           Authorization: `Bearer ${keycloak.token}`,
         },
       });
-  
+
       if (!updatedRolesResponse.ok) {
         throw new Error(`Error al obtener roles después de la operación: ${updatedRolesResponse.statusText}`);
       }
-  
+
       const updatedRoles = await updatedRolesResponse.json();
       setRoles(updatedRoles);
-  
+
       form.resetFields();
       setEditingRole(null);
       setVisible(false);
@@ -136,11 +141,17 @@ const Rol = () => {
       console.error(`Error al ${editingRole ? 'editar' : 'crear'} el rol:`, error);
     }
   };
-  
-  
+
+
 
   const handleDelete = async (id) => {
+    const confirmDelete = window.confirm('¿Estás seguro de que deseas eliminar este formato?');
+
+      if (!confirmDelete) {
+        return; // If the user cancels the deletion, do nothing
+      }
     try {
+
       const url = `https://localhost:7208/api/Role/${id}`;
       const response = await fetch(url, {
         method: 'DELETE',
@@ -173,15 +184,9 @@ const Rol = () => {
       key: 'actions',
       render: (text, record) => (
         <Space size="middle">
-          <Button icon={<EditOutlined />} onClick={() => showModal(record)} />
-          <Popconfirm
-            title="¿Estás seguro de que deseas eliminar este rol?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Sí"
-            cancelText="No"
-          >
-            <Button icon={<DeleteOutlined />} />
-          </Popconfirm>
+          <FabActionButton icon={<EditIcon />} handleClick={() => showModal(record)} color={"info"} />
+
+          <FabActionButton icon={<DeleteIcon />} color={"error"} handleClick={() => handleDelete(record.id)} />
         </Space>
       ),
     },
@@ -190,21 +195,26 @@ const Rol = () => {
   return (
     <div>
       <h2>Roles</h2>
-      <Button type="primary" onClick={() => showModal(null)}>
-        Crear Rol
-      </Button>
+      <div>
+        <FabActionButton
+          handleClick={() => showModal(null)}
+          icon={<AddIcon></AddIcon>}
+          color={"secondary"}
+        />
+      </div>
       <Table dataSource={roles} columns={columns} rowKey="id" />
 
       <Modal
         title={editingRole ? 'Editar Rol' : 'Crear Rol'}
         visible={visible}
-        onOk={handleSubmit}
+        footer={null}
         onCancel={() => {
           form.resetFields();
           setEditingRole(null);
           setVisible(false);
         }}
       >
+
         <Form form={form} layout="vertical">
           <Form.Item label="Nombre" name="name" rules={[{ required: true, message: 'Por favor, ingresa el nombre del rol' }]}>
             <Input />
@@ -226,7 +236,7 @@ const Rol = () => {
                         rules={[{ required: true, message: 'Seleccione al menos una acción' }]}
                         style={{ display: 'inline-block', marginLeft: '8px', width: '200px' }}
                       >
-                        <Select  placeholder="Seleccione acciones" style={{ width: '100%', overflow: 'auto' }}>
+                        <Select placeholder="Seleccione acciones" style={{ width: '100%', overflow: 'auto' }}>
                           <Option value="ClinicalHistoryFormat">Formato Historia Clinica</Option>
                           <Option value="ClinicalHistory">Historia Clinica</Option>
                           <Option value="PatientFormat">Formato Paciente</Option>
@@ -254,7 +264,7 @@ const Rol = () => {
                           ))}
                         </Select>
                       </Form.Item>
-                      <Button type="link" onClick={() => remove(name)} icon={<DeleteOutlined />} />
+                      <FabActionButton  handleClick={() => remove(name)} icon={<DeleteIcon />} color={"error"} />
                     </div>
                   ))}
                   <Form.Item>
@@ -267,6 +277,24 @@ const Rol = () => {
             </Form.List>
           </Form.Item>
         </Form>
+        {/* Botones personalizados */}
+        <div style={{ textAlign: 'right' }}>
+
+          <FabActionButton
+            color="error" // O ajusta el color deseado
+            handleClick={() => {
+              form.resetFields();
+              setEditingRole(null);
+              setVisible(false);
+            }}
+            icon={<CancelIcon />} // Ajusta el ícono deseado
+          />
+          <FabActionButton
+            color="info" // O ajusta el color deseado
+            handleClick={handleSubmit}
+            icon={<SaveIcon />} // Ajusta el ícono deseado
+          />
+        </div>
       </Modal>
     </div>
   );
