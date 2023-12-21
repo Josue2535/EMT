@@ -11,6 +11,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Visibility from '@mui/icons-material/Visibility';
+import Header from '../components/Header';
 
 const date = new Intl.DateTimeFormat('es-CO', {
   dateStyle: 'full',
@@ -650,7 +651,7 @@ const VerHistoriaClinica = () => {
 
   return (
     <div>
-      <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>Historia Clínica</h2>
+      <Header title={"Historia Clínica"}/>
       <p style={{ fontSize: '18px' }}>Fecha de Creación: {date.format(new Date(historiaClinica.created))}</p>
 
       <Form form={form} onFinish={handleCreate}>

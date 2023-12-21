@@ -10,6 +10,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import Header from '../components/Header';
 const date = new Intl.DateTimeFormat('es-CO', {
   dateStyle: 'full',
   timeStyle: 'short',
@@ -299,7 +300,7 @@ const FormatoPaciente = () => {
 
   return (
     <div>
-      <h2>Formato de Paciente</h2>
+      <Header title={"Formato de Paciente"}/>
       <FabActionButton
         color={"primary"}
         handleClick={() => showModal()}

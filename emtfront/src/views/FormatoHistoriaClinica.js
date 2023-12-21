@@ -10,6 +10,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import Header from '../components/Header';
 const FormatoHistoriaClinica = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [formatos, setFormatos] = useState([]);
@@ -298,7 +299,7 @@ const FormatoHistoriaClinica = () => {
 
   return (
     <div>
-      <h2>Formato de Historia Clínica</h2>
+      <Header title={"Formato de Historia Clínica"}/>
       <FabActionButton  handleClick={() => showModal()} color={"secondary"} icon={<AddIcon></AddIcon>}/>
 
       <Table dataSource={formatos} columns={columns} rowKey={(record, index) => index} />

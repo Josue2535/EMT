@@ -4,6 +4,7 @@ import { useKeycloak } from '@react-keycloak/web';
 import { Navigate, useNavigate } from 'react-router-dom';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import FabActionButton from '../components/FabActionButton';
+import Header from '../components/Header';
 const HistoriaClinica = () => {
   const [historiasClinicas, setHistoriasClinicas] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -221,7 +222,7 @@ const HistoriaClinica = () => {
 
   return (
     <div>
-      <h2>Historia Clínica</h2>
+      <Header title={"Historia Clínica"}/>
 
       <Form layout="inline">
         <Form.Item label="Filtrar por">

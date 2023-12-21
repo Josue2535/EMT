@@ -9,6 +9,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import Header from '../components/Header';
 const { Option: AntOption } = AntSelect;
 const { Option } = Select;
 const Rol = () => {
@@ -194,7 +195,7 @@ const Rol = () => {
 
   return (
     <div>
-      <h2>Roles</h2>
+      <Header title={"Rol"}/>
       <div>
         <FabActionButton
           handleClick={() => showModal(null)}

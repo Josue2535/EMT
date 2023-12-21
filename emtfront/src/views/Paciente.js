@@ -9,6 +9,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import Header from '../components/Header';
 const date = new Intl.DateTimeFormat('es-CO', {
   dateStyle: 'full',
   timeStyle: 'short',
@@ -217,7 +218,7 @@ const Paciente = () => {
 
   return (
     <div>
-      <h2>Pacientes</h2>
+      <Header title={"Paciente"}/>
       <FabActionButton icon={<AddIcon></AddIcon>} handleClick={handleCreate} color={"secondary"}/>
         
       <Table dataSource={pacientes} columns={columns} rowKey="id" />
