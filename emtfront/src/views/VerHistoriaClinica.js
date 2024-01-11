@@ -512,18 +512,28 @@ const VerHistoriaClinica = () => {
   };
 
 
-  const renderFieldValueCreate = (field) => {
+ const renderFieldValueCreate = (field) => {
     switch (field.fieldType) {
       case 'String':
         return (
           <Form.Item
-            label={field.fieldName}
-            name={field.fieldName + 'value'}
-            key={field.fieldName + 'value'}
-            rules={[{ required: true, message: `Please input ${field.fieldName}!` }]}
-          >
-            <Input onChange={(e) => handleFieldChange(e.target.value, field.fieldName)} />
-          </Form.Item>
+              label={field.fieldName}
+              name={field.fieldName}
+              key={field.fieldName}
+              rules={[{ required: true, message: `Please select ${field.fieldName}!` }]}
+            >
+              <Select
+                style={{ width: '100%' }}
+                placeholder={`Select ${field.fieldName}`}
+                onChange={(value) => handleFieldChange(value, field.fieldName)}
+              >
+                {field.fieldOptions.map((option) => (
+                  <Select.Option key={option} value={option}>
+                    {option}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
         );
       case 'Number':
       case 'Integer':
@@ -553,10 +563,10 @@ const VerHistoriaClinica = () => {
           return (
             <div>
               <FabActionButton
-
+               
                 handleClick={() => handleAddAttachmentField(field)}
                 color={"secondary"}
-                icon={<AddIcon></AddIcon>} />
+                icon={<AddIcon></AddIcon>}/>
 
               {attachmentsList.map((set, currentSetIndex) => (
                 <div key={currentSetIndex} style={{ border: '1px solid #ccc', padding: '8px', marginBottom: '8px' }}>
@@ -570,7 +580,7 @@ const VerHistoriaClinica = () => {
                   <FabActionButton
                     handleClick={() => handleAddCampo(currentSetIndex)}
                     color={"secondary"}
-                    icon={<AddIcon></AddIcon>} />
+                    icon={<AddIcon></AddIcon>}/>
 
                   {set.campos && set.campos.map((campo, campoIndex) => (
                     <div key={campoIndex} style={{ display: 'flex', marginBottom: '8px' }}>
@@ -693,7 +703,7 @@ const VerHistoriaClinica = () => {
           name="selectedFormat"
           label="Seleccione un formato"
           rules={[{ required: true, message: 'Seleccione un formato' }]}>
-          <Select style={{ width: 300 }} placeholder="Seleccione un formato">
+           <Select style={{ width: 300 }} placeholder="Seleccione un formato">
             {clinicalHistoryFormats.map((format) => (
               <Select.Option key={format.id} value={format.id}>
                 {format.name}
@@ -725,6 +735,8 @@ const VerHistoriaClinica = () => {
                 <div key={field.fieldName}>
                   <h3>{field.fieldName}</h3>
                   {renderFieldValueCreate(field)}
+
+
                 </div>
               ))}
           </>
