@@ -46,7 +46,25 @@ const VerHistoriaClinica = () => {
             Authorization: `Bearer ${keycloak.token}`,
           },
         });
-
+        const responsePaciente = await fetch(`https://localhost:7208/api/Pacient/${pacienteId}`, {
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+      });
+      const dataPaciente = await responsePaciente.json();
+      console.log('Data recibida del paciente:', dataPaciente);
+      const pacienteData = {
+        id: dataPaciente.id,
+        created: dataPaciente.created,
+        role: dataPaciente.role,
+        fieldsList: dataPaciente.fieldsList.map((field) => ({
+          name: field.name,
+          value: field.value,
+        })),
+        personalInformationId: dataPaciente.personalInformationId,
+        isEnabled: dataPaciente.isEnabled,
+      };
         if (!responseHistoriaClinica.ok) {
           // Si es un error 404, interpretamos que la historia clínica no existe y la creamos
           if (responseHistoriaClinica.status === 404) {
@@ -90,10 +108,10 @@ const VerHistoriaClinica = () => {
   const handleDownloadPDF = async () => {
     try {
       const attachmentDetails = selectedAttachment;
-
+  
       // Crear un contenedor para el HTML que deseas convertir a PDF
       const container = document.createElement('div');
-
+  
       // Agregar la información del JSON al contenedor
       container.innerHTML = `
         <h2>${attachmentDetails.nameFormat}</h2>
@@ -104,31 +122,42 @@ const VerHistoriaClinica = () => {
           ${attachmentDetails.fields.map((field) => `<li>${field.name}: ${field.value}</li>`).join('')}
         </ul>
       `;
-
+  
       // Esperar a que el contenedor esté en el DOM antes de utilizar html2canvas
       document.body.appendChild(container);
-
+  
       // Utilizar html2canvas para capturar el contenido del contenedor como una imagen
       const canvas = await html2canvas(container, { scale: 15 });
-
+      var fecha = date.format(new Date(attachmentDetails.created));
       // Crear un objeto jsPDF y agregar la imagen como una página
       const pdf = new jsPDF({ unit: 'mm', format: 'A4' }); // Ajusta el formato según tus necesidades
       pdf.setFontSize(18);
       pdf.setTextColor(0, 18, 13);
-      pdf.text('HISTORIA CLINICA', 105, 15, { align: 'center' }); // Ajusta la posición según tus necesidades
-
+      pdf.text(`${attachmentDetails.nameFormat}`, 105, 15, { align: 'center' }); // Ajusta la posición según tus necesidades
+      pdf.text("Fecha de creación: " +fecha, 105, 30, { align: 'center' }); // Ajusta la posición según tus necesidades
+     
       // Iterar sobre los campos y agregarlos al PDF
       let currentY = 40; // Ajusta la posición inicial según tus necesidades
       attachmentDetails.fields.forEach((field) => {
-        pdf.text(`${field.name}: ${field.value}`, 10, currentY);
-        currentY += 10; // Ajusta el espaciado vertical según tus necesidades
+        if ( isBase64(field.value)) {
+          if ( isBase64(field.value)) {
+            // Si el campo es una imagen, agregarla al PDF
+            pdf.text(`${field.name}`, 10, currentY);
+            pdf.addImage(field.value, 'PNG', 10, currentY, 50, 50); // Ajusta las coordenadas y dimensiones según tus necesidades
+            currentY += 60; // Ajusta el espaciado vertical después de la imagen según tus necesidades
+          }
+        } else {
+          // Si el campo es texto, agregarlo al PDF
+          pdf.text(`${field.name}: ${field.value}`, 10, currentY);
+          currentY += 10; // Ajusta el espaciado vertical después del texto según tus necesidades
+        }
       });
-
+  
       // Descargar el PDF con el nombre deseado
       pdf.save('formulario.pdf');
-
+  
       setSelectedAttachment(null);
-
+  
       // Remover el contenedor del DOM después de usarlo si es necesario
       document.body.removeChild(container);
     } catch (error) {
