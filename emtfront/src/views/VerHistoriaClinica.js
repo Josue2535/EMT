@@ -31,7 +31,7 @@ const VerHistoriaClinica = () => {
   const [attachmentsList, setAttachmentsList] = useState([{ campos: [] }]);
   const [fieldValues, setFieldValues] = useState({});
   const [form] = Form.useForm();
-
+  const [pacienteData, setPacienteData] = useState(null);
   const fetchData = async () => {
     try {
       console.log('Valor de pacienteId:', pacienteId);
@@ -47,24 +47,14 @@ const VerHistoriaClinica = () => {
           },
         });
         const responsePaciente = await fetch(`https://localhost:7208/api/Pacient/${pacienteId}`, {
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${keycloak.token}`,
-        },
-      });
-      const dataPaciente = await responsePaciente.json();
-      console.log('Data recibida del paciente:', dataPaciente);
-      const pacienteData = {
-        id: dataPaciente.id,
-        created: dataPaciente.created,
-        role: dataPaciente.role,
-        fieldsList: dataPaciente.fieldsList.map((field) => ({
-          name: field.name,
-          value: field.value,
-        })),
-        personalInformationId: dataPaciente.personalInformationId,
-        isEnabled: dataPaciente.isEnabled,
-      };
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${keycloak.token}`,
+          },
+        });
+        const dataPaciente = await responsePaciente.json();
+        console.log('Data recibida del paciente:', dataPaciente);
+        setPacienteData(dataPaciente);
         if (!responseHistoriaClinica.ok) {
           // Si es un error 404, interpretamos que la historia clínica no existe y la creamos
           if (responseHistoriaClinica.status === 404) {
@@ -108,10 +98,10 @@ const VerHistoriaClinica = () => {
   const handleDownloadPDF = async () => {
     try {
       const attachmentDetails = selectedAttachment;
-  
+
       // Crear un contenedor para el HTML que deseas convertir a PDF
       const container = document.createElement('div');
-  
+
       // Agregar la información del JSON al contenedor
       container.innerHTML = `
         <h2>${attachmentDetails.nameFormat}</h2>
@@ -122,25 +112,40 @@ const VerHistoriaClinica = () => {
           ${attachmentDetails.fields.map((field) => `<li>${field.name}: ${field.value}</li>`).join('')}
         </ul>
       `;
-  
+      container.innerHTML += `
+      <h2>Información del Paciente</h2>
+      <p>ID del Paciente: ${pacienteData.id}</p>
+      <p>Fecha de Creación del Paciente: ${pacienteData.created}</p>
+      <p>Campos del Paciente:</p>
+      <ul>
+        ${pacienteData.fieldsList.map((field) => `<li>${field.name}: ${field.value}</li>`).join('')}
+      </ul>
+    `;
       // Esperar a que el contenedor esté en el DOM antes de utilizar html2canvas
       document.body.appendChild(container);
-  
+
       // Utilizar html2canvas para capturar el contenido del contenedor como una imagen
       const canvas = await html2canvas(container, { scale: 15 });
       var fecha = date.format(new Date(attachmentDetails.created));
+      let currentY = 40; // Ajusta la posición inicial según tus necesidades
       // Crear un objeto jsPDF y agregar la imagen como una página
       const pdf = new jsPDF({ unit: 'mm', format: 'A4' }); // Ajusta el formato según tus necesidades
       pdf.setFontSize(18);
       pdf.setTextColor(0, 18, 13);
       pdf.text(`${attachmentDetails.nameFormat}`, 105, 15, { align: 'center' }); // Ajusta la posición según tus necesidades
-      pdf.text("Fecha de creación: " +fecha, 105, 30, { align: 'center' }); // Ajusta la posición según tus necesidades
-     
+      pdf.text("Fecha de creación: " + fecha, 105, 30, { align: 'center' }); // Ajusta la posición según tus necesidades
+      pdf.text(`Información del paciente`,105, currentY,{align:'center'});
+      currentY +=10;
+      pacienteData.fieldsList.forEach((field) => {
+        pdf.text(`${field.name}: ${field.value}`, 10, currentY);
+        currentY += 10; // Ajusta el espaciado vertical después del texto según tus necesidades
+      });
       // Iterar sobre los campos y agregarlos al PDF
-      let currentY = 40; // Ajusta la posición inicial según tus necesidades
+      pdf.text(`Información`, 105, currentY, {align:'center'});
+      currentY +=10;
       attachmentDetails.fields.forEach((field) => {
-        if ( isBase64(field.value)) {
-          if ( isBase64(field.value)) {
+        if (isBase64(field.value)) {
+          if (isBase64(field.value)) {
             // Si el campo es una imagen, agregarla al PDF
             pdf.text(`${field.name}`, 10, currentY);
             pdf.addImage(field.value, 'PNG', 10, currentY, 50, 50); // Ajusta las coordenadas y dimensiones según tus necesidades
@@ -152,12 +157,12 @@ const VerHistoriaClinica = () => {
           currentY += 10; // Ajusta el espaciado vertical después del texto según tus necesidades
         }
       });
-  
+
       // Descargar el PDF con el nombre deseado
       pdf.save('formulario.pdf');
-  
+
       setSelectedAttachment(null);
-  
+
       // Remover el contenedor del DOM después de usarlo si es necesario
       document.body.removeChild(container);
     } catch (error) {
@@ -244,7 +249,7 @@ const VerHistoriaClinica = () => {
       title: 'Acciones',
       key: 'acciones',
       render: (_, record) => (
-        <FabActionButton handleClick={() => handleViewAttachment(record)} icon={<Visibility></Visibility>} color={"info"}/>
+        <FabActionButton handleClick={() => handleViewAttachment(record)} icon={<Visibility></Visibility>} color={"info"} />
       ),
     },
   ];
@@ -548,10 +553,10 @@ const VerHistoriaClinica = () => {
           return (
             <div>
               <FabActionButton
-               
+
                 handleClick={() => handleAddAttachmentField(field)}
                 color={"secondary"}
-                icon={<AddIcon></AddIcon>}/>
+                icon={<AddIcon></AddIcon>} />
 
               {attachmentsList.map((set, currentSetIndex) => (
                 <div key={currentSetIndex} style={{ border: '1px solid #ccc', padding: '8px', marginBottom: '8px' }}>
@@ -565,7 +570,7 @@ const VerHistoriaClinica = () => {
                   <FabActionButton
                     handleClick={() => handleAddCampo(currentSetIndex)}
                     color={"secondary"}
-                    icon={<AddIcon></AddIcon>}/>
+                    icon={<AddIcon></AddIcon>} />
 
                   {set.campos && set.campos.map((campo, campoIndex) => (
                     <div key={campoIndex} style={{ display: 'flex', marginBottom: '8px' }}>
@@ -680,7 +685,7 @@ const VerHistoriaClinica = () => {
 
   return (
     <div>
-      <Header title={"Historia Clínica"}/>
+      <Header title={"Historia Clínica"} />
       <p style={{ fontSize: '18px' }}>Fecha de Creación: {date.format(new Date(historiaClinica.created))}</p>
 
       <Form form={form} onFinish={handleCreate}>
@@ -752,6 +757,18 @@ const VerHistoriaClinica = () => {
           <p style={{ fontSize: '18px', fontWeight: 'bold' }}>ID: {selectedAttachment.id}</p>
           <p style={{ fontSize: '18px', fontWeight: 'bold' }}>Fecha de Creación: {selectedAttachment.created}</p>
           <p style={{ fontSize: '18px', fontWeight: 'bold' }}>Nombre del Formato: {selectedAttachment.nameFormat}</p>
+          {/* Información del Paciente */}
+          {pacienteData.fieldsList && (
+            <div>
+              <p style={{ fontSize: '18px', fontWeight: 'bold', marginTop: '20px' }}>Información del Paciente:</p>
+              {pacienteData.fieldsList.map((field) => (
+                <div key={field.name}>
+                  <p style={{ fontSize: '16px', fontWeight: 'bold' }}>{field.name}</p>
+                  <p style={{ fontSize: '16px' }}>{renderFieldValue(field.value)}</p>
+                </div>
+              ))}
+            </div>
+          )}
           <p style={{ fontSize: '18px', fontWeight: 'bold' }}>Campos:</p>
           {selectedAttachment.fields.map((field) => (
             <div key={field.name}>
@@ -759,6 +776,7 @@ const VerHistoriaClinica = () => {
               <p style={{ fontSize: '16px' }}>{renderFieldValue(field.value)}</p>
             </div>
           ))}
+          
           {/* Botones personalizados */}
           <div style={{ textAlign: 'right' }}>
 
