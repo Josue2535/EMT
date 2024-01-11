@@ -515,13 +515,16 @@ const VerHistoriaClinica = () => {
  const renderFieldValueCreate = (field) => {
     switch (field.fieldType) {
       case 'String':
-        return (
-          <Form.Item
-              label={field.fieldName}
-              name={field.fieldName}
-              key={field.fieldName}
-              rules={[{ required: true, message: `Please select ${field.fieldName}!` }]}
-            >
+        const commonProps = {
+          label: field.fieldName,
+          name: field.fieldName,
+          key: field.fieldName,
+          rules: [{ required: true, message: `Please enter ${field.fieldName}!` }],
+        };
+        if (field.fieldOptions && field.fieldOptions.length > 0) {
+          // Render a Select component if options are available
+          return (
+            <Form.Item {...commonProps}>
               <Select
                 style={{ width: '100%' }}
                 placeholder={`Select ${field.fieldName}`}
@@ -534,7 +537,18 @@ const VerHistoriaClinica = () => {
                 ))}
               </Select>
             </Form.Item>
-        );
+          );
+        } else {
+          // Render a simple input field if no options are available
+          return (
+            <Form.Item {...commonProps}>
+              <Input
+                placeholder={`Enter ${field.fieldName}`}
+                onChange={(e) => handleFieldChange(e.target.value, field.fieldName)}
+              />
+            </Form.Item>
+          );
+        }
       case 'Number':
       case 'Integer':
         return (
